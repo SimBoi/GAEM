@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8164447933402656394}
   - component: {fileID: -4544310723011560390}
   - component: {fileID: -30830473682224474}
+  - component: {fileID: -5312467722245586943}
   m_Layer: 0
   m_Name: Gold
   m_TagString: Untagged
@@ -94,7 +95,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8164447933402656395}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
@@ -111,7 +112,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a3b00f0dd32ed2429be728b20d3b39f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefabs: {fileID: 0}
+  itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
   name: Gold
   id: 4
   maxStackSize: 64
@@ -154,4 +155,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83b4ba22b89d07d429ec2aeba8d101c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventType: 1
+  eventType: 0
+  block: {fileID: 8164447933402656394}
+  maxDistance: 3
+  prevCoords: {x: 0, y: 0, z: 0}
+--- !u!114 &-5312467722245586943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8164447933402656395}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3994de9ae3c515b46957a672d969cbd7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pickupDelay: 1
