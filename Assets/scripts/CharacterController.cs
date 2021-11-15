@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CharacterController : MonoBehaviour
 {
@@ -13,8 +14,13 @@ public class CharacterController : MonoBehaviour
     public GameObject eyePosition;
     public Transform gunRaySpawnPoint;
 
+    public Slider healthSlider;
+    public Gradient healthGradient;
+    public Image healthFill;
+
     private bool wasThrowing = false;
     private bool GetThrowItemDown = false;
+
     private void Update()
     {
         if (health.GetHp() <= 0)
@@ -59,7 +65,16 @@ public class CharacterController : MonoBehaviour
                 heldItem.SecondaryEvent(gameObject);
         }
 
+        UpdateUI();
+
         GetThrowItemDown = false;
+    }
+
+    public void UpdateUI()
+    {
+        healthSlider.maxValue = health.GetMaxHp();
+        healthSlider.value = health.GetHp();
+        healthFill.color = healthGradient.Evaluate(healthSlider.normalizedValue);
     }
 
     public void Die()

@@ -72,4 +72,9 @@ public class Health : MonoBehaviour
     {
         return hp;
     }
+
+    public float GetMaxHp()
+    {
+        return maxHp;
+    }
 }

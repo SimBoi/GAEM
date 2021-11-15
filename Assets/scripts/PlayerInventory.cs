@@ -57,7 +57,8 @@ public class PlayerInventory : MonoBehaviour
         if (hotbar.IsSlotFilled(index))
         {
             // spawn item to be held and update inventory to the new spawned item and update held item index
-            Item spawnedItem = hotbar.GetItemRef(index).Spawn(heldItemPos.position, heldItemPos.rotation, heldItemPos);
+            Item spawnedItem = hotbar.GetItemRef(index).Spawn(true, heldItemPos.position, heldItemPos.rotation, heldItemPos);
+            spawnedItem.isHeld = true;
             spawnedItem.preventDespawn = true;
             hotbar.DeleteItem(index);
             hotbar.SetItemRef(spawnedItem, index);
@@ -76,6 +77,7 @@ public class PlayerInventory : MonoBehaviour
 
         // return previously selected item to the inventory by saving a copy of the item in the inventory and despawning the held item
         Item heldItem = GetHeldItemRef();
+        heldItem.isHeld = false;
         heldItem.preventDespawn = false;
         hotbar.DeleteItem(heldItemIndex);
         hotbar.SetItemCopy(heldItem, heldItemIndex);
