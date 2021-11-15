@@ -18,14 +18,14 @@ public class ChunkGenerator : MonoBehaviour
         {
             for (int z = 0; z < landSize * land.chunkSizeZ; z++)
             {
-                land.AddBlock(new Vector3Int(x, 0, z), (short)1);
+                land.AddBlock(new Vector3Int(x, 0, z), (short)2);
             }
         }
         for (int x = 0; x < landSize * land.chunkSizeX; x++)
         {
             for (int z = 0; z < landSize * land.chunkSizeZ; z++)
             {
-                land.AddBlock(new Vector3Int(x, 1, z), (short)1);
+                land.AddBlock(new Vector3Int(x, 1, z), (short)2);
             }
         }
         for (int x = 0; x < landSize * land.chunkSizeX; x++)

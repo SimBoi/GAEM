@@ -299,6 +299,8 @@ public class VoxelChunk : MonoBehaviour
 
     public Rect GetFaceTexture(short blockID, Faces face)
     {
+        Debug.Log((float)face * vertexLength / resolution[0] + "////" + (float)blockID * vertexLength / resolution[1] + "////" + (float)vertexLength / resolution[0]+"////" + (float)vertexLength / resolution[1]);
         return new Rect((float)face * vertexLength / resolution[0], (float)blockID * vertexLength / resolution[1], (float)vertexLength / resolution[0], (float)vertexLength / resolution[1]);
+        new Rect((float)face * vertexLength / resolution[0], (float)blockID * vertexLength / resolution[1], (float)vertexLength / resolution[0], (float)vertexLength / resolution[1]);
     }
 }
