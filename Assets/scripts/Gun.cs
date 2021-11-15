@@ -93,7 +93,7 @@ public class Gun : Item
         spawnedItem.CopyFrom(this);
         return spawnedItem;
     }
-    
+
     public void Initialize()
     {
         fireTimer = 0;
@@ -103,7 +103,7 @@ public class Gun : Item
 
     public void InitializeToNewCaller(GameObject eventCaller)
     {
-        if (this.eventCaller == null)
+        if (this.eventCaller != eventCaller)
         {
             this.eventCaller = eventCaller;
             CharacterController controller = eventCaller.GetComponent<CharacterController>();
@@ -137,13 +137,11 @@ public class Gun : Item
     public void GetFireKey(GameObject eventCaller)
     {
         InitializeToNewCaller(eventCaller);
-        if (type == WeaponType.Automatic && Input.GetButton("Fire1") && fireTimer == 0 && magazine > 0)
-        {
-            fireTimer = 10;
-            Fire();
-            StartCoroutine(FireDelay());
-        }
-        else if (type == WeaponType.SemiAutomatic && Input.GetButtonDown("Fire1") && fireTimer == 0 && magazine > 0)
+        if (isReloading || fireTimer != 0 || magazine <= 0)
+            return;
+
+        if ((type == WeaponType.Automatic && Input.GetButton("Fire1")) ||
+            (type == WeaponType.SemiAutomatic && Input.GetButtonDown("Fire1")))
         {
             fireTimer = 10;
             Fire();
