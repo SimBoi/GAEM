@@ -170,7 +170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LandPosition: {x: 0, y: 0, z: 0}
   vertexLength: 386
-  resolution: {x: 3088, y: 1544}
+  resolution: {x: 3088, y: 772}
   chunkSizeX: 16
   chunkSizeY: 16
   chunkSizeZ: 16
