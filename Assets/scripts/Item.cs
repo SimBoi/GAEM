@@ -112,9 +112,9 @@ public class Item : MonoBehaviour
         Item spawnedItem = newItem.GetComponent<Item>();
         spawnedItem.CopyFrom(this);
         spawnedItem.isHeld = isHeld;
-        if (isHeld)
+        if (isHeld && spawnedItem.ui != null)
         {
-            ui.SetActive(true);
+            spawnedItem.ui.SetActive(true);
         }
         return spawnedItem;
     }

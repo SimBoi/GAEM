@@ -130,28 +130,26 @@ public class PlayerInventory : MonoBehaviour
         int index = heldItemIndex;
         if (GetHeldItemRef().GetStackSize() == 1)
             LetGoOfHeldItem();
-        return ThrowItem(PlayerInventoryType.Hotbar, index, itemCount);
+        Item thrownItem = ThrowItem(PlayerInventoryType.Hotbar, index, itemCount);
+        if (thrownItem == null)
+            return false;
+        thrownItem.isHeld = false;
+        return true;
     }
 
-    public bool ThrowItem(PlayerInventoryType inventoryType, int index, int itemCount)
+    public Item ThrowItem(PlayerInventoryType inventoryType, int index, int itemCount)
     {
         if (inventoryType == PlayerInventoryType.Backpack)
         {
-            if (backpack.ThrowItem(index, itemCount, transform) != null)
-                return true;
-            return false;
+            return backpack.ThrowItem(index, itemCount, transform);
         }
         else if (inventoryType == PlayerInventoryType.Hotbar)
         {
-            if (hotbar.ThrowItem(index, itemCount, transform) != null)
-                return true;
-            return false;
+            return hotbar.ThrowItem(index, itemCount, transform);
         }
         else
         {
-            if (armor.ThrowItem(index, itemCount, transform) != null)
-                return true;
-            return false;
+            return armor.ThrowItem(index, itemCount, transform);
         }
     }
 
