@@ -18,9 +18,8 @@ public class PlaceBlock : ItemEvent
             if (hitInfo.transform.tag == "Chunk")
             {
                 VoxelChunk chunk = hitInfo.transform.GetComponent<VoxelChunk>();
-                Vector3 hitCoords = hitInfo.point - (0.5f * hitInfo.normal);
+                Vector3 hitCoords = hitInfo.point + (0.5f * hitInfo.normal);
                 Vector3Int blockCoords = new Vector3Int((int)hitCoords.x % chunk.sizeX, (int)hitCoords.y % chunk.sizeY, (int)hitCoords.z % chunk.sizeZ);
-                Debug.Log("placed block");
                 chunk.AddBlock(blockCoords,(short)block.blockID);
             }
         }
