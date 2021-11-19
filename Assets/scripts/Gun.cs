@@ -91,28 +91,27 @@ public class Gun : Item
     {
         Gun spawnedItem = (Gun)base.Spawn(pos, rotation, parent);
         spawnedItem.CopyFrom(this);
+        spawnedItem.ResetGun();
         return spawnedItem;
     }
 
-    public void Initialize()
+    public override void HoldEvent(GameObject eventCaller)
+    {
+        this.eventCaller = eventCaller;
+        CharacterController controller = eventCaller.GetComponent<CharacterController>();
+        this.inventory = controller.inventory;
+        this.playerLook = controller.mouseLook;
+        this.playerMovement = controller.characterMovement;
+        this.raySpawnPoint = controller.gunRaySpawnPoint;
+
+        ResetGun();
+    }
+
+    public void ResetGun()
     {
         fireTimer = 0;
         isReloading = false;
         reloadTimer = 0;
-    }
-
-    public void InitializeToNewCaller(GameObject eventCaller)
-    {
-        if (this.eventCaller != eventCaller)
-        {
-            this.eventCaller = eventCaller;
-            CharacterController controller = eventCaller.GetComponent<CharacterController>();
-            this.inventory = controller.inventory;
-            this.playerLook = controller.mouseLook;
-            this.playerMovement = controller.characterMovement;
-            this.raySpawnPoint = controller.gunRaySpawnPoint;
-            Initialize();
-        }
     }
 
     private void Update()
@@ -134,9 +133,8 @@ public class Gun : Item
         isAiming = false;
     }
 
-    public void GetFireKey(GameObject eventCaller)
+    public void GetFireKey()
     {
-        InitializeToNewCaller(eventCaller);
         if (isReloading || fireTimer != 0 || magazine <= 0)
             return;
 
@@ -149,9 +147,8 @@ public class Gun : Item
         }
     }
 
-    public void GetReloadKey(GameObject eventCaller)
+    public void GetReloadKey()
     {
-        InitializeToNewCaller(eventCaller);
         if (Input.GetButtonDown("Reload") && !isReloading && magazine < magazineSize && inventory.GetTotalStack(ammoType) > 0)
         {
             reloadTimer = 0;
@@ -159,9 +156,8 @@ public class Gun : Item
         }
     }
 
-    public void GetADSKey(GameObject eventCaller)
+    public void GetADSKey()
     {
-        InitializeToNewCaller(eventCaller);
         isAiming = true;
         playerLook.ChangeZoomLevel(adsZoom, adsTime);
     }
