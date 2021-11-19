@@ -59,6 +59,7 @@ public class PlayerInventory : MonoBehaviour
             // spawn item to be held and update inventory to the new spawned item and update held item index
             Item spawnedItem = hotbar.GetItemRef(index).Spawn(heldItemPos.position, heldItemPos.rotation, heldItemPos);
             spawnedItem.preventDespawn = true;
+            spawnedItem.HoldEvent(gameObject);
             hotbar.DeleteItem(index);
             hotbar.SetItemRef(spawnedItem, index);
             heldItemIndex = index;
@@ -78,7 +79,7 @@ public class PlayerInventory : MonoBehaviour
         Item heldItem = GetHeldItemRef();
         heldItem.preventDespawn = false;
         hotbar.DeleteItem(heldItemIndex);
-        hotbar.SetItemCopy(heldItem, heldItemIndex);
+        hotbar.SetItemCopy(heldItem, heldItemIndex, out _);
         heldItem.Despawn();
 
         // set held item index to holding nothing

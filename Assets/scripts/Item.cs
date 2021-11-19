@@ -143,6 +143,16 @@ public class Item : MonoBehaviour
         }
     }
 
+    public virtual void PickupEvent()
+    {
+
+    }
+    
+    public virtual void HoldEvent(GameObject eventCaller)
+    {
+
+    }
+
     public virtual void PrimaryEvent(GameObject eventCaller)
     {
         SendMessageUpwards("CustomPrimaryEvent", eventCaller, SendMessageOptions.DontRequireReceiver);

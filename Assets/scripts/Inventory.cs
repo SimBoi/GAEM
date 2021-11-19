@@ -29,21 +29,23 @@ public class Inventory : MonoBehaviour
     public InsertResult PickupItem(Item item, int index = -1) // if index is -1 item gets inserted in the first empty inventory space
     {
         InsertResult result;
+        Item insertedItem;
 
         if (index == -1)
         {
-            result = InsertItemCopy(item);
+            result = InsertItemCopy(item, out insertedItem);
             if (result != InsertResult.Success)
                 return result;
         }
         else
         {
-            result = SetItemCopy(item, index);
+            result = SetItemCopy(item, index, out insertedItem);
             if (result != InsertResult.Success)
                 return result;
         }
 
         item.Despawn();
+        insertedItem.PickupEvent();
         return result;
     }
 
@@ -56,15 +58,17 @@ public class Inventory : MonoBehaviour
     }
     
     //returns true on success, false on failure (e.g. inventry is full)
-    public InsertResult InsertItemCopy(Item item)
+    public InsertResult InsertItemCopy(Item item, out Item insertedItem)
     {
+        insertedItem = null;
         InsertResult result = InsertResult.Failure;
+
         // check if there is a stack of the same item type and add item on top
         for (int i = 0; i < size; i++)
         {
             if (GetItemRef(i) == item)
             {
-                InsertResult currResult = SetItemCopy(item, i);
+                InsertResult currResult = SetItemCopy(item, i, out insertedItem);
                 if (currResult == InsertResult.Partial)
                     result = InsertResult.Partial;
                 if (currResult == InsertResult.Success)
@@ -73,8 +77,9 @@ public class Inventory : MonoBehaviour
         }
         // add item to the first empty slot
         for (int i = 0; i < size; i++)
-            if (SetItemCopy(item, i) == InsertResult.Success)
+            if (SetItemCopy(item, i, out insertedItem) == InsertResult.Success)
                 return InsertResult.Success;
+
         return result;
     }
 
@@ -88,7 +93,6 @@ public class Inventory : MonoBehaviour
         return items[index].Clone();
     }
 
-    //returns true on success, false on failure
     public InsertResult SetItemRef(Item item, int index)
     {
         if (items[index] == null)
@@ -102,12 +106,12 @@ public class Inventory : MonoBehaviour
         }
     }
     
-    //returns true on success, false on failure
-    public InsertResult SetItemCopy(Item item, int index)
+    public InsertResult SetItemCopy(Item item, int index, out Item insertedItem)
     {
         if (items[index] == null)
         {
             items[index] = item.Clone();
+            insertedItem = items[index];
             return InsertResult.Success;
         }
         else if (item == items[index])
@@ -117,13 +121,16 @@ public class Inventory : MonoBehaviour
                 int stackToAdd = items[index].maxStackSize - items[index].GetStackSize();
                 items[index].ChangeStackSize(stackToAdd);
                 item.ChangeStackSize(-stackToAdd);
+                insertedItem = items[index];
                 return InsertResult.Partial;
             }
             items[index].ChangeStackSize(item.GetStackSize());
+            insertedItem = items[index];
             return InsertResult.Success;
         }
         else
         {
+            insertedItem = null;
             return InsertResult.Failure;
         }
     }
