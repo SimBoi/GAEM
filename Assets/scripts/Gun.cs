@@ -34,6 +34,8 @@ public class Gun : Item
     public Item ammoType;
     public GameObject testBulletHole;
     public Transform raySpawnPoint;
+    public GameObject crosshairUI;
+    public GameObject reloadUI;
 
     //gets set when calling an event
     private GameObject eventCaller = null;
@@ -87,9 +89,9 @@ public class Gun : Item
         return clone;
     }
 
-    public override Item Spawn(Vector3 pos, Quaternion rotation, Transform parent = null)
+    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation, Transform parent = null)
     {
-        Gun spawnedItem = (Gun)base.Spawn(pos, rotation, parent);
+        Gun spawnedItem = (Gun)base.Spawn(isHeld, pos, rotation, parent);
         spawnedItem.CopyFrom(this);
         spawnedItem.ResetGun();
         return spawnedItem;
@@ -118,6 +120,8 @@ public class Gun : Item
     {
         if (isReloading)
         {
+            crosshairUI.SetActive(false);
+            reloadUI.SetActive(true);
             reloadTimer += Time.deltaTime;
             if (reloadTimer >= reloadTime)
             {
@@ -125,6 +129,11 @@ public class Gun : Item
                 reloadTimer = 0;
                 isReloading = false;
             }
+        }
+        else
+        {
+            crosshairUI.SetActive(true);
+            reloadUI.SetActive(false);
         }
     }
 

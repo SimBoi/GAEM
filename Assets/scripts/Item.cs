@@ -15,21 +15,9 @@ public class Item : MonoBehaviour
     public Health health;
     public bool preventDespawn;
     public float despawnTimer = 0;
+    public bool isHeld;
     public bool isDestroyed = false;
-
-    /*public virtual void Construct(ItemPrefabs itemPrefabs, string name, int id, int maxStackSize, float maxDurability, float spawnDurability, int stackSize, bool preventDespawn)
-    {
-        this.itemPrefabs = itemPrefabs;
-        this.name = name;
-        this.id = id;
-        this.maxStackSize = maxStackSize;
-        this.maxDurability = maxDurability;
-        this.spawnDurability = spawnDurability;
-        this.stackSize = stackSize;
-        this.health = new Health(spawnDurability, 0, maxDurability, 0, 0);
-        this.preventDespawn = preventDespawn;
-        this.despawnTimer = 0;
-    }*/
+    public GameObject ui = null;
 
     public void CopyFrom(Item source)
     {
@@ -46,6 +34,7 @@ public class Item : MonoBehaviour
             this.health = new Health(source.health.GetHp(), 0, source.maxDurability, 0, 0);
         this.preventDespawn = source.preventDespawn;
         this.despawnTimer = source.despawnTimer;
+        this.isHeld = source.isHeld;
         this.isDestroyed = source.isDestroyed;
     }
 
@@ -112,7 +101,7 @@ public class Item : MonoBehaviour
         despawnTimer = 0;
     }
 
-    public virtual Item Spawn(Vector3 pos, Quaternion rotation, Transform parent = null)
+    public virtual Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation, Transform parent = null)
     {
         GameObject newItem;
         if (parent == null)
@@ -122,6 +111,11 @@ public class Item : MonoBehaviour
 
         Item spawnedItem = newItem.GetComponent<Item>();
         spawnedItem.CopyFrom(this);
+        spawnedItem.isHeld = isHeld;
+        if (isHeld && spawnedItem.ui != null)
+        {
+            spawnedItem.ui.SetActive(true);
+        }
         return spawnedItem;
     }
 

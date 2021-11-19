@@ -181,7 +181,7 @@ public class Inventory : MonoBehaviour
 
         Item itemToBeThrown = items[index].Clone();
         itemToBeThrown.SetStackSize(itemCount);
-        Item thrownItem = itemToBeThrown.Spawn(throwPosition.position, throwPosition.rotation, parent);
+        Item thrownItem = itemToBeThrown.Spawn(false, throwPosition.position, throwPosition.rotation, parent);
         if (items[index].ChangeStackSize(-1 * itemCount) == 0)
         {
             DeleteItem(index);

@@ -57,7 +57,8 @@ public class PlayerInventory : MonoBehaviour
         if (hotbar.IsSlotFilled(index))
         {
             // spawn item to be held and update inventory to the new spawned item and update held item index
-            Item spawnedItem = hotbar.GetItemRef(index).Spawn(heldItemPos.position, heldItemPos.rotation, heldItemPos);
+            Item spawnedItem = hotbar.GetItemRef(index).Spawn(true, heldItemPos.position, heldItemPos.rotation, heldItemPos);
+            spawnedItem.isHeld = true;
             spawnedItem.preventDespawn = true;
             spawnedItem.HoldEvent(gameObject);
             hotbar.DeleteItem(index);
@@ -77,6 +78,7 @@ public class PlayerInventory : MonoBehaviour
 
         // return previously selected item to the inventory by saving a copy of the item in the inventory and despawning the held item
         Item heldItem = GetHeldItemRef();
+        heldItem.isHeld = false;
         heldItem.preventDespawn = false;
         hotbar.DeleteItem(heldItemIndex);
         hotbar.SetItemCopy(heldItem, heldItemIndex, out _);
@@ -129,28 +131,26 @@ public class PlayerInventory : MonoBehaviour
         int index = heldItemIndex;
         if (GetHeldItemRef().GetStackSize() == 1)
             LetGoOfHeldItem();
-        return ThrowItem(PlayerInventoryType.Hotbar, index, itemCount);
+        Item thrownItem = ThrowItem(PlayerInventoryType.Hotbar, index, itemCount);
+        if (thrownItem == null)
+            return false;
+        thrownItem.isHeld = false;
+        return true;
     }
 
-    public bool ThrowItem(PlayerInventoryType inventoryType, int index, int itemCount)
+    public Item ThrowItem(PlayerInventoryType inventoryType, int index, int itemCount)
     {
         if (inventoryType == PlayerInventoryType.Backpack)
         {
-            if (backpack.ThrowItem(index, itemCount, transform) != null)
-                return true;
-            return false;
+            return backpack.ThrowItem(index, itemCount, transform);
         }
         else if (inventoryType == PlayerInventoryType.Hotbar)
         {
-            if (hotbar.ThrowItem(index, itemCount, transform) != null)
-                return true;
-            return false;
+            return hotbar.ThrowItem(index, itemCount, transform);
         }
         else
         {
-            if (armor.ThrowItem(index, itemCount, transform) != null)
-                return true;
-            return false;
+            return armor.ThrowItem(index, itemCount, transform);
         }
     }
 

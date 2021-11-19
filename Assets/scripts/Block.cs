@@ -21,9 +21,9 @@ public class Block : Item
         return clone;
     }
 
-    public override Item Spawn(Vector3 pos, Quaternion rotation, Transform parent = null)
+    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation, Transform parent = null)
     {
-        Block spawnedItem = (Block)base.Spawn(pos, rotation, parent);
+        Block spawnedItem = (Block)base.Spawn(isHeld, pos, rotation, parent);
         spawnedItem.CopyFrom(this);
         return spawnedItem;
     }
