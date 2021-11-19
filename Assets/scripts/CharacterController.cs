@@ -52,11 +52,11 @@ public class CharacterController : MonoBehaviour
             if (heldItem.GetType() == typeof(Gun))
             {
                 if (Input.GetAxisRaw("Fire1") == 1)
-                    ((Gun)heldItem).GetFireKey(gameObject);
+                    ((Gun)heldItem).GetFireKey();
                 if (Input.GetAxisRaw("Fire2") == 1)
-                    ((Gun)heldItem).GetADSKey(gameObject);
+                    ((Gun)heldItem).GetADSKey();
                 if (Input.GetAxisRaw("Reload") == 1)
-                    ((Gun)heldItem).GetReloadKey(gameObject);
+                    ((Gun)heldItem).GetReloadKey();
             }
 
             if (Input.GetAxisRaw("Fire1") == 1 && inventory.heldItemIndex != -1)

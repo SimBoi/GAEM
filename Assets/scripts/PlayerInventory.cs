@@ -60,6 +60,7 @@ public class PlayerInventory : MonoBehaviour
             Item spawnedItem = hotbar.GetItemRef(index).Spawn(true, heldItemPos.position, heldItemPos.rotation, heldItemPos);
             spawnedItem.isHeld = true;
             spawnedItem.preventDespawn = true;
+            spawnedItem.HoldEvent(gameObject);
             hotbar.DeleteItem(index);
             hotbar.SetItemRef(spawnedItem, index);
             heldItemIndex = index;
@@ -80,7 +81,7 @@ public class PlayerInventory : MonoBehaviour
         heldItem.isHeld = false;
         heldItem.preventDespawn = false;
         hotbar.DeleteItem(heldItemIndex);
-        hotbar.SetItemCopy(heldItem, heldItemIndex);
+        hotbar.SetItemCopy(heldItem, heldItemIndex, out _);
         heldItem.Despawn();
 
         // set held item index to holding nothing
