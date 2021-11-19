@@ -14,6 +14,7 @@ public enum Faces
 
 public class VoxelChunk : MonoBehaviour
 {
+    public Land land;
     public ItemPrefabs itemPrefabs;
     public BlockToItemID blockToItemID;
     public MeshRenderer meshRenderer;

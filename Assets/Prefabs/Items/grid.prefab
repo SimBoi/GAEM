@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6906159332493323477}
   - component: {fileID: 7959325127622393445}
   - component: {fileID: 5838950628382587129}
+  - component: {fileID: -1823581783024886119}
   m_Layer: 0
   m_Name: grid
   m_TagString: Untagged
@@ -111,7 +112,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a3b00f0dd32ed2429be728b20d3b39f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefabs: {fileID: 0}
+  itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
   name: Grid
   id: 6
   maxStackSize: 64
@@ -137,7 +138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6300a0f0e5f89f458bcc601f42715b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventType: 0
+  eventType: 1
   maxDistance: 3
   timer: 0
   efficiency: 1
@@ -154,7 +155,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83b4ba22b89d07d429ec2aeba8d101c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventType: 1
-  block: {fileID: 0}
+  eventType: 2
+  block: {fileID: 6906159332493323477}
   maxDistance: 3
   prevCoords: {x: 0, y: 0, z: 0}
+--- !u!114 &-1823581783024886119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6906159332493323476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3994de9ae3c515b46957a672d969cbd7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pickupDelay: 1

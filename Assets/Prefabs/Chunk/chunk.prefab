@@ -110,6 +110,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f46e748926138c04abe2edf9e99c6e58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  land: {fileID: 0}
   itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
   blockToItemID: {fileID: 8468740666753732256, guid: 25b9fb8253abe4a4b8d11e60258ad1d6, type: 3}
   meshRenderer: {fileID: 3629375312731890500}
@@ -119,3 +120,5 @@ MonoBehaviour:
   sizeY: 16
   sizeZ: 16
   requiresMeshGeneration: 0
+  vertexLength: 0
+  resolution: {x: 0, y: 0}

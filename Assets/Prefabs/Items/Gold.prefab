@@ -138,7 +138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6300a0f0e5f89f458bcc601f42715b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventType: 0
+  eventType: 1
   maxDistance: 3
   timer: 0
   efficiency: 1
@@ -155,7 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83b4ba22b89d07d429ec2aeba8d101c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventType: 0
+  eventType: 2
   block: {fileID: 8164447933402656394}
   maxDistance: 3
   prevCoords: {x: 0, y: 0, z: 0}
