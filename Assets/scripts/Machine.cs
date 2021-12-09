@@ -17,8 +17,8 @@ public class Machine : Block
     public Port[] portTypes;
     public int[] portConnections;
     public int[] faces = new int[6];
-    
-    private Inventory[] inventories;
+
+    [HideInInspector] public Inventory[] inventories;
     [HideInInspector] public int energyInput;
     [HideInInspector] public int energyOutput;
 
@@ -31,5 +31,5 @@ public class Machine : Block
             Debug.Log(inventories[i].size);
         }
     }
-
+    
 }
