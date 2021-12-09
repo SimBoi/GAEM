@@ -607,6 +607,71 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 478887299}
   m_CullTransparentMesh: 1
+--- !u!1 &495018116
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 495018118}
+  - component: {fileID: 495018117}
+  m_Layer: 0
+  m_Name: test
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &495018117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 495018116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7b094f4313ae184e8ba3f492bac8827, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemPrefabs: {fileID: 0}
+  name: 
+  id: 0
+  maxStackSize: 0
+  despawnTime: 300
+  maxDurability: 0
+  spawnDurability: 0
+  stackSize: 0
+  health: {fileID: 0}
+  preventDespawn: 0
+  despawnTimer: 0
+  isHeld: 0
+  isDestroyed: 0
+  ui: {fileID: 0}
+  blockID: 0
+  stiffness: 0
+  inventorySizes: 01000000
+  portTypes: 
+  portConnections: 
+  faces: 000000000100000002000000000000000000000000000000
+  energyInput: 0
+  energyOutput: 0
+--- !u!4 &495018118
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 495018116}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 11.809538, y: 9.306821, z: -3.137808}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &709986013
 GameObject:
   m_ObjectHideFlags: 0
