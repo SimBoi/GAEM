@@ -5,13 +5,17 @@ using UnityEngine;
 public class Block : Item
 {
     public int blockID;
-    public float stiffness ;
+    public float stiffness;
+    public bool hasCustomMesh;
+    public MeshFilter customMeshFilter;
 
     public void CopyFrom(Block source)
     {
         base.CopyFrom(source);
         this.blockID = source.blockID;
         this.stiffness = source.stiffness;
+        this.hasCustomMesh = source.hasCustomMesh;
+        this.customMeshFilter = source.customMeshFilter;
     }
 
     public override Item Clone()

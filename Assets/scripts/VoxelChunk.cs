@@ -60,6 +60,7 @@ public class VoxelChunk : MonoBehaviour
     void GenerateMesh()
     {
         Mesh newMesh = new Mesh();
+        List<MeshFilter> customMeshFilters = new List<MeshFilter>();
         List<Vector3> vertices = new List<Vector3>();
         List<Vector3> normals = new List<Vector3>();
         List<Vector2> uvs = new List<Vector2>();
@@ -78,12 +79,12 @@ public class VoxelChunk : MonoBehaviour
                     else
                     {
                         Vector3Int pos = new Vector3Int(x, y, z);
-                        GenerateBlock_Top(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Up), pos);
-                        GenerateBlock_Right(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Right), pos);
-                        GenerateBlock_Left(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Left), pos);
-                        GenerateBlock_Forward(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Front), pos);
-                        GenerateBlock_Back(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Back), pos);
-                        GenerateBlock_Bottom(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Down), pos);
+                        GenerateBlock_Top(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Up), pos, customMeshFilters);
+                        GenerateBlock_Right(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Right), pos, customMeshFilters);
+                        GenerateBlock_Left(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Left), pos, customMeshFilters);
+                        GenerateBlock_Forward(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Front), pos, customMeshFilters);
+                        GenerateBlock_Back(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Back), pos, customMeshFilters);
+                        GenerateBlock_Bottom(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Down), pos, customMeshFilters);
                     }
                 }
             }
@@ -93,18 +94,37 @@ public class VoxelChunk : MonoBehaviour
         newMesh.SetNormals(normals);
         newMesh.SetUVs(0, uvs);
         newMesh.SetIndices(indices, MeshTopology.Triangles, 0);
-
         newMesh.RecalculateTangents();
+
+        CombineInstance[] combinecustomMeshFilters = new CombineInstance[customMeshFilters.Count + 1];
+        meshFilter.mesh = newMesh;
+        combinecustomMeshFilters[0].mesh = newMesh;
+        combinecustomMeshFilters[0].transform = transform.localToWorldMatrix;
+        int i = 1;
+        while (i < customMeshFilters.Count + 1)
+        {
+            combinecustomMeshFilters[i].mesh = customMeshFilters[i].sharedMesh;
+            combinecustomMeshFilters[i].transform = customMeshFilters[i].transform.localToWorldMatrix;
+            i++;
+        }
+
         meshFilter.mesh = newMesh;
         meshCollider.sharedMesh = newMesh;
+        meshFilter.mesh.CombineMeshes(combinecustomMeshFilters);
         // Set Texture
 
         requiresMeshGeneration = false;
     }
 
-    void GenerateBlock_Top(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
+    void GenerateBlock_Top(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos, List<MeshFilter> customMeshFilters)
     {
-        if (pos.y + 1 < sizeY && blockIDs[pos.x, pos.y + 1, pos.z] != 0) return;
+        if (itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh)
+        {
+            customMeshFilters.Add(itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().customMeshFilter);
+            return;
+        }
+
+        if (pos.y + 1 < sizeY && blockIDs[pos.x, pos.y + 1, pos.z] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y + 1, pos.z])].GetComponent<Block>().hasCustomMesh) return;
         vertices.Add(new Vector3(0, 1, 1) + offset);
         vertices.Add(new Vector3(1, 1, 1) + offset);
         vertices.Add(new Vector3(1, 1, 0) + offset);
@@ -129,9 +149,15 @@ public class VoxelChunk : MonoBehaviour
         currentIndex += 4;
     }
 
-    void GenerateBlock_Right(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
+    void GenerateBlock_Right(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos, List<MeshFilter> customMeshFilters)
     {
-        if (pos.x + 1 < sizeX && blockIDs[pos.x + 1, pos.y, pos.z] != 0) return;
+        if (itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh)
+        {
+            customMeshFilters.Add(itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().customMeshFilter);
+            return;
+        }
+
+        if (pos.x + 1 < sizeX && blockIDs[pos.x + 1, pos.y, pos.z] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x + 1, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh) return;
         vertices.Add(new Vector3(1, 1, 0) + offset);
         vertices.Add(new Vector3(1, 1, 1) + offset);
         vertices.Add(new Vector3(1, 0, 1) + offset);
@@ -156,9 +182,15 @@ public class VoxelChunk : MonoBehaviour
         currentIndex += 4;
     }
 
-    void GenerateBlock_Left(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
+    void GenerateBlock_Left(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos, List<MeshFilter> customMeshFilters)
     {
-        if (pos.x - 1 >= 0 && blockIDs[pos.x - 1, pos.y, pos.z] != 0) return;
+        if (itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh)
+        {
+            customMeshFilters.Add(itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().customMeshFilter);
+            return;
+        }
+
+        if (pos.x - 1 >= 0 && blockIDs[pos.x - 1, pos.y, pos.z] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x - 1, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh) return;
         vertices.Add(new Vector3(0, 1, 1) + offset);
         vertices.Add(new Vector3(0, 1, 0) + offset);
         vertices.Add(new Vector3(0, 0, 0) + offset);
@@ -183,9 +215,15 @@ public class VoxelChunk : MonoBehaviour
         currentIndex += 4;
     }
 
-    void GenerateBlock_Forward(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
+    void GenerateBlock_Forward(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos, List<MeshFilter> customMeshFilters)
     {
-        if (pos.z + 1 < sizeZ && blockIDs[pos.x, pos.y, pos.z + 1] != 0) return;
+        if (itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh)
+        {
+            customMeshFilters.Add(itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().customMeshFilter);
+            return;
+        }
+
+        if (pos.z + 1 < sizeZ && blockIDs[pos.x, pos.y, pos.z + 1] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z + 1])].GetComponent<Block>().hasCustomMesh) return;
         vertices.Add(new Vector3(1, 1, 1) + offset);
         vertices.Add(new Vector3(0, 1, 1) + offset);
         vertices.Add(new Vector3(0, 0, 1) + offset);
@@ -210,9 +248,15 @@ public class VoxelChunk : MonoBehaviour
         currentIndex += 4;
     }
 
-    void GenerateBlock_Back(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
+    void GenerateBlock_Back(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos, List<MeshFilter> customMeshFilters)
     {
-        if (pos.z - 1 >= 0 && blockIDs[pos.x, pos.y, pos.z - 1] != 0) return;
+        if (itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh)
+        {
+            customMeshFilters.Add(itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().customMeshFilter);
+            return;
+        }
+
+        if (pos.z - 1 >= 0 && blockIDs[pos.x, pos.y, pos.z - 1] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z - 1])].GetComponent<Block>().hasCustomMesh) return;
         vertices.Add(new Vector3(0, 1, 0) + offset);
         vertices.Add(new Vector3(1, 1, 0) + offset);
         vertices.Add(new Vector3(1, 0, 0) + offset);
@@ -237,9 +281,15 @@ public class VoxelChunk : MonoBehaviour
         currentIndex += 4;
     }
 
-    void GenerateBlock_Bottom(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
+    void GenerateBlock_Bottom(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos, List<MeshFilter> customMeshFilters)
     {
-        if (pos.y - 1 >= 0 && blockIDs[pos.x, pos.y - 1, pos.z] != 0) return;
+        if (itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh)
+        {
+            customMeshFilters.Add(itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().customMeshFilter);
+            return;
+        }
+
+        if (pos.y - 1 >= 0 && blockIDs[pos.x, pos.y - 1, pos.z] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y - 1, pos.z])].GetComponent<Block>().hasCustomMesh) return;
         vertices.Add(new Vector3(0, 0, 0) + offset);
         vertices.Add(new Vector3(1, 0, 0) + offset);
         vertices.Add(new Vector3(1, 0, 1) + offset);

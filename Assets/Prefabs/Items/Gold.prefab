@@ -123,9 +123,13 @@ MonoBehaviour:
   health: {fileID: 0}
   preventDespawn: 0
   despawnTimer: 0
+  isHeld: 0
   isDestroyed: 0
+  ui: {fileID: 0}
   blockID: 1
   stiffness: 1
+  hasCustomMesh: 1
+  customMeshFilter: {fileID: 8164447933402656399}
 --- !u!114 &-4544310723011560390
 MonoBehaviour:
   m_ObjectHideFlags: 0
