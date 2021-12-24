@@ -59,7 +59,7 @@ public class VoxelChunk : MonoBehaviour
 
     void GenerateMesh()
     {
-        Mesh newMesh = new Mesh();
+        Mesh normalMesh = new Mesh();
         List<MeshFilter> customMeshFilters = new List<MeshFilter>();
         List<Vector3> vertices = new List<Vector3>();
         List<Vector3> normals = new List<Vector3>();
@@ -90,27 +90,28 @@ public class VoxelChunk : MonoBehaviour
             }
         }
 
-        newMesh.SetVertices(vertices);
-        newMesh.SetNormals(normals);
-        newMesh.SetUVs(0, uvs);
-        newMesh.SetIndices(indices, MeshTopology.Triangles, 0);
-        newMesh.RecalculateTangents();
+        normalMesh.SetVertices(vertices);
+        normalMesh.SetNormals(normals);
+        normalMesh.SetUVs(0, uvs);
+        normalMesh.SetIndices(indices, MeshTopology.Triangles, 0);
+        normalMesh.RecalculateTangents();
 
-        CombineInstance[] combinecustomMeshFilters = new CombineInstance[customMeshFilters.Count + 1];
-        meshFilter.mesh = newMesh;
-        combinecustomMeshFilters[0].mesh = newMesh;
-        combinecustomMeshFilters[0].transform = transform.localToWorldMatrix;
+        CombineInstance[] combineCustomMeshFilters = new CombineInstance[customMeshFilters.Count + 1];
+        meshFilter.mesh = normalMesh;
+        combineCustomMeshFilters[0].mesh = normalMesh;
+        combineCustomMeshFilters[0].transform = transform.worldToLocalMatrix * transform.localToWorldMatrix;
         int i = 1;
         while (i < customMeshFilters.Count + 1)
         {
-            combinecustomMeshFilters[i].mesh = customMeshFilters[i].sharedMesh;
-            combinecustomMeshFilters[i].transform = customMeshFilters[i].transform.localToWorldMatrix;
+            combineCustomMeshFilters[i].mesh = customMeshFilters[i].sharedMesh;
+            combineCustomMeshFilters[i].transform = customMeshFilters[i].transform.localToWorldMatrix;
             i++;
         }
 
-        meshFilter.mesh = newMesh;
-        meshCollider.sharedMesh = newMesh;
-        meshFilter.mesh.CombineMeshes(combinecustomMeshFilters);
+        Mesh finalMesh = new Mesh();
+        finalMesh.CombineMeshes(combineCustomMeshFilters);
+        meshFilter.mesh = finalMesh;
+        meshCollider.sharedMesh = finalMesh;
         // Set Texture
 
         requiresMeshGeneration = false;
