@@ -31,17 +31,17 @@ public class Land : MonoBehaviour
         return;
     }
 
-    public bool RemoveBlock(Vector3Int coords, bool spawnItem = false, Vector3 itemSpawnPos = default(Vector3))
+    public bool RemoveBlock(Vector3Int coords, bool spawnItem = false, Vector3 itemSpawnPos = default)
     {
         VoxelChunk chunk = chunks[new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ)].GetComponent<VoxelChunk>();
         return chunk.RemoveBlock(new Vector3Int(coords.x % chunkSizeX, coords.y, coords.z % chunkSizeZ), spawnItem, itemSpawnPos);
     }
 
-    public bool AddBlock(Vector3Int coords, short blockID)
+    public bool AddBlock(Vector3Int coords, short blockID, Quaternion rotation = default)
     {
         if (!chunks.ContainsKey(new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ)))
             InitChunk(new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ));
         VoxelChunk chunk = chunks[new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ)].GetComponent<VoxelChunk>();
-        return chunk.AddBlock(new Vector3Int(coords.x % chunkSizeX, coords.y, coords.z % chunkSizeZ), blockID);
+        return chunk.AddBlock(new Vector3Int(coords.x % chunkSizeX, coords.y, coords.z % chunkSizeZ), blockID, rotation);
     }
 }

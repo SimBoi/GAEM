@@ -7,7 +7,9 @@ public class Block : Item
     public int blockID;
     public float stiffness;
     public bool hasCustomMesh;
-    public MeshFilter customMeshFilter;
+    public GameObject itemObject;
+    public GameObject blockObject;
+    public VoxelChunk parentChunk = null;
 
     public void CopyFrom(Block source)
     {
@@ -15,7 +17,6 @@ public class Block : Item
         this.blockID = source.blockID;
         this.stiffness = source.stiffness;
         this.hasCustomMesh = source.hasCustomMesh;
-        this.customMeshFilter = source.customMeshFilter;
     }
 
     public override Item Clone()
@@ -30,5 +31,23 @@ public class Block : Item
         Block spawnedItem = (Block)base.Spawn(isHeld, pos, rotation, parent);
         spawnedItem.CopyFrom(this);
         return spawnedItem;
+    }
+
+    public Item PlaceBlock(Vector3 pos, Quaternion rotation, VoxelChunk parentChunk)
+    {
+        Block spawnedItem = (Block)base.Spawn(false, pos, rotation, parentChunk.transform);
+        spawnedItem.CopyFrom(this);
+        spawnedItem.parentChunk = parentChunk;
+        spawnedItem.itemObject.SetActive(false);
+        spawnedItem.blockObject.SetActive(true);
+        spawnedItem.preventDespawn = true;
+        spawnedItem.GetComponent<PickupItem>().enabled = false;
+        return spawnedItem;
+    }
+
+    public virtual bool BreakBlock(Vector3 pos, bool spawnItem = false)
+    {
+        if (spawnItem) Spawn(false, pos, default(Quaternion));
+        return Despawn();
     }
 }

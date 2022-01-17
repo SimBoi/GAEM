@@ -652,10 +652,13 @@ MonoBehaviour:
   ui: {fileID: 0}
   blockID: 0
   stiffness: 0
+  hasCustomMesh: 0
+  customMeshFilter: {fileID: 0}
   inventorySizes: 01000000
   portTypes: 
   portConnections: 
   faces: 000000000100000002000000000000000000000000000000
+  inventories: []
   energyInput: 0
   energyOutput: 0
 --- !u!4 &495018118

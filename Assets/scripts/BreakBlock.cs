@@ -16,21 +16,34 @@ public class BreakBlock : ItemEvent
         Debug.DrawRay(origin.position, origin.TransformDirection(Vector3.forward) * 20, Color.green);
         if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, maxDistance))
         {
-            if (hitInfo.transform.tag == "Chunk")
+            VoxelChunk chunk = null;
+
+            if (hitInfo.transform.GetComponent<VoxelChunk>() != null)
             {
-                VoxelChunk chunk = hitInfo.transform.GetComponent<VoxelChunk>();
+                chunk = hitInfo.transform.GetComponent<VoxelChunk>();
+            }
+            else if (hitInfo.transform.GetComponent<Block>() != null)
+            {
+                chunk = hitInfo.transform.GetComponent<Block>().parentChunk;
+            }
+            if (chunk != null)
+            {
                 Vector3 hitCoords = hitInfo.point - (0.5f * hitInfo.normal);
+                Vector3Int globalBlockCoords = Vector3Int.FloorToInt(hitCoords);
                 Vector3Int blockCoords = new Vector3Int((int)hitCoords.x % chunk.sizeX, (int)hitCoords.y % chunk.sizeY, (int)hitCoords.z % chunk.sizeZ);
-                if (blockCoords != prevCoords) timer = 0;
+                if (globalBlockCoords != prevCoords) timer = 0;
                 float blockStiffness = chunk.GetStiffness(blockCoords);
-                Debug.Log(timer * 100 /(blockStiffness / efficiency) + "%");
-                if (timer >= blockStiffness/efficiency)
+                Debug.Log(timer * 100 / (blockStiffness / efficiency) + "%");
+                if (timer >= blockStiffness / efficiency)
                 {
-                    Debug.Log("am here yo");
-                    chunk.RemoveBlock(blockCoords);
+                    chunk.RemoveBlock(blockCoords, true, globalBlockCoords);
                     timer = 0;
                 }
-                prevCoords = new Vector3Int((int)hitCoords.x % chunk.sizeX, (int)hitCoords.y % chunk.sizeY, (int)hitCoords.z % chunk.sizeZ);
+                prevCoords = globalBlockCoords;
+            }
+            else
+            {
+                timer = 0;
             }
         }
         timer += Time.deltaTime;
