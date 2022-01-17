@@ -21,6 +21,8 @@ public class PlaceBlock : ItemEvent
                 Vector3 hitCoords = hitInfo.point + (0.5f * hitInfo.normal);
                 Vector3Int blockCoords = new Vector3Int((int)hitCoords.x, (int)hitCoords.y, (int)hitCoords.z);
 		chunk.land.AddBlock(blockCoords, (short)block.blockID);
+                PlayerInventory inventory = eventCaller.GetComponent<PlayerInventory>();
+                inventory.ConsumeFromStack(1, inventory.heldItemIndex);
             }
         }
     }
