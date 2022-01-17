@@ -31,10 +31,10 @@ public class Land : MonoBehaviour
         return;
     }
 
-    public bool RemoveBlock(Vector3Int coords, bool spawnItem = false, Vector3 itemSpawnPos = default)
+    public bool RemoveBlock(Vector3Int coords, bool spawnItem = false, Vector3 itemSpawnPos = default, Quaternion spawnRotation = default)
     {
         VoxelChunk chunk = chunks[new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ)].GetComponent<VoxelChunk>();
-        return chunk.RemoveBlock(new Vector3Int(coords.x % chunkSizeX, coords.y, coords.z % chunkSizeZ), spawnItem, itemSpawnPos);
+        return chunk.RemoveBlock(new Vector3Int(coords.x % chunkSizeX, coords.y, coords.z % chunkSizeZ), spawnItem, itemSpawnPos, spawnRotation);
     }
 
     public bool AddBlock(Vector3Int coords, short blockID, Quaternion rotation = default)

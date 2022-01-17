@@ -16,30 +16,34 @@ public class BreakBlock : ItemEvent
         Debug.DrawRay(origin.position, origin.TransformDirection(Vector3.forward) * 20, Color.green);
         if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, maxDistance))
         {
-            VoxelChunk chunk = null;
+            Land land = null;
 
             if (hitInfo.transform.GetComponent<VoxelChunk>() != null)
             {
-                chunk = hitInfo.transform.GetComponent<VoxelChunk>();
+                land = hitInfo.transform.GetComponent<VoxelChunk>().land;
             }
             else if (hitInfo.transform.GetComponent<Block>() != null)
             {
-                chunk = hitInfo.transform.GetComponent<Block>().parentChunk;
+                land = hitInfo.transform.GetComponent<Block>().parentChunk.land;
             }
-            if (chunk != null)
+            if (land != null)
             {
                 Vector3 hitCoords = hitInfo.point - (0.5f * hitInfo.normal);
-                Vector3Int globalBlockCoords = Vector3Int.FloorToInt(hitCoords);
-                Vector3Int blockCoords = new Vector3Int((int)hitCoords.x % chunk.sizeX, (int)hitCoords.y % chunk.sizeY, (int)hitCoords.z % chunk.sizeZ);
-                if (globalBlockCoords != prevCoords) timer = 0;
-                float blockStiffness = chunk.GetStiffness(blockCoords);
+                Vector3 landHitCoords = land.transform.InverseTransformPoint(hitCoords);
+                Vector3Int landBlockCoords = Vector3Int.FloorToInt(landHitCoords);
+                Vector3Int chunkBlockCoords = new Vector3Int((int)landHitCoords.x % land.chunkSizeX, (int)landHitCoords.y % land.chunkSizeY, (int)landHitCoords.z % land.chunkSizeZ);
+                if (landBlockCoords != prevCoords) timer = 0;
+                float blockStiffness = land.chunks[new Vector2Int((int)landBlockCoords.x/ land.chunkSizeX, (int)landBlockCoords.z/ land.chunkSizeZ)].GetComponent<VoxelChunk>().GetStiffness(chunkBlockCoords);
+
+                /////////////////////////// debug remove later
                 Debug.Log(timer * 100 / (blockStiffness / efficiency) + "%");
+
                 if (timer >= blockStiffness / efficiency)
                 {
-                    chunk.RemoveBlock(blockCoords, true, globalBlockCoords);
+                    land.RemoveBlock(landBlockCoords, true, land.transform.TransformPoint(landBlockCoords + new Vector3(0.5f, 0.5f, 0.5f)), land.transform.rotation);
                     timer = 0;
                 }
-                prevCoords = globalBlockCoords;
+                prevCoords = landBlockCoords;
             }
             else
             {

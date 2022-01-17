@@ -267,7 +267,7 @@ public class VoxelChunk : MonoBehaviour
         currentIndex += 4;
     }
 
-    public bool RemoveBlock(Vector3Int pos, bool spawnItem = false, Vector3 spawnPos = default(Vector3), Quaternion spawnRotation = default(Quaternion))
+    public bool RemoveBlock(Vector3Int pos, bool spawnItem = false, Vector3 spawnPos = default(Vector3), Quaternion spawnRotation = default)
     {
         if (blockIDs[pos.x, pos.y, pos.z] != 0)
         {
