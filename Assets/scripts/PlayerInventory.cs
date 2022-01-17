@@ -128,7 +128,7 @@ public class PlayerInventory : MonoBehaviour
         }
         else
         {
-            return backpack.ConsumeFromStack(index, stackToConsume - consumedStack);
+            return backpack.ConsumeFromStack(index, stackToConsume);
         }
     }
 
