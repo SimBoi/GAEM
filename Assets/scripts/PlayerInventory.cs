@@ -119,6 +119,20 @@ public class PlayerInventory : MonoBehaviour
     }
 
     // returns number of items consumed
+    public int ConsumeFromStack(int stackToConsume, int index, PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar)
+    {
+
+        if (inventoryType == PlayerInventoryType.Hotbar)
+        {
+            return hotbar.ConsumeFromStack(index, stackToConsume);
+        }
+        else
+        {
+            return backpack.ConsumeFromStack(index, stackToConsume - consumedStack);
+        }
+    }
+
+    // returns number of items consumed
     public int ConsumeFromTotalStack(Item item, int stackToConsume)
     {
         int consumedStack = hotbar.ConsumeFromTotalStack(item, stackToConsume);
