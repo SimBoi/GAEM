@@ -101,7 +101,7 @@ public class Item : MonoBehaviour
         despawnTimer = 0;
     }
 
-    public virtual Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation, Transform parent = null)
+    public virtual Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
     {
         GameObject newItem;
         if (parent == null)

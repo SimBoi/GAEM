@@ -21,7 +21,7 @@ public class Wearable : Item
         return clone;
     }
 
-    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation, Transform parent = null)
+    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
     {
         Wearable spawnedItem = (Wearable)base.Spawn(isHeld, pos, rotation, parent);
         spawnedItem.CopyFrom(this);

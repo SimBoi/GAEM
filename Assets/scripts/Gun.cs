@@ -89,7 +89,7 @@ public class Gun : Item
         return clone;
     }
 
-    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation, Transform parent = null)
+    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
     {
         Gun spawnedItem = (Gun)base.Spawn(isHeld, pos, rotation, parent);
         spawnedItem.CopyFrom(this);
