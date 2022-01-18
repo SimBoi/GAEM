@@ -267,23 +267,29 @@ public class VoxelChunk : MonoBehaviour
         currentIndex += 4;
     }
 
-    public bool RemoveBlock(Vector3Int pos, bool spawnItem = false, Vector3 spawnPos = default(Vector3), Quaternion spawnRotation = default)
+    public bool RemoveBlock(Vector3Int pos, bool spawnItem = false)
     {
         if (blockIDs[pos.x, pos.y, pos.z] != 0)
         {
             if (customBlocks.ContainsKey(pos))
             {
-                customBlocks[pos].BreakBlock(pos + transform.position, spawnItem);
+                Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
+                customBlocks[pos].BreakCustomBlock(spawnItem, spawnPos);
+                customBlocks.Remove(pos);
             }
-            else if (spawnItem == true)
+            else
             {
-                GameObject newItem;
-                newItem = Instantiate(itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])], spawnPos, spawnRotation);
-                Item spawnedItem = newItem.GetComponent<Item>();
-                spawnedItem.SetStackSize(1);
+                if (spawnItem == true)
+                {
+                    GameObject newItem;
+                    Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
+                    newItem = Instantiate(itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])], spawnPos, default(Quaternion));
+                    Item spawnedItem = newItem.GetComponent<Item>();
+                    spawnedItem.SetStackSize(1);
+                }
+                requiresMeshGeneration = true;
             }
             blockIDs[pos.x, pos.y, pos.z] = 0;
-            requiresMeshGeneration = true;
             return true;
         }
         return false;
@@ -296,9 +302,14 @@ public class VoxelChunk : MonoBehaviour
             blockIDs[pos.x, pos.y, pos.z] = blockID;
             if (itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh)
             {
-                itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().PlaceBlock(pos + transform.position, rotation, this);
+                Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
+                Block customBlock = (Block)itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().PlaceCustomBlock(spawnPos, rotation, this);
+                customBlocks.Add(pos, customBlock);
             }
-            requiresMeshGeneration = true;
+            else
+            {
+                requiresMeshGeneration = true;
+            }
             return true;
         }
         return false;

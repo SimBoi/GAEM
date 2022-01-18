@@ -26,14 +26,14 @@ public class Block : Item
         return clone;
     }
 
-    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation, Transform parent = null)
+    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
     {
         Block spawnedItem = (Block)base.Spawn(isHeld, pos, rotation, parent);
         spawnedItem.CopyFrom(this);
         return spawnedItem;
     }
 
-    public Item PlaceBlock(Vector3 pos, Quaternion rotation, VoxelChunk parentChunk)
+    public Item PlaceCustomBlock(Vector3 pos, Quaternion rotation, VoxelChunk parentChunk)
     {
         Block spawnedItem = (Block)base.Spawn(false, pos, rotation, parentChunk.transform);
         spawnedItem.CopyFrom(this);
@@ -41,13 +41,12 @@ public class Block : Item
         spawnedItem.itemObject.SetActive(false);
         spawnedItem.blockObject.SetActive(true);
         spawnedItem.preventDespawn = true;
-        spawnedItem.GetComponent<PickupItem>().enabled = false;
         return spawnedItem;
     }
 
-    public virtual bool BreakBlock(Vector3 pos, bool spawnItem = false)
+    public virtual bool BreakCustomBlock(bool spawnItem = false, Vector3 pos = default(Vector3))
     {
-        if (spawnItem) Spawn(false, pos, default(Quaternion));
+        if (spawnItem) Spawn(false, pos);
         return Despawn();
     }
 }

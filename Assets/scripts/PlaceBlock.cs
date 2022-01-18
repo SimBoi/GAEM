@@ -16,19 +16,20 @@ public class PlaceBlock : ItemEvent
 
         if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, maxDistance))
         {
-            Land land = new Land();
+            Land land = null;
             if (hitInfo.transform.GetComponent<VoxelChunk>() != null)
             {
                 land = hitInfo.transform.GetComponent<VoxelChunk>().land;
             }
-            else if (hitInfo.transform.GetComponent<Block>() != null)
+            else if (hitInfo.transform.parent != null && hitInfo.transform.parent.GetComponent<Block>() != null)
             {
-                land = hitInfo.transform.GetComponent<Block>().parentChunk.land;
+                land = hitInfo.transform.parent.GetComponent<Block>().parentChunk.land;
             }
+
             if (land != null)
             {
-                Vector3 hitCoords = hitInfo.point + (0.5f * hitInfo.normal);
-                Vector3 landHitCoords = land.transform.InverseTransformPoint(hitCoords);
+                Vector3 globalHitCoords = hitInfo.point + (0.001f * hitInfo.normal);
+                Vector3 landHitCoords = land.transform.InverseTransformPoint(globalHitCoords);
                 Vector3Int landBlockCoords = Vector3Int.FloorToInt(landHitCoords);
 
                 land.AddBlock(landBlockCoords, (short)block.blockID, Quaternion.LookRotation(hitInfo.normal));

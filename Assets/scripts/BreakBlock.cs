@@ -17,19 +17,19 @@ public class BreakBlock : ItemEvent
         if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, maxDistance))
         {
             Land land = null;
-
             if (hitInfo.transform.GetComponent<VoxelChunk>() != null)
             {
                 land = hitInfo.transform.GetComponent<VoxelChunk>().land;
             }
-            else if (hitInfo.transform.GetComponent<Block>() != null)
+            else if (hitInfo.transform.parent != null && hitInfo.transform.parent.GetComponent<Block>() != null)
             {
-                land = hitInfo.transform.GetComponent<Block>().parentChunk.land;
+                land = hitInfo.transform.parent.GetComponent<Block>().parentChunk.land;
             }
+
             if (land != null)
             {
-                Vector3 hitCoords = hitInfo.point - (0.5f * hitInfo.normal);
-                Vector3 landHitCoords = land.transform.InverseTransformPoint(hitCoords);
+                Vector3 globalHitCoords = hitInfo.point - (0.5f * hitInfo.normal);
+                Vector3 landHitCoords = land.transform.InverseTransformPoint(globalHitCoords);
                 Vector3Int landBlockCoords = Vector3Int.FloorToInt(landHitCoords);
                 Vector3Int chunkBlockCoords = new Vector3Int((int)landHitCoords.x % land.chunkSizeX, (int)landHitCoords.y % land.chunkSizeY, (int)landHitCoords.z % land.chunkSizeZ);
                 if (landBlockCoords != prevCoords) timer = 0;
@@ -40,7 +40,7 @@ public class BreakBlock : ItemEvent
 
                 if (timer >= blockStiffness / efficiency)
                 {
-                    land.RemoveBlock(landBlockCoords, true, land.transform.TransformPoint(landBlockCoords + new Vector3(0.5f, 0.5f, 0.5f)), land.transform.rotation);
+                    land.RemoveBlock(landBlockCoords, true);
                     timer = 0;
                 }
                 prevCoords = landBlockCoords;
