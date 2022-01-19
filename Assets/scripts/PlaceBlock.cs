@@ -8,7 +8,7 @@ public class PlaceBlock : ItemEvent
     public float maxDistance = 3;
     public Vector3 prevCoords;
 
-    public override void CustomEvent(GameObject eventCaller)
+    public override void CustomItemEvent(GameObject eventCaller)
     {
         Transform origin = eventCaller.GetComponent<CharacterController>().eyePosition.transform;
         RaycastHit hitInfo;
@@ -35,10 +35,5 @@ public class PlaceBlock : ItemEvent
                 land.AddBlock(landBlockCoords, (short)block.blockID, Quaternion.LookRotation(hitInfo.normal));
             }
         }
-    }
-
-    public override void CustomEventExit(GameObject eventCaller)
-    {
-       
     }
 }

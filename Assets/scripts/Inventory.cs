@@ -143,7 +143,12 @@ public class Inventory : MonoBehaviour
         return true;
     }
 
-    public int GetTotalStack(Item item)
+    public int GetStackSize(int index)
+    {
+        return GetItemRef(index).GetStackSize();
+    }
+
+    public int GetTotalStackSize(Item item)
     {
         int totalStack = 0;
         for (int i = 0; i < size; i++)

@@ -28,7 +28,7 @@ public class Wearable : Item
         return spawnedItem;
     }
 
-    public override void SecondaryEvent(GameObject eventCaller)
+    public override void SecondaryItemEvent(GameObject eventCaller)
     {
         eventCaller.GetComponent<PlayerInventory>().EquipArmor(this, armorPiece, armorStrength); ////////////////////// if item was held then destroy reference to this wearable
     }

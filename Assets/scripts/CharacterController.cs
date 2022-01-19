@@ -5,11 +5,12 @@ using UnityEngine.UI;
 
 public class CharacterController : MonoBehaviour
 {
+    public Health health;
+    public Hunger hunger;
+    public float interactDistance;
     public CharacterMovement characterMovement;
     public Camera characterCamera;
     public MouseLook mouseLook;
-    public Health health;
-    public Hunger hunger;
     public PlayerInventory inventory;
     public GameObject eyePosition;
     public Transform gunRaySpawnPoint;
@@ -58,11 +59,32 @@ public class CharacterController : MonoBehaviour
                 if (Input.GetAxisRaw("Reload") == 1)
                     ((Gun)heldItem).GetReloadKey();
             }
+            else
+            {
+                if (Input.GetAxisRaw("Fire1") == 1 && inventory.heldItemIndex != -1)
+                    heldItem.PrimaryItemEvent(gameObject);
+                if (Input.GetAxisRaw("Fire2") == 1 && inventory.heldItemIndex != -1)
+                    heldItem.SecondaryItemEvent(gameObject);
+            }
+        }
 
-            if (Input.GetAxisRaw("Fire1") == 1 && inventory.heldItemIndex != -1)
-                heldItem.PrimaryEvent(gameObject);
-            else if (Input.GetAxisRaw("Fire2") == 1 && inventory.heldItemIndex != -1)
-                heldItem.SecondaryEvent(gameObject);
+        if (Input.GetAxisRaw("Interact1") == 1)
+        {
+            Transform origin = eyePosition.transform;
+            RaycastHit hitInfo;
+            if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, interactDistance))
+            {
+                hitInfo.collider.SendMessageUpwards("PrimaryInteractEvent", gameObject, SendMessageOptions.DontRequireReceiver);
+            }
+        }
+        if (Input.GetAxisRaw("Interact2") == 1)
+        {
+            Transform origin = eyePosition.transform;
+            RaycastHit hitInfo;
+            if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, interactDistance))
+            {
+                hitInfo.collider.SendMessageUpwards("SecondaryInteractEvent", gameObject, SendMessageOptions.DontRequireReceiver);
+            }
         }
 
         UpdateUI();

@@ -109,7 +109,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3994de9ae3c515b46957a672d969cbd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  item: {fileID: 8164447933402656394}
+  item: {fileID: 6860486424626803581}
   pickupDelay: 1
 --- !u!1 &8164447933402656395
 GameObject:
@@ -120,11 +120,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8164447933402656398}
-  - component: {fileID: 8164447933402656394}
+  - component: {fileID: 6860486424626803581}
   - component: {fileID: -4544310723011560390}
   - component: {fileID: -30830473682224474}
   m_Layer: 0
-  m_Name: Gold
+  m_Name: Dogecoin Minter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -146,7 +146,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8164447933402656394
+--- !u!114 &6860486424626803581
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -155,11 +155,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 8164447933402656395}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a3b00f0dd32ed2429be728b20d3b39f, type: 3}
+  m_Script: {fileID: 11500000, guid: 3cf49432732155249ba7cfe9555936a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
-  name: Gold
+  name: Dogecoin Minter
   id: 4
   maxStackSize: 64
   despawnTime: 300
@@ -178,6 +178,18 @@ MonoBehaviour:
   itemObject: {fileID: 1362694357772957986}
   blockObject: {fileID: 9192997310427570172}
   parentChunk: {fileID: 0}
+  inventorySizes: 
+  portTypes: 
+  portConnections: 
+  faces: 000000000000000000000000000000000000000000000000
+  inventories: []
+  energyInput: 0
+  energyOutput: 0
+  PrimaryMachineEventType: 1
+  SecondaryMachineEventType: 0
+  inputItem: {fileID: 2483047963270853810, guid: 3ef3be445a1b0e34bb9a73c70cf4782b, type: 3}
+  outputItem: {fileID: 8181782636717577039, guid: a2858dbd47a742e4ba14469be27baed1, type: 3}
+  cost: 1
 --- !u!114 &-4544310723011560390
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -208,7 +220,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   eventType: 2
-  block: {fileID: 8164447933402656394}
+  block: {fileID: 6860486424626803581}
   maxDistance: 3
   prevCoords: {x: 0, y: 0, z: 0}
 --- !u!1 &9192997310427570172

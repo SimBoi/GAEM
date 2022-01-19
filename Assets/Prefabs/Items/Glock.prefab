@@ -547,6 +547,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3994de9ae3c515b46957a672d969cbd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  item: {fileID: 8752844573586030655}
   pickupDelay: 2
 --- !u!135 &4626922982977740656
 SphereCollider:

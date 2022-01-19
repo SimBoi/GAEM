@@ -158,7 +158,7 @@ public class Gun : Item
 
     public void GetReloadKey()
     {
-        if (Input.GetButtonDown("Reload") && !isReloading && magazine < magazineSize && inventory.GetTotalStack(ammoType) > 0)
+        if (Input.GetButtonDown("Reload") && !isReloading && magazine < magazineSize && inventory.GetTotalStackSize(ammoType) > 0)
         {
             reloadTimer = 0;
             isReloading = true;

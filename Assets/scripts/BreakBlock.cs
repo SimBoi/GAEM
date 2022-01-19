@@ -9,11 +9,10 @@ public class BreakBlock : ItemEvent
     public float efficiency = 1;
     public Vector3 prevCoords;
 
-    public override void CustomEvent(GameObject eventCaller)
+    public override void CustomItemEvent(GameObject eventCaller)
     {
         Transform origin = eventCaller.GetComponent<CharacterController>().eyePosition.transform;
         RaycastHit hitInfo;
-        Debug.DrawRay(origin.position, origin.TransformDirection(Vector3.forward) * 20, Color.green);
         if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, maxDistance))
         {
             Land land = null;
@@ -53,7 +52,7 @@ public class BreakBlock : ItemEvent
         timer += Time.deltaTime;
     }
 
-    public override void CustomEventExit(GameObject eventCaller)
+    public override void CustomItemEventExit(GameObject eventCaller)
     {
         timer = 0;
     }
