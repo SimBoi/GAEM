@@ -32,7 +32,11 @@ public class PlaceBlock : ItemEvent
                 Vector3 landHitCoords = land.transform.InverseTransformPoint(globalHitCoords);
                 Vector3Int landBlockCoords = Vector3Int.FloorToInt(landHitCoords);
 
-                land.AddBlock(landBlockCoords, (short)block.blockID, Quaternion.LookRotation(hitInfo.normal));
+                if (land.AddBlock(landBlockCoords, (short)block.blockID, Quaternion.LookRotation(hitInfo.normal)))
+                {
+                    PlayerInventory inventory = eventCaller.GetComponent<PlayerInventory>();
+                    inventory.ConsumeFromStack(1, inventory.heldItemIndex);
+                }
             }
         }
     }

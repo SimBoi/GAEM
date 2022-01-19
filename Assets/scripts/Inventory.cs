@@ -158,6 +158,17 @@ public class Inventory : MonoBehaviour
     }
 
     // returns number of items consumed
+    public int ConsumeFromStack(int index, int stackToConsume)
+    {
+        int oldStackSize = GetItemRef(index).GetStackSize();
+        int newStackSize = GetItemRef(index).ChangeStackSize(Mathf.Clamp(-stackToConsume, -oldStackSize, 0));
+        if (newStackSize == 0)
+            DeleteItem(index);
+
+        return oldStackSize - newStackSize;
+    }
+
+    // returns number of items consumed
     public int ConsumeFromTotalStack(Item item, int stackToConsume)
     {
         int consumedStack = 0;
@@ -165,12 +176,7 @@ public class Inventory : MonoBehaviour
         {
             if (GetItemRef(i) == item)
             {
-                int oldStackSize = GetItemRef(i).GetStackSize();
-                int newStackSize = GetItemRef(i).ChangeStackSize(Mathf.Clamp(-(stackToConsume - consumedStack), -oldStackSize, 0));
-                if (newStackSize == 0)
-                    DeleteItem(i);
-                consumedStack += oldStackSize - newStackSize;
-
+                consumedStack += ConsumeFromStack(i, stackToConsume - consumedStack);
                 if (consumedStack == stackToConsume)
                     break;
             }
