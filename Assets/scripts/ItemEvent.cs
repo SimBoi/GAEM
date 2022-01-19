@@ -13,59 +13,59 @@ public enum ItemEventType
 public class ItemEvent : MonoBehaviour
 {
     public ItemEventType eventType;
-    private bool isActive = false;
-    private bool wasActive = false;
+    private bool isEventActive = false;
+    private bool wasEventActive = false;
     private GameObject lastEventCaller;
 
     private void LateUpdate()
     {
-        if (wasActive && !isActive)
-            CustomEventExit(lastEventCaller);
+        if (wasEventActive && !isEventActive)
+            CustomItemEventExit(lastEventCaller);
 
-        wasActive = isActive;
-        isActive = false;
+        wasEventActive = isEventActive;
+        isEventActive = false;
     }
 
-    public void CustomPrimaryEvent(GameObject eventCaller)
+    public void CustomPrimaryItemEvent(GameObject eventCaller)
     {
         if (eventType == ItemEventType.SinglePrimaryEvent)
         {
-            isActive = true;
+            isEventActive = true;
             lastEventCaller = eventCaller;
-            if (wasActive == false)
-                CustomEvent(eventCaller);
+            if (wasEventActive == false)
+                CustomItemEvent(eventCaller);
         }
         else if (eventType == ItemEventType.ContinuousPrimaryEvent)
         {
-            isActive = true;
+            isEventActive = true;
             lastEventCaller = eventCaller;
-            CustomEvent(eventCaller);
+            CustomItemEvent(eventCaller);
         }
     }
 
-    public void CustomSecondaryEvent(GameObject eventCaller)
+    public void CustomSecondaryItemEvent(GameObject eventCaller)
     {
         if (eventType == ItemEventType.SingleSeconadryEvent)
         {
-            isActive = true;
+            isEventActive = true;
             lastEventCaller = eventCaller;
-            if (wasActive == false)
-                CustomEvent(eventCaller);
+            if (wasEventActive == false)
+                CustomItemEvent(eventCaller);
         }
         else if (eventType == ItemEventType.ContinuousSeconadryEvent)
         {
-            isActive = true;
+            isEventActive = true;
             lastEventCaller = eventCaller;
-            CustomEvent(eventCaller);
+            CustomItemEvent(eventCaller);
         }
     }
 
-    public virtual void CustomEvent(GameObject eventCaller)
+    public virtual void CustomItemEvent(GameObject eventCaller)
     {
 
     }
 
-    public virtual void CustomEventExit(GameObject eventCaller)
+    public virtual void CustomItemEventExit(GameObject eventCaller)
     {
 
     }

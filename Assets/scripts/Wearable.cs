@@ -21,14 +21,14 @@ public class Wearable : Item
         return clone;
     }
 
-    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation, Transform parent = null)
+    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
     {
         Wearable spawnedItem = (Wearable)base.Spawn(isHeld, pos, rotation, parent);
         spawnedItem.CopyFrom(this);
         return spawnedItem;
     }
 
-    public override void SecondaryEvent(GameObject eventCaller)
+    public override void SecondaryItemEvent(GameObject eventCaller)
     {
         eventCaller.GetComponent<PlayerInventory>().EquipArmor(this, armorPiece, armorStrength); ////////////////////// if item was held then destroy reference to this wearable
     }

@@ -8,27 +8,36 @@ public class PlaceBlock : ItemEvent
     public float maxDistance = 3;
     public Vector3 prevCoords;
 
-    public override void CustomEvent(GameObject eventCaller)
+    public override void CustomItemEvent(GameObject eventCaller)
     {
         Transform origin = eventCaller.GetComponent<CharacterController>().eyePosition.transform;
         RaycastHit hitInfo;
         Debug.DrawRay(origin.position, origin.TransformDirection(Vector3.forward) * 20, Color.green);
+
         if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, maxDistance))
         {
-            if (hitInfo.transform.tag == "Chunk")
+            Land land = null;
+            if (hitInfo.transform.GetComponent<VoxelChunk>() != null)
             {
-                VoxelChunk chunk = hitInfo.transform.GetComponent<VoxelChunk>();
-                Vector3 hitCoords = hitInfo.point + (0.5f * hitInfo.normal);
-                Vector3Int blockCoords = new Vector3Int((int)hitCoords.x, (int)hitCoords.y, (int)hitCoords.z);
-		chunk.land.AddBlock(blockCoords, (short)block.blockID);
-                PlayerInventory inventory = eventCaller.GetComponent<PlayerInventory>();
-                inventory.ConsumeFromStack(1, inventory.heldItemIndex);
+                land = hitInfo.transform.GetComponent<VoxelChunk>().land;
+            }
+            else if (hitInfo.transform.parent != null && hitInfo.transform.parent.GetComponent<Block>() != null)
+            {
+                land = hitInfo.transform.parent.GetComponent<Block>().parentChunk.land;
+            }
+
+            if (land != null)
+            {
+                Vector3 globalHitCoords = hitInfo.point + (0.001f * hitInfo.normal);
+                Vector3 landHitCoords = land.transform.InverseTransformPoint(globalHitCoords);
+                Vector3Int landBlockCoords = Vector3Int.FloorToInt(landHitCoords);
+
+                if (land.AddBlock(landBlockCoords, (short)block.blockID, Quaternion.LookRotation(hitInfo.normal)))
+                {
+                    PlayerInventory inventory = eventCaller.GetComponent<PlayerInventory>();
+                    inventory.ConsumeFromStack(1, inventory.heldItemIndex);
+                }
             }
         }
-    }
-
-    public override void CustomEventExit(GameObject eventCaller)
-    {
-       
     }
 }

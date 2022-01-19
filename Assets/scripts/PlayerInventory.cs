@@ -113,9 +113,21 @@ public class PlayerInventory : MonoBehaviour
         return true;
     }
 
-    public int GetTotalStack(Item item)
+    public int GetStackSize(int index, PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar)
     {
-        return hotbar.GetTotalStack(item) + backpack.GetTotalStack(item);
+        if (inventoryType == PlayerInventoryType.Hotbar)
+        {
+            return hotbar.GetStackSize(index);
+        }
+        else
+        {
+            return backpack.GetStackSize(index);
+        }
+    }
+
+    public int GetTotalStackSize(Item item)
+    {
+        return hotbar.GetTotalStackSize(item) + backpack.GetTotalStackSize(item);
     }
 
     // returns number of items consumed

@@ -1,3 +1,4 @@
+using System;
 using  System.Collections;
 using  System.Collections.Generic;
 using  UnityEngine;
@@ -101,7 +102,7 @@ public class Item : MonoBehaviour
         despawnTimer = 0;
     }
 
-    public virtual Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation, Transform parent = null)
+    public virtual Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
     {
         GameObject newItem;
         if (parent == null)
@@ -121,9 +122,12 @@ public class Item : MonoBehaviour
 
     public virtual bool Despawn()
     {
-        if (gameObject == null)
-            return false;
-        Destroy(gameObject);
+        try
+        {
+            if (gameObject != null)
+                Destroy(gameObject);
+        }
+        catch (NullReferenceException) { }
         isDestroyed = true;
         return true;
     }
@@ -147,13 +151,13 @@ public class Item : MonoBehaviour
 
     }
 
-    public virtual void PrimaryEvent(GameObject eventCaller)
+    public virtual void PrimaryItemEvent(GameObject eventCaller)
     {
-        SendMessageUpwards("CustomPrimaryEvent", eventCaller, SendMessageOptions.DontRequireReceiver);
+        SendMessageUpwards("CustomPrimaryItemEvent", eventCaller, SendMessageOptions.DontRequireReceiver);
     }
 
-    public virtual void SecondaryEvent(GameObject eventCaller)
+    public virtual void SecondaryItemEvent(GameObject eventCaller)
     {
-        SendMessageUpwards("CustomSecondaryEvent", eventCaller, SendMessageOptions.DontRequireReceiver);
+        SendMessageUpwards("CustomSecondaryItemEvent", eventCaller, SendMessageOptions.DontRequireReceiver);
     }
 }

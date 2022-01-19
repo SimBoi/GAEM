@@ -123,9 +123,15 @@ MonoBehaviour:
   health: {fileID: 0}
   preventDespawn: 0
   despawnTimer: 0
+  isHeld: 0
   isDestroyed: 0
+  ui: {fileID: 0}
   blockID: 2
   stiffness: 1
+  hasCustomMesh: 0
+  itemObject: {fileID: 0}
+  blockObject: {fileID: 0}
+  parentChunk: {fileID: 0}
 --- !u!114 &7959325127622393445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,4 +177,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3994de9ae3c515b46957a672d969cbd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  item: {fileID: 6906159332493323477}
   pickupDelay: 1

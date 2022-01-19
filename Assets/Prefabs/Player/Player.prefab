@@ -392,11 +392,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94d987a9edcf55b4ab284e7a02c48d76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  health: {fileID: 1828069676}
+  hunger: {fileID: 1828069675}
+  interactDistance: 5
   characterMovement: {fileID: 2051427869558859581}
   characterCamera: {fileID: 2051427869518740362}
   mouseLook: {fileID: 2051427869558859582}
-  health: {fileID: 1828069676}
-  hunger: {fileID: 1828069675}
   inventory: {fileID: 1828069674}
   eyePosition: {fileID: 1949629237}
   gunRaySpawnPoint: {fileID: 4576706661783122559}

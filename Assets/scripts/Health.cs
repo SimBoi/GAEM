@@ -54,7 +54,6 @@ public class Health : MonoBehaviour
     {
         float effectiveDmg = Mathf.Clamp(dmg - armor, 0, maxHp);
         ChangeHp(-effectiveDmg);
-        Debug.Log(hp);
         regenTimer = regenDelay;
     }
 

@@ -9,34 +9,50 @@ public class BreakBlock : ItemEvent
     public float efficiency = 1;
     public Vector3 prevCoords;
 
-    public override void CustomEvent(GameObject eventCaller)
+    public override void CustomItemEvent(GameObject eventCaller)
     {
         Transform origin = eventCaller.GetComponent<CharacterController>().eyePosition.transform;
         RaycastHit hitInfo;
-        Debug.DrawRay(origin.position, origin.TransformDirection(Vector3.forward) * 20, Color.green);
         if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, maxDistance))
         {
-            if (hitInfo.transform.tag == "Chunk")
+            Land land = null;
+            if (hitInfo.transform.GetComponent<VoxelChunk>() != null)
             {
-                VoxelChunk chunk = hitInfo.transform.GetComponent<VoxelChunk>();
-                Vector3 hitCoords = hitInfo.point - (0.5f * hitInfo.normal);
-                Vector3Int blockCoords = new Vector3Int((int)hitCoords.x % chunk.sizeX, (int)hitCoords.y % chunk.sizeY, (int)hitCoords.z % chunk.sizeZ);
-                if (blockCoords != prevCoords) timer = 0;
-                float blockStiffness = chunk.GetStiffness(blockCoords);
-                Debug.Log(timer * 100 /(blockStiffness / efficiency) + "%");
-                if (timer >= blockStiffness/efficiency)
+                land = hitInfo.transform.GetComponent<VoxelChunk>().land;
+            }
+            else if (hitInfo.transform.parent != null && hitInfo.transform.parent.GetComponent<Block>() != null)
+            {
+                land = hitInfo.transform.parent.GetComponent<Block>().parentChunk.land;
+            }
+
+            if (land != null)
+            {
+                Vector3 globalHitCoords = hitInfo.point - (0.5f * hitInfo.normal);
+                Vector3 landHitCoords = land.transform.InverseTransformPoint(globalHitCoords);
+                Vector3Int landBlockCoords = Vector3Int.FloorToInt(landHitCoords);
+                Vector3Int chunkBlockCoords = new Vector3Int((int)landHitCoords.x % land.chunkSizeX, (int)landHitCoords.y % land.chunkSizeY, (int)landHitCoords.z % land.chunkSizeZ);
+                if (landBlockCoords != prevCoords) timer = 0;
+                float blockStiffness = land.chunks[new Vector2Int((int)landBlockCoords.x/ land.chunkSizeX, (int)landBlockCoords.z/ land.chunkSizeZ)].GetComponent<VoxelChunk>().GetStiffness(chunkBlockCoords);
+
+                /////////////////////////// debug remove later
+                Debug.Log(timer * 100 / (blockStiffness / efficiency) + "%");
+
+                if (timer >= blockStiffness / efficiency)
                 {
-                    Debug.Log("am here yo");
-                    chunk.RemoveBlock(blockCoords);
+                    land.RemoveBlock(landBlockCoords, true);
                     timer = 0;
                 }
-                prevCoords = new Vector3Int((int)hitCoords.x % chunk.sizeX, (int)hitCoords.y % chunk.sizeY, (int)hitCoords.z % chunk.sizeZ);
+                prevCoords = landBlockCoords;
+            }
+            else
+            {
+                timer = 0;
             }
         }
         timer += Time.deltaTime;
     }
 
-    public override void CustomEventExit(GameObject eventCaller)
+    public override void CustomItemEventExit(GameObject eventCaller)
     {
         timer = 0;
     }

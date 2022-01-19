@@ -121,7 +121,9 @@ MonoBehaviour:
   health: {fileID: 0}
   preventDespawn: 0
   despawnTimer: 0
+  isHeld: 0
   isDestroyed: 0
+  ui: {fileID: 0}
 --- !u!114 &-3781147318714020202
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -134,3 +136,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3994de9ae3c515b46957a672d969cbd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  item: {fileID: 8181782636717577039}
+  pickupDelay: 1
