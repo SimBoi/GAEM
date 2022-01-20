@@ -21,20 +21,20 @@ public class Land : MonoBehaviour
     public void InitChunk(Vector2Int coords)
     {
         chunks.Add(coords, Instantiate(chunkPrefab, new Vector3Int(coords.x * chunkSizeX, 0, coords.y * chunkSizeZ), transform.rotation, gameObject.transform));
-        chunks[coords].GetComponent<VoxelChunk>().resolution = resolution;
-        chunks[coords].GetComponent<VoxelChunk>().vertexLength = vertexLength;
-        chunks[coords].GetComponent<VoxelChunk>().land = this;
-        chunks[coords].GetComponent<VoxelChunk>().sizeX = chunkSizeX;
-        chunks[coords].GetComponent<VoxelChunk>().sizeY = chunkSizeY;
-        chunks[coords].GetComponent<VoxelChunk>().sizeZ = chunkSizeZ;
-        chunks[coords].GetComponent<VoxelChunk>().WakeUp();
+        chunks[coords].GetComponent<Chunk>().resolution = resolution;
+        chunks[coords].GetComponent<Chunk>().vertexLength = vertexLength;
+        chunks[coords].GetComponent<Chunk>().land = this;
+        chunks[coords].GetComponent<Chunk>().sizeX = chunkSizeX;
+        chunks[coords].GetComponent<Chunk>().sizeY = chunkSizeY;
+        chunks[coords].GetComponent<Chunk>().sizeZ = chunkSizeZ;
+        chunks[coords].GetComponent<Chunk>().WakeUp();
         return;
     }
 
     public bool RemoveBlock(Vector3Int coords, bool spawnItem = false)
     {
         if (coords.y > chunkSizeY) return false;
-        VoxelChunk chunk = chunks[new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ)].GetComponent<VoxelChunk>();
+        Chunk chunk = chunks[new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ)].GetComponent<Chunk>();
         return chunk.RemoveBlock(new Vector3Int(coords.x % chunkSizeX, coords.y, coords.z % chunkSizeZ), spawnItem);
     }
 
@@ -44,7 +44,7 @@ public class Land : MonoBehaviour
         Vector2Int chunkIndex = new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ);
         if (!chunks.ContainsKey(chunkIndex))
             InitChunk(chunkIndex);
-        VoxelChunk chunk = chunks[chunkIndex].GetComponent<VoxelChunk>();
+        Chunk chunk = chunks[chunkIndex].GetComponent<Chunk>();
         return chunk.AddBlock(new Vector3Int(coords.x % chunkSizeX, coords.y, coords.z % chunkSizeZ), blockID, rotation);
     }
 }

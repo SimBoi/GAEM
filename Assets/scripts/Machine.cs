@@ -2,15 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum Port
-{
-    disabled,
-    itemInput,
-    itemOutput,
-    energyInput,
-    energyOutput
-}
-
 public enum MachineEventType
 {
     disabled,
@@ -21,13 +12,10 @@ public enum MachineEventType
 public class Machine : Block
 {
     public int[] inventorySizes;
-    public Port[] portTypes;
-    public int[] portConnections;
-    public int[] faces = new int[6];
+    public Port[] ports;
 
     [HideInInspector] public Inventory[] inventories;
-    [HideInInspector] public int energyInput;
-    [HideInInspector] public int energyOutput;
+    public int peakEnergyDemand = 0;
 
     public virtual void Awake()
     {
@@ -35,7 +23,20 @@ public class Machine : Block
         for (int i = 0; i< inventories.Length; i++)
         {
             inventories[i] = new Inventory(inventorySizes[i]);
-            Debug.Log(inventories[i].size);
+        }
+        ports = new Port[6];
+        for (int i = 0; i < ports.Length; i++)
+        {
+            ports[i] = new Port();
+        }
+    }
+
+    public void TryLinkNetwork(Faces face, Network targetNetwork)
+    {
+        Port port = ports[(int)face];
+        if (port.type != PortType.disabled && targetNetwork.GetType() == typeof(EnergyNetwork) && port.GetType() == typeof(EnergyPort))
+        {
+            targetNetwork.LinkPort(port);
         }
     }
 
@@ -100,23 +101,11 @@ public class Machine : Block
         }
     }
 
-    public virtual void PrimaryMachineEvent(GameObject eventCaller)
-    {
+    public virtual void PrimaryMachineEvent(GameObject eventCaller) { }
 
-    }
-
-    public virtual void PrimaryMachineEventExit(GameObject eventCaller)
-    {
-
-    }
+    public virtual void PrimaryMachineEventExit(GameObject eventCaller) { }
     
-    public virtual void SecondaryMachineEvent(GameObject eventCaller)
-    {
+    public virtual void SecondaryMachineEvent(GameObject eventCaller) { }
 
-    }
-
-    public virtual void SecondaryMachineEventExit(GameObject eventCaller)
-    {
-
-    }
+    public virtual void SecondaryMachineEventExit(GameObject eventCaller) { }
 }

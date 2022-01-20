@@ -12,7 +12,7 @@ public enum Faces
     Back
 }
 
-public class VoxelChunk : MonoBehaviour
+public class Chunk : MonoBehaviour
 {
     public Land land;
     public ItemPrefabs itemPrefabs;
@@ -29,17 +29,30 @@ public class VoxelChunk : MonoBehaviour
     public Vector2Int resolution;
     public Dictionary<Vector3Int, Block> customBlocks = new Dictionary<Vector3Int, Block>();
 
-    public Vector3 FaceToDirection(Faces face)
+    static public Vector3Int FaceToDirection(Faces face)
     {
         switch (face)
         {
-            case Faces.Up: return Vector3.up;
-            case Faces.Down: return Vector3.down;
-            case Faces.Right: return Vector3.right;
-            case Faces.Left: return Vector3.left;
-            case Faces.Front: return Vector3.forward;
+            case Faces.Up: return Vector3Int.up;
+            case Faces.Down: return Vector3Int.down;
+            case Faces.Right: return Vector3Int.right;
+            case Faces.Left: return Vector3Int.left;
+            case Faces.Front: return Vector3Int.forward;
         }
-        return Vector3.back;
+        return Vector3Int.back;
+    }
+    
+    static public Faces GetOppositeFace(Faces face)
+    {
+        switch (face)
+        {
+            case Faces.Up: return Faces.Down;
+            case Faces.Down: return Faces.Up;
+            case Faces.Right: return Faces.Left;
+            case Faces.Left: return Faces.Right;
+            case Faces.Front: return Faces.Back;
+        }
+        return Faces.Front;
     }
 
     public void WakeUp()

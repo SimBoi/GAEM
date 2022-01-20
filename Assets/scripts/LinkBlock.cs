@@ -5,16 +5,16 @@ using UnityEngine;
 
 public class LinkBlock : Block
 {
-    public LinkNetwork network;
+    public Network network = null;
 
-    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, VoxelChunk parentChunk, Vector3Int chunkPos)
+    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int chunkPos)
     {
         LinkBlock spawnedItem = (LinkBlock)base.PlaceCustomBlock(globalPos, rotation, parentChunk, chunkPos);
 
         bool relinkNetwork = false;
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
         {
-            Vector3Int neighborPos = chunkPos + Vector3Int.FloorToInt(parentChunk.FaceToDirection(face));
+            Vector3Int neighborPos = chunkPos + Chunk.FaceToDirection(face);
             if (spawnedItem.blockID == parentChunk.blockIDs[neighborPos.x, neighborPos.y, neighborPos.z])
                 relinkNetwork = true;
         }
@@ -22,34 +22,39 @@ public class LinkBlock : Block
         if (relinkNetwork)
             spawnedItem.RelinkNetwork(chunkPos);
         else
-            spawnedItem.network = new LinkNetwork();
+            spawnedItem.network = new Network();
 
         return spawnedItem;
     }
 
-    public void RelinkNetwork(Vector3Int chunkPos, LinkNetwork targetNetwork = null)
+    public void RelinkNetwork(Vector3Int chunkPos, Network targetNetwork = null)
     {
         if (network != null && ReferenceEquals(targetNetwork, network))
             return;
         if (targetNetwork != null)
-        {
             network = targetNetwork;
-            Debug.Log("changed Networks for" + chunkPos.x + " " + chunkPos.y + " " + chunkPos.z);
-        }
 
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
         {
-            Vector3Int neighborPos = chunkPos + Vector3Int.FloorToInt(parentChunk.FaceToDirection(face));
+            Vector3Int neighborPos = chunkPos + Chunk.FaceToDirection(face);
             Block neighborBlock = parentChunk.GetCustomBlock(neighborPos);
-            if (neighborBlock != null && blockID == neighborBlock.blockID)
+            if (neighborBlock != null)
             {
-                if (targetNetwork == null)
+                if (blockID == neighborBlock.blockID)
                 {
-                    targetNetwork = ((LinkBlock)neighborBlock).network;
+                    if (targetNetwork == null)
+                    {
+                        targetNetwork = ((LinkBlock)neighborBlock).network;
+                        network = targetNetwork;
+                    }
+                    else
+                    {
+                        ((LinkBlock)neighborBlock).RelinkNetwork(neighborPos, targetNetwork);
+                    }
                 }
-                else
+                else if (typeof(Machine).IsAssignableFrom(neighborBlock.GetType()))
                 {
-                    ((LinkBlock)neighborBlock).RelinkNetwork(neighborPos, targetNetwork);
+                    ((Machine)neighborBlock).TryLinkNetwork(Chunk.GetOppositeFace(face), targetNetwork);
                 }
             }
         }

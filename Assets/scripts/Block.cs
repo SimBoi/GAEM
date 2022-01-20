@@ -9,7 +9,7 @@ public class Block : Item
     public bool hasCustomMesh;
     public GameObject itemObject;
     public GameObject blockObject;
-    public VoxelChunk parentChunk = null;
+    public Chunk parentChunk = null;
 
     public void CopyFrom(Block source)
     {
@@ -33,7 +33,7 @@ public class Block : Item
         return spawnedItem;
     }
 
-    public virtual Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, VoxelChunk parentChunk, Vector3Int chunkPos)
+    public virtual Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int chunkPos)
     {
         Block spawnedItem = (Block)base.Spawn(false, globalPos, rotation, parentChunk.transform);
         spawnedItem.CopyFrom(this);
