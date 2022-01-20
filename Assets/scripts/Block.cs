@@ -33,9 +33,9 @@ public class Block : Item
         return spawnedItem;
     }
 
-    public Item PlaceCustomBlock(Vector3 pos, Quaternion rotation, VoxelChunk parentChunk)
+    public virtual Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, VoxelChunk parentChunk, Vector3Int chunkPos)
     {
-        Block spawnedItem = (Block)base.Spawn(false, pos, rotation, parentChunk.transform);
+        Block spawnedItem = (Block)base.Spawn(false, globalPos, rotation, parentChunk.transform);
         spawnedItem.CopyFrom(this);
         spawnedItem.parentChunk = parentChunk;
         spawnedItem.itemObject.SetActive(false);
