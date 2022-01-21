@@ -47,4 +47,10 @@ public class Land : MonoBehaviour
         Chunk chunk = chunks[chunkIndex].GetComponent<Chunk>();
         return chunk.AddBlock(new Vector3Int(coords.x % chunkSizeX, coords.y, coords.z % chunkSizeZ), blockID, rotation);
     }
+
+    // message[0] = (Land)return
+    public void GetLandRef(object[] message)
+    {
+        message[0] = this;
+    }
 }

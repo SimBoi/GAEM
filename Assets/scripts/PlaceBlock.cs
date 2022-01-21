@@ -12,19 +12,13 @@ public class PlaceBlock : ItemEvent
     {
         Transform origin = eventCaller.GetComponent<CharacterController>().eyePosition.transform;
         RaycastHit hitInfo;
-        Debug.DrawRay(origin.position, origin.TransformDirection(Vector3.forward) * 20, Color.green);
-
         if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, maxDistance))
         {
-            Land land = null;
-            if (hitInfo.transform.GetComponent<Chunk>() != null)
-            {
-                land = hitInfo.transform.GetComponent<Chunk>().land;
-            }
-            else if (hitInfo.transform.parent != null && hitInfo.transform.parent.GetComponent<Block>() != null)
-            {
-                land = hitInfo.transform.parent.GetComponent<Block>().parentChunk.land;
-            }
+            object[] message = new object[1]{
+                null
+            };
+            hitInfo.collider.SendMessageUpwards("GetLandRef", message, SendMessageOptions.DontRequireReceiver);
+            Land land = (Land)message[0];
 
             if (land != null)
             {
