@@ -15,15 +15,11 @@ public class BreakBlock : ItemEvent
         RaycastHit hitInfo;
         if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, maxDistance))
         {
-            Land land = null;
-            if (hitInfo.transform.GetComponent<VoxelChunk>() != null)
-            {
-                land = hitInfo.transform.GetComponent<VoxelChunk>().land;
-            }
-            else if (hitInfo.transform.parent != null && hitInfo.transform.parent.GetComponent<Block>() != null)
-            {
-                land = hitInfo.transform.parent.GetComponent<Block>().parentChunk.land;
-            }
+            object[] message = new object[1]{
+                null
+            };
+            hitInfo.collider.SendMessageUpwards("GetLandRef", message, SendMessageOptions.DontRequireReceiver);
+            Land land = (Land)message[0];
 
             if (land != null)
             {
@@ -35,6 +31,7 @@ public class BreakBlock : ItemEvent
                 float blockStiffness = land.chunks[new Vector2Int((int)landBlockCoords.x/ land.chunkSizeX, (int)landBlockCoords.z/ land.chunkSizeZ)].GetComponent<VoxelChunk>().GetStiffness(chunkBlockCoords);
 
                 /////////////////////////// debug remove later
+                /////heq
                 Debug.Log(timer * 100 / (blockStiffness / efficiency) + "%");
 
                 if (timer >= blockStiffness / efficiency)
