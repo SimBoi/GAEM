@@ -17,8 +17,11 @@ public class Machine : Block
 
     [HideInInspector] public Inventory[] inventories;
 
+    private bool woke;
     public virtual void Awake()
     {
+        if (woke) return;
+        woke = true;
         inventories = new Inventory[inventorySizes.Length];
         for (int i = 0; i< inventories.Length; i++)
         {
@@ -34,6 +37,7 @@ public class Machine : Block
     public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int chunkPos)
     {
         Machine spawnedItem = (Machine)base.PlaceCustomBlock(globalPos, rotation, parentChunk, chunkPos);
+        spawnedItem.Awake();
 
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
         {
@@ -43,6 +47,12 @@ public class Machine : Block
             {
                 if (typeof(LinkBlock).IsAssignableFrom(neighborBlock.GetType()))
                     spawnedItem.TryLinkNetwork(face, ((LinkBlock)neighborBlock).network);
+                if (typeof(Machine).IsAssignableFrom(neighborBlock.GetType()))
+                {
+                    Network newNetwork = spawnedItem.LinkNewNetwork(spawnedItem.ports[(int)face].GetType());
+                    spawnedItem.TryLinkNetwork(face, newNetwork);
+                    ((Machine)neighborBlock).TryLinkNetwork(Chunk.GetOppositeFace(face), newNetwork);
+                }
             }
         }
 
@@ -56,6 +66,13 @@ public class Machine : Block
         {
             targetNetwork.LinkPort(port);
         }
+    }
+
+    public Network LinkNewNetwork(Type portType)
+    {
+        if (portType == typeof(EnergyPort))
+            return new EnergyNetwork();
+        return null;
     }
 
     /// <summary>
