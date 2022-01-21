@@ -23,7 +23,7 @@ public class BreakBlock : ItemEvent
 
             if (land != null)
             {
-                Vector3 globalHitCoords = hitInfo.point - (0.5f * hitInfo.normal);
+                Vector3 globalHitCoords = hitInfo.point - (0.01f * hitInfo.normal);
                 Vector3 landHitCoords = land.transform.InverseTransformPoint(globalHitCoords);
                 Vector3Int landBlockCoords = Vector3Int.FloorToInt(landHitCoords);
                 Vector3Int chunkBlockCoords = new Vector3Int((int)landHitCoords.x % land.chunkSizeX, (int)landHitCoords.y % land.chunkSizeY, (int)landHitCoords.z % land.chunkSizeZ);

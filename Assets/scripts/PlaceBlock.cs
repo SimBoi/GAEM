@@ -22,11 +22,12 @@ public class PlaceBlock : ItemEvent
 
             if (land != null)
             {
-                Vector3 globalHitCoords = hitInfo.point + (0.001f * hitInfo.normal);
+                Vector3 globalHitCoords = hitInfo.point + (0.99f * hitInfo.normal);
                 Vector3 landHitCoords = land.transform.InverseTransformPoint(globalHitCoords);
                 Vector3Int landBlockCoords = Vector3Int.FloorToInt(landHitCoords);
 
-                if (land.AddBlock(landBlockCoords, (short)block.blockID, Quaternion.LookRotation(hitInfo.normal)))
+                //if (land.AddBlock(landBlockCoords, (short)block.blockID, Quaternion.LookRotation(hitInfo.normal)))
+                if (land.AddBlock(landBlockCoords, (short)block.blockID))
                 {
                     PlayerInventory inventory = eventCaller.GetComponent<PlayerInventory>();
                     inventory.ConsumeFromStack(1, inventory.heldItemIndex);

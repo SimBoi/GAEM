@@ -9,11 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1517388010991462053}
-  - component: {fileID: 1300106749437274620}
+  - component: {fileID: 4139453497478876656}
   - component: {fileID: 2642617928776922129}
   - component: {fileID: 2004486254621618829}
   m_Layer: 0
-  m_Name: LinkBlock
+  m_Name: Energy Cable
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -35,7 +35,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1300106749437274620
+--- !u!114 &4139453497478876656
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -44,11 +44,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1517388010991462048}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bbfdb5bfe02b15043a92a5808512af06, type: 3}
+  m_Script: {fileID: 11500000, guid: d0b07ef79026c1a45a2458f80fee6f1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
-  name: LinkBlock
+  name: Energy Cable
   id: 7
   maxStackSize: 64
   despawnTime: 300
@@ -97,7 +97,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   eventType: 2
-  block: {fileID: 1300106749437274620}
+  block: {fileID: 4139453497478876656}
   maxDistance: 15.09
   prevCoords: {x: 0, y: 0, z: 0}
 --- !u!1 &2006138270527657943
@@ -434,7 +434,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3994de9ae3c515b46957a672d969cbd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  item: {fileID: 1300106749437274620}
+  item: {fileID: 4139453497478876656}
   pickupDelay: 1
 --- !u!1 &9083830352957954044
 GameObject:

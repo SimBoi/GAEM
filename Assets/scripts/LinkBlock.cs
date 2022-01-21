@@ -7,6 +7,11 @@ public class LinkBlock : Block
 {
     public Network network = null;
 
+    public virtual Network LinkNewNetwork()
+    {
+        return new Network();
+    }
+
     public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int chunkPos)
     {
         LinkBlock spawnedItem = (LinkBlock)base.PlaceCustomBlock(globalPos, rotation, parentChunk, chunkPos);
@@ -22,7 +27,7 @@ public class LinkBlock : Block
         if (relinkNetwork)
             spawnedItem.RelinkNetwork(chunkPos);
         else
-            spawnedItem.network = new Network();
+            spawnedItem.RelinkNetwork(chunkPos, LinkNewNetwork());
 
         return spawnedItem;
     }

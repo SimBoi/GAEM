@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,7 +16,6 @@ public class Machine : Block
     public Port[] ports;
 
     [HideInInspector] public Inventory[] inventories;
-    public int peakEnergyDemand = 0;
 
     public virtual void Awake()
     {
@@ -31,6 +31,24 @@ public class Machine : Block
         }
     }
 
+    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int chunkPos)
+    {
+        Machine spawnedItem = (Machine)base.PlaceCustomBlock(globalPos, rotation, parentChunk, chunkPos);
+
+        foreach (Faces face in Enum.GetValues(typeof(Faces)))
+        {
+            Vector3Int neighborPos = chunkPos + Chunk.FaceToDirection(face);
+            Block neighborBlock = parentChunk.GetCustomBlock(neighborPos);
+            if (neighborBlock != null)
+            {
+                if (typeof(LinkBlock).IsAssignableFrom(neighborBlock.GetType()))
+                    spawnedItem.TryLinkNetwork(face, ((LinkBlock)neighborBlock).network);
+            }
+        }
+
+        return spawnedItem;
+    }
+
     public void TryLinkNetwork(Faces face, Network targetNetwork)
     {
         Port port = ports[(int)face];
@@ -39,6 +57,10 @@ public class Machine : Block
             targetNetwork.LinkPort(port);
         }
     }
+
+    /// <summary>
+    /// -------------------> machine events
+    /// </summary>
 
     public MachineEventType PrimaryMachineEventType = MachineEventType.disabled;
     private bool isPrimaryMachineEventActive = false;

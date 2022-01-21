@@ -4,26 +4,46 @@ using UnityEngine;
 
 public class EnergyPort : Port
 {
-    public int capacity = 0;
-    public int peakDemand = 0;
-    public int input = 0;
-    public int output = 0;
+    private float _capacity = 0;
+    private float _peakDemand = 0;
+    private float _input = 0;
+    private float _output = 0;
 
-    public void ChangeSpecs(int capacity, int peakDemand, int input, int output)
+    public float capacity
     {
-        this.capacity = capacity;
-        this.peakDemand = peakDemand;
-        this.input = input;
-        this.output = output;
+        get { return _capacity; }
+        set { _capacity = value; CalcNetworkSpecs(); }
+    }
 
-        ((EnergyNetwork)network).CalcSpecs();
+    public float peakDemand
+    {
+        get { return _peakDemand; }
+        set { _peakDemand = value; CalcNetworkSpecs(); }
+    }
+
+    public float input
+    {
+        get { return _input; }
+        set { _input = value; }
+    }
+
+    public float output
+    {
+        get { return _output; }
+        set { _output = value; }
+    }
+
+    private void CalcNetworkSpecs()
+    {
+        if (network != null)
+            ((EnergyNetwork)network).CalcSpecs();
     }
 }
 
 public class EnergyNetwork : Network
 {
-    int capacity = 0;
-    int peakDemand = 0;
+    float capacity = 0;
+    float peakDemand = 0;
 
     public void CalcSpecs()
     {
@@ -34,8 +54,8 @@ public class EnergyNetwork : Network
             capacity += port.capacity;
             peakDemand += port.peakDemand;
         }
-        int inputPercentage = Mathf.Clamp(peakDemand / capacity, 0, 1);
-        int outputPercentage = Mathf.Clamp(capacity / peakDemand, 0, 1);
+        float inputPercentage = capacity != 0 ? Mathf.Clamp(peakDemand / capacity, 0, 1) : 0;
+        float outputPercentage = peakDemand != 0 ? Mathf.Clamp(capacity / peakDemand, 0, 1) : 0;
         foreach (EnergyPort port in linkedPorts)
         {
             port.output = port.capacity * inputPercentage;
