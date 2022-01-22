@@ -12,27 +12,20 @@ public class PlaceBlock : ItemEvent
     {
         Transform origin = eventCaller.GetComponent<CharacterController>().eyePosition.transform;
         RaycastHit hitInfo;
-        Debug.DrawRay(origin.position, origin.TransformDirection(Vector3.forward) * 20, Color.green);
-
         if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, maxDistance))
         {
-            Land land = null;
-            if (hitInfo.transform.GetComponent<VoxelChunk>() != null)
-            {
-                land = hitInfo.transform.GetComponent<VoxelChunk>().land;
-            }
-            else if (hitInfo.transform.parent != null && hitInfo.transform.parent.GetComponent<Block>() != null)
-            {
-                land = hitInfo.transform.parent.GetComponent<Block>().parentChunk.land;
-            }
+            object[] message = new object[1]{
+                null
+            };
+            hitInfo.collider.SendMessageUpwards("GetLandRef", message, SendMessageOptions.DontRequireReceiver);
+            Land land = (Land)message[0];
 
             if (land != null)
             {
-                Vector3 globalHitCoords = hitInfo.point + (0.001f * hitInfo.normal);
-                Vector3 landHitCoords = land.transform.InverseTransformPoint(globalHitCoords);
-                Vector3Int landBlockCoords = Vector3Int.FloorToInt(landHitCoords);
+                Vector3Int landBlockCoords = land.ConvertToLandCoords(hitInfo.point + (0.99f * hitInfo.normal));
 
-                if (land.AddBlock(landBlockCoords, (short)block.blockID, Quaternion.LookRotation(hitInfo.normal)))
+                //if (land.AddBlock(landBlockCoords, (short)block.blockID, Quaternion.LookRotation(hitInfo.normal)))
+                if (land.AddBlock(landBlockCoords, (short)block.blockID))
                 {
                     PlayerInventory inventory = eventCaller.GetComponent<PlayerInventory>();
                     inventory.ConsumeFromStack(1, inventory.heldItemIndex);

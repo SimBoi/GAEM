@@ -12,9 +12,8 @@ public enum Faces
     Back
 }
 
-public class VoxelChunk : MonoBehaviour
+public class Chunk : MonoBehaviour
 {
-    public Land land;
     public ItemPrefabs itemPrefabs;
     public BlockToItemID blockToItemID;
     public MeshRenderer meshRenderer;
@@ -28,6 +27,32 @@ public class VoxelChunk : MonoBehaviour
     public int vertexLength;
     public Vector2Int resolution;
     public Dictionary<Vector3Int, Block> customBlocks = new Dictionary<Vector3Int, Block>();
+
+    static public Vector3Int FaceToDirection(Faces face)
+    {
+        switch (face)
+        {
+            case Faces.Up: return Vector3Int.up;
+            case Faces.Down: return Vector3Int.down;
+            case Faces.Right: return Vector3Int.right;
+            case Faces.Left: return Vector3Int.left;
+            case Faces.Front: return Vector3Int.forward;
+        }
+        return Vector3Int.back;
+    }
+    
+    static public Faces GetOppositeFace(Faces face)
+    {
+        switch (face)
+        {
+            case Faces.Up: return Faces.Down;
+            case Faces.Down: return Faces.Up;
+            case Faces.Right: return Faces.Left;
+            case Faces.Left: return Faces.Right;
+            case Faces.Front: return Faces.Back;
+        }
+        return Faces.Front;
+    }
 
     public void WakeUp()
     {
@@ -289,21 +314,23 @@ public class VoxelChunk : MonoBehaviour
                 }
                 requiresMeshGeneration = true;
             }
+
             blockIDs[pos.x, pos.y, pos.z] = 0;
             return true;
         }
         return false;
     }
 
-    public bool AddBlock(Vector3Int pos, short blockID, Quaternion rotation = default)
+    public bool AddBlock(Vector3Int landPos, short blockID, Quaternion rotation = default)
     {
+        Vector3Int pos = new Vector3Int(landPos.x % sizeX, landPos.y % sizeY, landPos.z % sizeZ);
         if (blockIDs[pos.x, pos.y, pos.z] == 0)
         {
             blockIDs[pos.x, pos.y, pos.z] = blockID;
             if (itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh)
             {
                 Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
-                Block customBlock = (Block)itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().PlaceCustomBlock(spawnPos, rotation, this);
+                Block customBlock = (Block)itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().PlaceCustomBlock(spawnPos, rotation, this, landPos);
                 customBlocks.Add(pos, customBlock);
             }
             else
@@ -323,5 +350,13 @@ public class VoxelChunk : MonoBehaviour
     public Rect GetFaceTexture(short blockID, Faces face)
     {
         return new Rect((float)face * vertexLength / resolution[0], (float)blockID * vertexLength / resolution[1], (float)vertexLength / resolution[0], (float)vertexLength / resolution[1]);
+    }
+
+    public Block GetCustomBlock(Vector3Int pos)
+    {
+        if (customBlocks.ContainsKey(pos))
+            return customBlocks[pos];
+        else
+            return null;
     }
 }
