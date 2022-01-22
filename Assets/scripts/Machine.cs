@@ -34,22 +34,28 @@ public class Machine : Block
         }
     }
 
-    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int chunkPos)
+    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
     {
-        Machine spawnedItem = (Machine)base.PlaceCustomBlock(globalPos, rotation, parentChunk, chunkPos);
+        Machine spawnedItem = (Machine)base.PlaceCustomBlock(globalPos, rotation, parentChunk, landPos);
         spawnedItem.Awake();
+
+        object[] message = new object[1]{
+                null
+            };
+        parentChunk.SendMessageUpwards("GetLandRef", message);
+        Land land = (Land)message[0];
 
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
         {
-            Vector3Int neighborPos = chunkPos + Chunk.FaceToDirection(face);
-            Block neighborBlock = parentChunk.GetCustomBlock(neighborPos);
+            Vector3Int neighborLandPos = landPos + Chunk.FaceToDirection(face);
+            Block neighborBlock = land.GetCustomBlock(neighborLandPos);
             if (neighborBlock != null)
             {
                 if (typeof(LinkBlock).IsAssignableFrom(neighborBlock.GetType()))
                     spawnedItem.TryLinkNetwork(face, ((LinkBlock)neighborBlock).network);
                 if (typeof(Machine).IsAssignableFrom(neighborBlock.GetType()))
                 {
-                    Network newNetwork = spawnedItem.LinkNewNetwork(spawnedItem.ports[(int)face].GetType());
+                    Network newNetwork = spawnedItem.ports[(int)face].CreateNewNetwork();
                     spawnedItem.TryLinkNetwork(face, newNetwork);
                     ((Machine)neighborBlock).TryLinkNetwork(Chunk.GetOppositeFace(face), newNetwork);
                 }
@@ -59,16 +65,30 @@ public class Machine : Block
         return spawnedItem;
     }
 
-    public void TryLinkNetwork(Faces face, Network targetNetwork)
+    public override bool BreakCustomBlock(bool spawnItem = false, Vector3 pos = default)
     {
-        Port port = ports[(int)face];
-        if (port.type != PortType.disabled && targetNetwork.GetType() == typeof(EnergyNetwork) && port.GetType() == typeof(EnergyPort))
-        {
-            targetNetwork.LinkPort(port);
-        }
+        if (!base.BreakCustomBlock(spawnItem, pos))
+            return false;
+        foreach (Faces face in Enum.GetValues(typeof(Faces)))
+            UnlinkNetwork(face);
+        return true;
     }
 
-    public Network LinkNewNetwork(Type portType)
+public void TryLinkNetwork(Faces face, Network targetNetwork)
+    {
+        if (isDestroyed || targetNetwork == null)
+            return;
+        targetNetwork.LinkPort(ports[(int)face]);
+    }
+
+    public void UnlinkNetwork(Faces face)
+    {
+        Port port = ports[(int)face];
+        if (port.network != null)
+            port.network.UnlinkPort(port);
+    }
+
+    public Network CreateNewNetwork(Type portType)
     {
         if (portType == typeof(EnergyPort))
             return new EnergyNetwork();

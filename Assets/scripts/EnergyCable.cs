@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class EnergyCable : LinkBlock
 {
-    public override Network LinkNewNetwork()
+    public override Network CreateNewNetwork()
     {
-        return new EnergyNetwork();
+        return EnergyNetwork.CreateNewNetwork();
     }
 }

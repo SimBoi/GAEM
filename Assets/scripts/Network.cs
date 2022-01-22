@@ -14,24 +14,41 @@ public class Port
 {
     public PortType type = PortType.disabled;
     public Network network = null;
+
+    public virtual Network CreateNewNetwork()
+    {
+        return Network.CreateNewNetwork();
+    }
 }
 
 public class Network
 {
     public List<Port> linkedPorts = new List<Port>();
 
-    public virtual void LinkPort(Port port)
+    public virtual bool LinkPort(Port port)
     {
         if (!linkedPorts.Contains(port))
         {
             linkedPorts.Add(port);
             port.network = this;
+            return true;
         }
+        return false;
     }
 
-    public virtual void UnlinkPort(Port port)
+    public virtual bool UnlinkPort(Port port)
     {
-        linkedPorts.Remove(port);
-        port.network = null;
+        if (linkedPorts.Contains(port))
+        {
+            linkedPorts.Remove(port);
+            port.network = null;
+            return true;
+        }
+        return false;
+    }
+
+    static public Network CreateNewNetwork()
+    {
+        return new Network();
     }
 }

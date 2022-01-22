@@ -23,10 +23,8 @@ public class BreakBlock : ItemEvent
 
             if (land != null)
             {
-                Vector3 globalHitCoords = hitInfo.point - (0.01f * hitInfo.normal);
-                Vector3 landHitCoords = land.transform.InverseTransformPoint(globalHitCoords);
-                Vector3Int landBlockCoords = Vector3Int.FloorToInt(landHitCoords);
-                Vector3Int chunkBlockCoords = new Vector3Int((int)landHitCoords.x % land.chunkSizeX, (int)landHitCoords.y % land.chunkSizeY, (int)landHitCoords.z % land.chunkSizeZ);
+                Vector3Int landBlockCoords = land.ConvertToLandCoords(hitInfo.point - (0.01f * hitInfo.normal));
+                Vector3Int chunkBlockCoords = new Vector3Int(landBlockCoords.x % land.chunkSizeX, landBlockCoords.y % land.chunkSizeY, landBlockCoords.z % land.chunkSizeZ);
                 if (landBlockCoords != prevCoords) timer = 0;
 
                 float blockStiffness = land.chunks[new Vector2Int((int)landBlockCoords.x/ land.chunkSizeX, (int)landBlockCoords.z/ land.chunkSizeZ)].GetComponent<Chunk>().GetStiffness(chunkBlockCoords);

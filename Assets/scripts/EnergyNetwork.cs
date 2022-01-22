@@ -38,6 +38,11 @@ public class EnergyPort : Port
         if (network != null)
             ((EnergyNetwork)network).CalcSpecs();
     }
+
+    public override Network CreateNewNetwork()
+    {
+        return EnergyNetwork.CreateNewNetwork();
+    }
 }
 
 public class EnergyNetwork : Network
@@ -63,15 +68,30 @@ public class EnergyNetwork : Network
         }
     }
 
-    public override void LinkPort(Port port)
+    public override bool LinkPort(Port port)
     {
-        base.LinkPort(port);
-        CalcSpecs();
+        if (port.type != PortType.disabled && port.GetType() == typeof(EnergyPort) && base.LinkPort(port))
+        {
+            CalcSpecs();
+            return true;
+        }
+        return false;
     }
 
-    public override void UnlinkPort(Port port)
+    public override bool UnlinkPort(Port port)
     {
-        base.UnlinkPort(port);
-        CalcSpecs();
+        if (base.UnlinkPort(port))
+        {
+            ((EnergyPort)port).input = 0;
+            ((EnergyPort)port).output = 0;
+            CalcSpecs();
+            return true;
+        }
+        return false;
+    }
+
+    static public new Network CreateNewNetwork()
+    {
+        return new EnergyNetwork();
     }
 }

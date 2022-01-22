@@ -14,7 +14,6 @@ public enum Faces
 
 public class Chunk : MonoBehaviour
 {
-    public Land land;
     public ItemPrefabs itemPrefabs;
     public BlockToItemID blockToItemID;
     public MeshRenderer meshRenderer;
@@ -315,21 +314,23 @@ public class Chunk : MonoBehaviour
                 }
                 requiresMeshGeneration = true;
             }
+
             blockIDs[pos.x, pos.y, pos.z] = 0;
             return true;
         }
         return false;
     }
 
-    public bool AddBlock(Vector3Int pos, short blockID, Quaternion rotation = default)
+    public bool AddBlock(Vector3Int landPos, short blockID, Quaternion rotation = default)
     {
+        Vector3Int pos = new Vector3Int(landPos.x % sizeX, landPos.y % sizeY, landPos.z % sizeZ);
         if (blockIDs[pos.x, pos.y, pos.z] == 0)
         {
             blockIDs[pos.x, pos.y, pos.z] = blockID;
             if (itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh)
             {
                 Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
-                Block customBlock = (Block)itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().PlaceCustomBlock(spawnPos, rotation, this, pos);
+                Block customBlock = (Block)itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().PlaceCustomBlock(spawnPos, rotation, this, landPos);
                 customBlocks.Add(pos, customBlock);
             }
             else
