@@ -296,6 +296,7 @@ GameObject:
   - component: {fileID: 7836257036931163264}
   - component: {fileID: 5317736145094063385}
   - component: {fileID: 7127127385805326241}
+  - component: {fileID: 4675419980472725119}
   m_Layer: 0
   m_Name: Cube (1)
   m_TagString: Untagged
@@ -367,6 +368,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &4675419980472725119
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2597024232335745731}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 0.99999994, z: 1}
+  m_Center: {x: 0, y: 0.0000009536743, z: 0}
 --- !u!1 &4379286450415449052
 GameObject:
   m_ObjectHideFlags: 0
@@ -378,6 +392,7 @@ GameObject:
   - component: {fileID: 7518921655361126821}
   - component: {fileID: 1678738233322663393}
   - component: {fileID: 5260048064600037003}
+  - component: {fileID: 3253432771249864062}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -449,6 +464,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &3253432771249864062
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4379286450415449052}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4626922982977740658
 GameObject:
   m_ObjectHideFlags: 0
@@ -459,8 +487,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4626922982977740661}
   - component: {fileID: 8752844573586030655}
-  - component: {fileID: 4626922982977740663}
-  - component: {fileID: 4626922982977740656}
   m_Layer: 0
   m_Name: Glock
   m_TagString: Untagged
@@ -500,13 +526,14 @@ MonoBehaviour:
   name: Glock
   id: 5
   maxStackSize: 1
-  despawnTime: 300
   maxDurability: 1
   spawnDurability: 1
   stackSize: 1
   health: {fileID: 0}
   preventDespawn: 0
-  despawnTimer: 0
+  despawnTime: 300
+  pickupDelay: 2
+  timeSinceSpawn: 0
   isHeld: 0
   isDestroyed: 0
   ui: {fileID: 1865841644}
@@ -535,33 +562,6 @@ MonoBehaviour:
   reloadUI: {fileID: 1505082519}
   isReloading: 0
   isAiming: 0
---- !u!114 &4626922982977740663
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4626922982977740658}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3994de9ae3c515b46957a672d969cbd7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  item: {fileID: 8752844573586030655}
-  pickupDelay: 2
---- !u!135 &4626922982977740656
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4626922982977740658}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 2
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6409290635311265886
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,8 +9,13 @@ public class Consumable : Item
     public void CopyFrom(Consumable source)
     {
         base.CopyFrom(source);
-        this.nutritionalValue = source.nutritionalValue;
+        CopyFromDerived(source);
     }
+
+    public void CopyFromDerived(Consumable source)
+    {
+        this.nutritionalValue = source.nutritionalValue;
+    }    
 
     public override Item Clone()
     {
@@ -22,7 +27,7 @@ public class Consumable : Item
     public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
     {
         Consumable spawnedItem = (Consumable)base.Spawn(isHeld, pos, rotation, parent);
-        spawnedItem.CopyFrom(this);
+        spawnedItem.CopyFromDerived(this);
         return spawnedItem;
     }
 }

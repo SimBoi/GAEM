@@ -9,17 +9,20 @@ public class Lamp : Machine
     public Light pointLight;
     public bool isActive = false;
 
-    public override void Awake()
+    public override bool BlockInitialize()
     {
-        base.Awake();
+        if (!base.BlockInitialize()) return false;
+
         ports[(int)Faces.Down] = new EnergyPort()
         {
             type = PortType.input
         };
         ((EnergyPort)ports[(int)Faces.Down]).peakDemand = isActive ? peakEnergyDemand : 0;
+
+        return true;
     }
 
-    private void Update()
+    public override void BlockUpdate()
     {
         pointLight.intensity = ((EnergyPort)ports[(int)Faces.Down]).input * maxIntensity / peakEnergyDemand;
     }

@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 6906159332493323477}
   - component: {fileID: 7959325127622393445}
   - component: {fileID: 5838950628382587129}
-  - component: {fileID: -1823581783024886119}
   m_Layer: 0
   m_Name: grid
   m_TagString: Untagged
@@ -65,7 +64,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 15f7adee97c05ba47ac04a2b058bf4c2, type: 2}
+  - {fileID: 2100000, guid: 51444d7e3d6633c4f893e8e98c6d6f24, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -116,13 +115,14 @@ MonoBehaviour:
   name: Grid
   id: 6
   maxStackSize: 64
-  despawnTime: 300
   maxDurability: 1
   spawnDurability: 1
   stackSize: 1
   health: {fileID: 0}
   preventDespawn: 0
-  despawnTimer: 0
+  despawnTime: 300
+  pickupDelay: 2
+  timeSinceSpawn: 0
   isHeld: 0
   isDestroyed: 0
   ui: {fileID: 0}
@@ -131,7 +131,6 @@ MonoBehaviour:
   hasCustomMesh: 0
   itemObject: {fileID: 0}
   blockObject: {fileID: 0}
-  parentChunk: {fileID: 0}
 --- !u!114 &7959325127622393445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -165,17 +164,3 @@ MonoBehaviour:
   block: {fileID: 6906159332493323477}
   maxDistance: 3
   prevCoords: {x: 0, y: 0, z: 0}
---- !u!114 &-1823581783024886119
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6906159332493323476}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3994de9ae3c515b46957a672d969cbd7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  item: {fileID: 6906159332493323477}
-  pickupDelay: 1

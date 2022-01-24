@@ -11,9 +11,8 @@ GameObject:
   - component: {fileID: 8181782636717577038}
   - component: {fileID: 1979657801824193892}
   - component: {fileID: 1979657801824193891}
-  - component: {fileID: 1979657801824193890}
   - component: {fileID: 8181782636717577039}
-  - component: {fileID: -3781147318714020202}
+  - component: {fileID: 684213270639588771}
   m_Layer: 0
   m_Name: Dogecoin
   m_TagString: Untagged
@@ -85,19 +84,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &1979657801824193890
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8181782636717577036}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &8181782636717577039
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -114,27 +100,27 @@ MonoBehaviour:
   name: DogeCoin
   id: 2
   maxStackSize: 1000
-  despawnTime: 30
   maxDurability: 1
   spawnDurability: 1
   stackSize: 1
   health: {fileID: 0}
   preventDespawn: 0
-  despawnTimer: 0
+  despawnTime: 30
+  pickupDelay: 2
+  timeSinceSpawn: 0
   isHeld: 0
   isDestroyed: 0
   ui: {fileID: 0}
---- !u!114 &-3781147318714020202
-MonoBehaviour:
+--- !u!135 &684213270639588771
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8181782636717577036}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3994de9ae3c515b46957a672d969cbd7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  item: {fileID: 8181782636717577039}
-  pickupDelay: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}

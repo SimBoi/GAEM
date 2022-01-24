@@ -14,16 +14,14 @@ public class Machine : Block
 {
     public int[] inventorySizes;
     public Port[] ports;
-
     [HideInInspector] public Inventory[] inventories;
 
-    private bool woke;
-    public virtual void Awake()
+    public override bool BlockInitialize()
     {
-        if (woke) return;
-        woke = true;
+        if (!base.BlockInitialize()) return false;
+
         inventories = new Inventory[inventorySizes.Length];
-        for (int i = 0; i< inventories.Length; i++)
+        for (int i = 0; i < inventories.Length; i++)
         {
             inventories[i] = new Inventory(inventorySizes[i]);
         }
@@ -32,12 +30,13 @@ public class Machine : Block
         {
             ports[i] = new Port();
         }
+
+        return true;
     }
 
     public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
     {
         Machine spawnedItem = (Machine)base.PlaceCustomBlock(globalPos, rotation, parentChunk, landPos);
-        spawnedItem.Awake();
 
         object[] message = new object[1]{
                 null

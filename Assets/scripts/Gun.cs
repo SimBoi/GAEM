@@ -52,7 +52,11 @@ public class Gun : Item
     public void CopyFrom(Gun source)
     {
         base.CopyFrom(source);
+        CopyFromDerived(source);
+    }
 
+    public void CopyFromDerived(Gun source)
+    {
         this.type = source.type;
 
         this.magazineSize = source.magazineSize;
@@ -92,7 +96,7 @@ public class Gun : Item
     public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
     {
         Gun spawnedItem = (Gun)base.Spawn(isHeld, pos, rotation, parent);
-        spawnedItem.CopyFrom(this);
+        spawnedItem.CopyFromDerived(this);
         spawnedItem.ResetGun();
         return spawnedItem;
     }

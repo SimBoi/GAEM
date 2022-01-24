@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class CharacterController : MonoBehaviour
 {
+    public float pickupRadius;
     public Health health;
     public Hunger hunger;
     public float interactDistance;
@@ -19,8 +20,6 @@ public class CharacterController : MonoBehaviour
     public Gradient healthGradient;
     public Image healthFill;
 
-    private bool wasThrowing = false;
-    private bool GetThrowItemDown = false;
 
     private void Update()
     {
@@ -29,6 +28,15 @@ public class CharacterController : MonoBehaviour
             Die();
         }
 
+        GetPlayerInput();
+        PickupItemsNearby();
+        UpdateUI();
+    }
+
+    private bool wasThrowing = false;
+    private bool GetThrowItemDown = false;
+    public void GetPlayerInput()
+    {
         if (Input.GetAxisRaw("Throw Item") == 1)
         {
             if (!wasThrowing)
@@ -87,9 +95,24 @@ public class CharacterController : MonoBehaviour
             }
         }
 
-        UpdateUI();
-
         GetThrowItemDown = false;
+    }
+
+    public void PickupItemsNearby()
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, pickupRadius);
+        foreach (var hitCollider in hitColliders)
+        {
+            object[] message = new object[1]{
+                null
+            };
+            hitCollider.SendMessageUpwards("GetItemRef", message, SendMessageOptions.DontRequireReceiver);
+            Item item = (Item)message[0];
+            if (item != null && item.CanBePickedUp())
+            {
+                inventory.PickupItem(item);
+            }
+        }
     }
 
     public void UpdateUI()

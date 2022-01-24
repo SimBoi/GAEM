@@ -9,13 +9,14 @@ public class Item : MonoBehaviour
     public string name;
     public int id;
     public int maxStackSize;
-    public float despawnTime = 300;
     public float maxDurability;
     public float spawnDurability;
     public  int stackSize;
     public Health health;
     public bool preventDespawn;
-    public float despawnTimer = 0;
+    public float despawnTime = 300;
+    public float pickupDelay;
+    public float timeSinceSpawn = 0;
     public bool isHeld;
     public bool isDestroyed = false;
     public GameObject ui = null;
@@ -34,7 +35,9 @@ public class Item : MonoBehaviour
         else
             this.health = new Health(source.health.GetHp(), 0, source.maxDurability, 0, 0);
         this.preventDespawn = source.preventDespawn;
-        this.despawnTimer = source.despawnTimer;
+        this.despawnTime = source.despawnTime;
+        this.pickupDelay = source.pickupDelay;
+        this.timeSinceSpawn = source.timeSinceSpawn;
         this.isHeld = source.isHeld;
         this.isDestroyed = source.isDestroyed;
     }
@@ -97,11 +100,6 @@ public class Item : MonoBehaviour
         return health.GetHp();
     }
 
-    public void ResetDespawnTimer()
-    {
-        despawnTimer = 0;
-    }
-
     public virtual Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
     {
         GameObject newItem;
@@ -112,7 +110,7 @@ public class Item : MonoBehaviour
 
         Item spawnedItem = newItem.GetComponent<Item>();
         spawnedItem.CopyFrom(this);
-        spawnedItem.isHeld = isHeld;
+        spawnedItem.timeSinceSpawn = 0;
         if (isHeld && spawnedItem.ui != null)
         {
             spawnedItem.ui.SetActive(true);
@@ -136,28 +134,35 @@ public class Item : MonoBehaviour
     {
         if (!preventDespawn)
         {
-            if (despawnTimer >= despawnTime) Despawn();
-            despawnTimer += Time.fixedDeltaTime;
+            if (timeSinceSpawn >= despawnTime) Despawn();
         }
+        if (timeSinceSpawn < despawnTime || timeSinceSpawn < pickupDelay)
+        timeSinceSpawn += Time.fixedDeltaTime;
     }
 
-    public virtual void PickupEvent()
+    public virtual bool CanBePickedUp()
     {
-
+        if (timeSinceSpawn >= pickupDelay && !isHeld && !isDestroyed) return true;
+        return false;
     }
+
+    public virtual void PickupEvent() { }
     
-    public virtual void HoldEvent(GameObject eventCaller)
-    {
-
-    }
+    public virtual void HoldEvent(GameObject eventCaller) { }
 
     public virtual void PrimaryItemEvent(GameObject eventCaller)
     {
-        SendMessageUpwards("CustomPrimaryItemEvent", eventCaller, SendMessageOptions.DontRequireReceiver);
+        SendMessage("CustomPrimaryItemEvent", eventCaller, SendMessageOptions.DontRequireReceiver);
     }
 
     public virtual void SecondaryItemEvent(GameObject eventCaller)
     {
-        SendMessageUpwards("CustomSecondaryItemEvent", eventCaller, SendMessageOptions.DontRequireReceiver);
+        SendMessage("CustomSecondaryItemEvent", eventCaller, SendMessageOptions.DontRequireReceiver);
+    }
+
+    // message[0] = (Land)return
+    public void GetItemRef(object[] message)
+    {
+        message[0] = this;
     }
 }

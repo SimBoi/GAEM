@@ -10,6 +10,11 @@ public class Wearable : Item
     public void CopyFrom(Wearable source)
     {
         base.CopyFrom(source);
+        CopyFromDerived(source);
+    }
+
+    public void CopyFromDerived(Wearable source)
+    {
         this.armorStrength = source.armorStrength;
         this.armorPiece = source.armorPiece;
     }
@@ -24,12 +29,13 @@ public class Wearable : Item
     public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
     {
         Wearable spawnedItem = (Wearable)base.Spawn(isHeld, pos, rotation, parent);
-        spawnedItem.CopyFrom(this);
+        spawnedItem.CopyFromDerived(this);
         return spawnedItem;
     }
 
     public override void SecondaryItemEvent(GameObject eventCaller)
     {
-        eventCaller.GetComponent<PlayerInventory>().EquipArmor(this, armorPiece, armorStrength); ////////////////////// if item was held then destroy reference to this wearable
+        if (eventCaller.GetComponent<PlayerInventory>() != null)
+            eventCaller.GetComponent<PlayerInventory>().EquipArmor(this, armorPiece, armorStrength); ////////////////////// if item was held then destroy reference to this wearable
     }
 }

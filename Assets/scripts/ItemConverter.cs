@@ -25,6 +25,6 @@ public class ItemConverter : Machine
             {
                 Debug.Log("not enough items/wrong item");
             }
-        }    
+        }
     }
 }

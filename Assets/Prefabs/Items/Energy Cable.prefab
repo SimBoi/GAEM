@@ -51,13 +51,14 @@ MonoBehaviour:
   name: Energy Cable
   id: 7
   maxStackSize: 64
-  despawnTime: 300
   maxDurability: 1
   spawnDurability: 1
-  stackSize: 30
+  stackSize: 1
   health: {fileID: 0}
   preventDespawn: 0
-  despawnTimer: 0
+  despawnTime: 300
+  pickupDelay: 2
+  timeSinceSpawn: 0
   isHeld: 0
   isDestroyed: 0
   ui: {fileID: 0}
@@ -66,7 +67,6 @@ MonoBehaviour:
   hasCustomMesh: 1
   itemObject: {fileID: 8550762515654144265}
   blockObject: {fileID: 2006138270527657943}
-  parentChunk: {fileID: 0}
 --- !u!114 &2642617928776922129
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -336,8 +336,7 @@ GameObject:
   - component: {fileID: 8550762515654144268}
   - component: {fileID: 8550762515654144269}
   - component: {fileID: 8550762515654144266}
-  - component: {fileID: 7681678629706222984}
-  - component: {fileID: 7681678629706222985}
+  - component: {fileID: 2668165168806357381}
   m_Layer: 0
   m_Name: Item
   m_TagString: Untagged
@@ -409,33 +408,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &7681678629706222984
-SphereCollider:
+--- !u!65 &2668165168806357381
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8550762515654144265}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 8
+  m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &7681678629706222985
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8550762515654144265}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3994de9ae3c515b46957a672d969cbd7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  item: {fileID: 4139453497478876656}
-  pickupDelay: 1
 --- !u!1 &9083830352957954044
 GameObject:
   m_ObjectHideFlags: 0

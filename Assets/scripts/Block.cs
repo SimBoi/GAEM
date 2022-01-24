@@ -13,6 +13,11 @@ public class Block : Item
     public void CopyFrom(Block source)
     {
         base.CopyFrom(source);
+        CopyFromDerived(source);
+    }
+
+    public void CopyFromDerived(Block source)
+    {
         this.blockID = source.blockID;
         this.stiffness = source.stiffness;
         this.hasCustomMesh = source.hasCustomMesh;
@@ -28,17 +33,43 @@ public class Block : Item
     public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
     {
         Block spawnedItem = (Block)base.Spawn(isHeld, pos, rotation, parent);
-        spawnedItem.CopyFrom(this);
+        spawnedItem.CopyFromDerived(this);
         return spawnedItem;
     }
+
+    public override bool CanBePickedUp()
+    {
+        if (base.CanBePickedUp() && itemObject.activeSelf)
+            return true;
+        return false;
+    }
+
+    private void Update()
+    {
+        if (blockObject != null && blockObject.activeSelf)
+        {
+            BlockInitialize();
+            BlockUpdate();
+        }
+    }
+
+    private bool initialized = false;
+    public virtual bool BlockInitialize()
+    {
+        if (initialized || blockObject == null || !blockObject.activeSelf) return false;
+        initialized = true;
+        return true;
+    }
+
+    public virtual void BlockUpdate() { }
 
     public virtual Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
     {
         Block spawnedItem = (Block)Spawn(false, globalPos, rotation, parentChunk.transform);
-        spawnedItem.CopyFrom(this);
         spawnedItem.itemObject.SetActive(false);
         spawnedItem.blockObject.SetActive(true);
         spawnedItem.preventDespawn = true;
+        spawnedItem.BlockInitialize();
         return spawnedItem;
     }
 

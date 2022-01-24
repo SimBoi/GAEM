@@ -11,8 +11,7 @@ GameObject:
   - component: {fileID: 1362694357772957991}
   - component: {fileID: 1362694357772957990}
   - component: {fileID: 1362694357772957985}
-  - component: {fileID: 1070137606067406243}
-  - component: {fileID: 1070137606067406242}
+  - component: {fileID: 1495745215667781566}
   m_Layer: 0
   m_Name: Item
   m_TagString: Untagged
@@ -84,8 +83,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &1070137606067406243
-SphereCollider:
+--- !u!65 &1495745215667781566
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -95,22 +94,8 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 8
+  m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1070137606067406242
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1362694357772957986}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3994de9ae3c515b46957a672d969cbd7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  item: {fileID: 6860486424626803581}
-  pickupDelay: 1
 --- !u!1 &8164447933402656395
 GameObject:
   m_ObjectHideFlags: 0
@@ -162,13 +147,14 @@ MonoBehaviour:
   name: Dogecoin Minter
   id: 4
   maxStackSize: 64
-  despawnTime: 300
   maxDurability: 1
   spawnDurability: 1
   stackSize: 1
   health: {fileID: 0}
   preventDespawn: 0
-  despawnTimer: 0
+  despawnTime: 300
+  pickupDelay: 2
+  timeSinceSpawn: 0
   isHeld: 0
   isDestroyed: 0
   ui: {fileID: 0}
@@ -177,14 +163,8 @@ MonoBehaviour:
   hasCustomMesh: 1
   itemObject: {fileID: 1362694357772957986}
   blockObject: {fileID: 9192997310427570172}
-  parentChunk: {fileID: 0}
   inventorySizes: 
-  portTypes: 
-  portConnections: 
-  faces: 000000000000000000000000000000000000000000000000
   inventories: []
-  energyInput: 0
-  energyOutput: 0
   PrimaryMachineEventType: 1
   SecondaryMachineEventType: 0
   inputItem: {fileID: 2483047963270853810, guid: 3ef3be445a1b0e34bb9a73c70cf4782b, type: 3}
