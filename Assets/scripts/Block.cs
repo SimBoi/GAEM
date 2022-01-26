@@ -39,7 +39,7 @@ public class Block : Item
 
     public override bool CanBePickedUp()
     {
-        if (base.CanBePickedUp() && itemObject.activeSelf)
+        if (base.CanBePickedUp() && (!hasCustomMesh || itemObject.activeSelf))
             return true;
         return false;
     }

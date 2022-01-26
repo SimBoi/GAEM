@@ -392,7 +392,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94d987a9edcf55b4ab284e7a02c48d76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pickupRadius: 3
+  pickupRadius: 1.5
   health: {fileID: 1828069676}
   hunger: {fileID: 1828069675}
   interactDistance: 5
