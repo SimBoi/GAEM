@@ -176,15 +176,15 @@ public class PlayerInventory : MonoBehaviour
     {
         if (inventoryType == PlayerInventoryType.Backpack)
         {
-            return backpack.ThrowItem(index, itemCount, transform);
+            return backpack.ThrowItem(index, itemCount, transform.position);
         }
         else if (inventoryType == PlayerInventoryType.Hotbar)
         {
-            return hotbar.ThrowItem(index, itemCount, transform);
+            return hotbar.ThrowItem(index, itemCount, transform.position);
         }
         else
         {
-            return armor.ThrowItem(index, itemCount, transform);
+            return armor.ThrowItem(index, itemCount, transform.position);
         }
     }
 

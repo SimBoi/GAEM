@@ -16,19 +16,55 @@ public class Machine : Block
     public Port[] ports;
     [HideInInspector] public Inventory[] inventories;
 
+    public void CopyFrom(Machine source)
+    {
+        base.CopyFrom(source);
+        CopyFromDerived(source);
+    }
+
+    public void CopyFromDerived(Machine source)
+    {
+        this.inventorySizes = (int[])source.inventorySizes.Clone();
+        this.inventories = new Inventory[source.inventories.Length];
+        for (int i = 0; i < source.inventories.Length; i++)
+        {
+            this.inventories[i] = source.inventories[i].DeepClone();
+        }
+    }
+
+    public override Item Clone()
+    {
+        Machine clone = new Machine();
+        clone.CopyFrom(this);
+        return clone;
+    }
+
+    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
+    {
+        Machine spawnedItem = (Machine)base.Spawn(isHeld, pos, rotation, parent);
+        spawnedItem.CopyFromDerived(this);
+        return spawnedItem;
+    }
+
     public override bool BlockInitialize()
     {
         if (!base.BlockInitialize()) return false;
 
-        inventories = new Inventory[inventorySizes.Length];
-        for (int i = 0; i < inventories.Length; i++)
+        if (inventories == null || inventories.Length == 0)
         {
-            inventories[i] = new Inventory(inventorySizes[i]);
+            inventories = new Inventory[inventorySizes.Length];
+            for (int i = 0; i < inventories.Length; i++)
+            {
+                inventories[i] = new Inventory(inventorySizes[i]);
+            }
         }
-        ports = new Port[6];
-        for (int i = 0; i < ports.Length; i++)
+        if (ports == null || ports.Length == 0)
         {
-            ports[i] = new Port();
+            ports = new Port[6];
+            for (int i = 0; i < ports.Length; i++)
+            {
+                ports[i] = new Port();
+            }
         }
 
         return true;
@@ -64,12 +100,15 @@ public class Machine : Block
         return spawnedItem;
     }
 
-    public override bool BreakCustomBlock(bool spawnItem = false, Vector3 pos = default)
+    public override bool BreakCustomBlock(Vector3 pos = default, bool spawnItem = false)
     {
-        if (!base.BreakCustomBlock(spawnItem, pos))
+        if (!base.BreakCustomBlock(pos, spawnItem))
             return false;
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
             UnlinkNetwork(face);
+        foreach (Inventory inventory in inventories)
+            for (int i = 0; i < inventory.size; i++)
+                inventory.ThrowItem(i, inventory.GetStackSize(i), pos);
         return true;
     }
 

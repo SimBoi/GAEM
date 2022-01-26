@@ -8,6 +8,33 @@ public class Portal : Machine
     public int cost;
     public Vector3 destCoords;
 
+    public void CopyFrom(Portal source)
+    {
+        base.CopyFrom(source);
+        CopyFromDerived(source);
+    }
+
+    public void CopyFromDerived(Portal source)
+    {
+        this.inputItem = source.inputItem;
+        this.destCoords = source.destCoords;
+        this.cost = source.cost;
+    }
+
+    public override Item Clone()
+    {
+        Portal clone = new Portal();
+        clone.CopyFrom(this);
+        return clone;
+    }
+
+    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
+    {
+        Portal spawnedItem = (Portal)base.Spawn(isHeld, pos, rotation, parent);
+        spawnedItem.CopyFromDerived(this);
+        return spawnedItem;
+    }
+
     public override void PrimaryMachineEvent(GameObject eventCaller)
     {
         if (eventCaller.GetComponent<CharacterController>() != null)

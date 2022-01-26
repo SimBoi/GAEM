@@ -299,7 +299,7 @@ public class Chunk : MonoBehaviour
             if (customBlocks.ContainsKey(pos))
             {
                 Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
-                customBlocks[pos].BreakCustomBlock(spawnItem, spawnPos);
+                customBlocks[pos].BreakCustomBlock(spawnPos, spawnItem);
                 customBlocks.Remove(pos);
             }
             else

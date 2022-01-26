@@ -38,9 +38,9 @@ public class LinkBlock : Block
         return spawnedItem;
     }
 
-    public override bool BreakCustomBlock(bool spawnItem = false, Vector3 pos = default)
+    public override bool BreakCustomBlock(Vector3 pos = default, bool spawnItem = false)
     {
-        if (!base.BreakCustomBlock(spawnItem, pos))
+        if (!base.BreakCustomBlock(pos, spawnItem))
             return false;
         UnlinkNetwork();
         return true;

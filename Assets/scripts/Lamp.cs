@@ -9,6 +9,32 @@ public class Lamp : Machine
     public Light pointLight;
     public bool isActive = false;
 
+    public void CopyFrom(Lamp source)
+    {
+        base.CopyFrom(source);
+        CopyFromDerived(source);
+    }
+
+    public void CopyFromDerived(Lamp source)
+    {
+        this.peakEnergyDemand = source.peakEnergyDemand;
+        this.maxIntensity = source.maxIntensity;
+    }
+
+    public override Item Clone()
+    {
+        Lamp clone = new Lamp();
+        clone.CopyFrom(this);
+        return clone;
+    }
+
+    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
+    {
+        Lamp spawnedItem = (Lamp)base.Spawn(isHeld, pos, rotation, parent);
+        spawnedItem.CopyFromDerived(this);
+        return spawnedItem;
+    }
+
     public override bool BlockInitialize()
     {
         if (!base.BlockInitialize()) return false;

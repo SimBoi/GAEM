@@ -73,7 +73,7 @@ public class Block : Item
         return spawnedItem;
     }
 
-    public virtual bool BreakCustomBlock(bool spawnItem = false, Vector3 pos = default(Vector3))
+    public virtual bool BreakCustomBlock(Vector3 pos = default, bool spawnItem = false)
     {
         if (spawnItem) Spawn(false, pos);
         return Despawn();

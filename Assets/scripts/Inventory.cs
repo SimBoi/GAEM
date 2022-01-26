@@ -20,6 +20,16 @@ public class Inventory : MonoBehaviour
         items = new Item[size];
     }
 
+    public Inventory DeepClone()
+    {
+        Inventory result = new Inventory(this.size);
+        for (int i = 0; i < this.size; i++)
+        {
+            result.SetItemCopy(this.items[i], i, out _);
+        }
+        return result;
+    }    
+
     private void Start()
     {
         items = new Item[size];
@@ -95,7 +105,11 @@ public class Inventory : MonoBehaviour
 
     public InsertResult SetItemRef(Item item, int index)
     {
-        if (items[index] == null)
+        if (item == null)
+        {
+            return InsertResult.Failure;
+        }
+        else if (items[index] == null)
         {
             items[index] = item;
             return InsertResult.Success;
@@ -108,7 +122,12 @@ public class Inventory : MonoBehaviour
     
     public InsertResult SetItemCopy(Item item, int index, out Item insertedItem)
     {
-        if (items[index] == null)
+        if (item == null)
+        {
+            insertedItem = null;
+            return InsertResult.Failure;
+        }
+        else if (items[index] == null)
         {
             items[index] = item.Clone();
             insertedItem = items[index];
@@ -185,14 +204,14 @@ public class Inventory : MonoBehaviour
     }
 
     //returns the thrown item on success, null on failure (e.g. there is no item with the index to delete, itemCount is bigger than the number of available items)
-    public Item ThrowItem(int index, int itemCount, Transform throwPosition, Transform parent = null)
+    public Item ThrowItem(int index, int itemCount, Vector3 position, Quaternion rotation = default, Transform parent = null)
     {
         if (items[index] == null || items[index].GetStackSize() < itemCount)
             return null;
 
         Item itemToBeThrown = items[index].Clone();
         itemToBeThrown.SetStackSize(itemCount);
-        Item thrownItem = itemToBeThrown.Spawn(false, throwPosition.position, throwPosition.rotation, parent);
+        Item thrownItem = itemToBeThrown.Spawn(false, position, rotation, parent);
         if (items[index].ChangeStackSize(-1 * itemCount) == 0)
         {
             DeleteItem(index);

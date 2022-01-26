@@ -5,7 +5,32 @@ using UnityEngine;
 public class AreaPickup : Machine
 {
     public float radius;
-    public bool isActive;
+    public bool isActive = false;
+
+    public void CopyFrom(AreaPickup source)
+    {
+        base.CopyFrom(source);
+        CopyFromDerived(source);
+    }
+
+    public void CopyFromDerived(AreaPickup source)
+    {
+        this.radius = source.radius;
+    }
+
+    public override Item Clone()
+    {
+        AreaPickup clone = new AreaPickup();
+        clone.CopyFrom(this);
+        return clone;
+    }
+
+    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
+    {
+        AreaPickup spawnedItem = (AreaPickup)base.Spawn(isHeld, pos, rotation, parent);
+        spawnedItem.CopyFromDerived(this);
+        return spawnedItem;
+    }
 
     public override void BlockUpdate()
     {
