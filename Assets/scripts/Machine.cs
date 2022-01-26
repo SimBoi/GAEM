@@ -112,7 +112,7 @@ public class Machine : Block
         return true;
     }
 
-public void TryLinkNetwork(Faces face, Network targetNetwork)
+    public void TryLinkNetwork(Faces face, Network targetNetwork)
     {
         if (isDestroyed || targetNetwork == null)
             return;
