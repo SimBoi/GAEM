@@ -22,6 +22,7 @@ public class ItemNetwork : Network
 {
     public void TransferItem()
     {
+        Debug.Log("transfer called");
         foreach (ItemPort outputPort in linkedPorts)
         {
             if (outputPort.type == PortType.output && outputPort.linkedInventory != null)
@@ -53,6 +54,7 @@ public class ItemNetwork : Network
     {
         if (port.type != PortType.disabled && port.GetType() == typeof(ItemPort) && base.LinkPort(port))
         {
+            TransferItem();
             return true;
         }
         return false;

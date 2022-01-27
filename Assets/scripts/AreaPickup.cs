@@ -47,6 +47,7 @@ public class AreaPickup : Machine
 
     public override void BlockUpdate()
     {
+        base.BlockUpdate();
         if (!isActive) return;
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, radius);
         foreach (var hitCollider in hitColliders)
@@ -59,7 +60,6 @@ public class AreaPickup : Machine
             if (item != null && item.CanBePickedUp())
             {
                 inventories[0].PickupItem(item);
-                ((ItemPort)ports[(int)Faces.Up]).TransferItem();
             }
         }
     }

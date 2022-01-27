@@ -13,6 +13,8 @@ public class Inventory : MonoBehaviour
 {
     public int size;
     private Item[] items;
+    public bool SlotFilledFlag = false;
+    public bool SlotEmptiedFlag = false;
 
     public Inventory(int size)
     {
@@ -122,6 +124,7 @@ public class Inventory : MonoBehaviour
         else if (items[index] == null)
         {
             items[index] = item;
+            SlotFilledFlag = true;
             return InsertResult.Success;
         }
         else
@@ -140,7 +143,9 @@ public class Inventory : MonoBehaviour
         else if (items[index] == null)
         {
             items[index] = item.Clone();
+            item.ChangeStackSize(-item.GetStackSize());
             insertedItem = items[index];
+            SlotFilledFlag = true;
             return InsertResult.Success;
         }
         else if (item == items[index])
@@ -153,9 +158,13 @@ public class Inventory : MonoBehaviour
                 insertedItem = items[index];
                 return InsertResult.Partial;
             }
-            items[index].ChangeStackSize(item.GetStackSize());
-            insertedItem = items[index];
-            return InsertResult.Success;
+            else
+            {
+                items[index].ChangeStackSize(item.GetStackSize());
+                item.ChangeStackSize(-item.GetStackSize());
+                insertedItem = items[index];
+                return InsertResult.Success;
+            }
         }
         else
         {
@@ -237,6 +246,7 @@ public class Inventory : MonoBehaviour
     {
         if (items[index] == null) return false;
         items[index] = null;
+        SlotEmptiedFlag = true;
         return true;
     }
 }

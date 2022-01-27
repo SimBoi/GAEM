@@ -8,7 +8,7 @@ public class Chest : Machine
     {
         if (!base.BlockInitialize()) return false;
 
-        ports[(int)Faces.Up] = new ItemPort() {
+        ports[(int)Faces.Down] = new ItemPort() {
             type = PortType.input,
             linkedInventory = inventories[0]
         };

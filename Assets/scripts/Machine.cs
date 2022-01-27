@@ -70,6 +70,33 @@ public class Machine : Block
         return true;
     }
 
+    public override void BlockUpdate()
+    {
+        base.BlockUpdate();
+        foreach (Port port in ports)
+        {
+            if (port.GetType() == typeof(ItemPort))
+            {
+                if (port.type == PortType.input)
+                {
+                    if (((ItemPort)port).linkedInventory.SlotEmptiedFlag)
+                    {
+                        ((ItemPort)port).TransferItem();
+                        ((ItemPort)port).linkedInventory.SlotEmptiedFlag = false;
+                    }
+                }
+                else if (port.type == PortType.output)
+                {
+                    if (((ItemPort)port).linkedInventory.SlotFilledFlag)
+                    {
+                        ((ItemPort)port).TransferItem();
+                        ((ItemPort)port).linkedInventory.SlotFilledFlag = false;
+                    }
+                }
+            }
+        }
+    }
+
     public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
     {
         Machine spawnedItem = (Machine)base.PlaceCustomBlock(globalPos, rotation, parentChunk, landPos);

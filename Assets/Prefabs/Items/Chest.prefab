@@ -163,7 +163,7 @@ MonoBehaviour:
   hasCustomMesh: 1
   itemObject: {fileID: 498573177659942960}
   blockObject: {fileID: 7752415408075902702}
-  inventorySizes: 0a000000
+  inventorySizes: 01000000
   inventories: []
   PrimaryMachineEventType: 1
   SecondaryMachineEventType: 0

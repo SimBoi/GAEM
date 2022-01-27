@@ -50,6 +50,7 @@ public class Lamp : Machine
 
     public override void BlockUpdate()
     {
+        base.BlockUpdate();
         pointLight.intensity = ((EnergyPort)ports[(int)Faces.Down]).input * maxIntensity / peakEnergyDemand;
     }
 
