@@ -19,6 +19,7 @@ public class Item : MonoBehaviour
     public float timeSinceSpawn = 0;
     public bool isHeld;
     public bool isDestroyed = false;
+    public Sprite icon;
     public GameObject ui = null;
 
     public void CopyFrom(Item source)
@@ -40,6 +41,7 @@ public class Item : MonoBehaviour
         this.timeSinceSpawn = source.timeSinceSpawn;
         this.isHeld = source.isHeld;
         this.isDestroyed = source.isDestroyed;
+        this.icon = source.icon;
     }
 
     public virtual Item Clone()

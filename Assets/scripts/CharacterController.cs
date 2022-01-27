@@ -16,10 +16,12 @@ public class CharacterController : MonoBehaviour
     public GameObject eyePosition;
     public Transform gunRaySpawnPoint;
 
+    public Canvas canvas;
     public Slider healthSlider;
     public Gradient healthGradient;
     public Image healthFill;
-
+    public Image heldItemIcon;
+    public Sprite handIcon;
 
     private void Update()
     {
@@ -120,6 +122,15 @@ public class CharacterController : MonoBehaviour
         healthSlider.maxValue = health.GetMaxHp();
         healthSlider.value = health.GetHp();
         healthFill.color = healthGradient.Evaluate(healthSlider.normalizedValue);
+        
+        if (inventory.heldItemIndex == -1)
+        {
+            heldItemIcon.sprite = handIcon;
+        }
+        else
+        {
+            heldItemIcon.sprite = inventory.GetHeldItemRef().icon;
+        }
     }
 
     public void Die()
