@@ -70,9 +70,9 @@ public class Machine : Block
         return true;
     }
 
-    public override void BlockUpdate()
+    public override void BlockFixedUpdate()
     {
-        base.BlockUpdate();
+        base.BlockFixedUpdate();
         foreach (Port port in ports)
         {
             if (port.GetType() == typeof(ItemPort))
@@ -155,13 +155,6 @@ public class Machine : Block
         Port port = ports[(int)face];
         if (port.network != null)
             port.network.UnlinkPort(port);
-    }
-
-    public Network CreateNewNetwork(Type portType)
-    {
-        if (portType == typeof(EnergyPort))
-            return new EnergyNetwork();
-        return null;
     }
 
     /// <summary>

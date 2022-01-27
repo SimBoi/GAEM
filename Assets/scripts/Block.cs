@@ -53,6 +53,14 @@ public class Block : Item
         }
     }
 
+    private void FixedUpdate()
+    {
+        if (blockObject != null && blockObject.activeSelf)
+        {
+            BlockFixedUpdate();
+        }
+    }
+
     private bool initialized = false;
     public virtual bool BlockInitialize()
     {
@@ -62,6 +70,8 @@ public class Block : Item
     }
 
     public virtual void BlockUpdate() { }
+
+    public virtual void BlockFixedUpdate() { }
 
     public virtual Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
     {
