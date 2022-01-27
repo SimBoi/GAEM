@@ -32,6 +32,19 @@ public class AreaPickup : Machine
         return spawnedItem;
     }
 
+    public override bool BlockInitialize()
+    {
+        if (!base.BlockInitialize()) return false;
+
+        ports[(int)Faces.Up] = new ItemPort()
+        {
+            type = PortType.output,
+            linkedInventory = inventories[0]
+        };
+
+        return true;
+    }
+
     public override void BlockUpdate()
     {
         if (!isActive) return;
@@ -46,6 +59,7 @@ public class AreaPickup : Machine
             if (item != null && item.CanBePickedUp())
             {
                 inventories[0].PickupItem(item);
+                ((ItemPort)ports[(int)Faces.Up]).TransferItem();
             }
         }
     }
