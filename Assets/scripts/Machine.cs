@@ -107,8 +107,12 @@ public class Machine : Block
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
             UnlinkNetwork(face);
         foreach (Inventory inventory in inventories)
+        {
+            if (inventory == null)
+                continue;
             for (int i = 0; i < inventory.size; i++)
                 inventory.ThrowItem(i, inventory.GetStackSize(i), pos);
+        }
         return true;
     }
 

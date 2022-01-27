@@ -20,6 +20,16 @@ public class Inventory : MonoBehaviour
         items = new Item[size];
     }
 
+    static public bool operator ==(Inventory inv1, Inventory inv2)
+    {
+        return ReferenceEquals(inv1, inv2);
+    }
+
+    static public bool operator !=(Inventory inv1, Inventory inv2)
+    {
+        return !(inv1 == inv2);
+    }
+
     public Inventory DeepClone()
     {
         Inventory result = new Inventory(this.size);
@@ -164,6 +174,8 @@ public class Inventory : MonoBehaviour
 
     public int GetStackSize(int index)
     {
+        if (GetItemRef(index) == null)
+            return 0;
         return GetItemRef(index).GetStackSize();
     }
 
