@@ -44,7 +44,7 @@ public class Block : Item
         return false;
     }
 
-    private void Update()
+    public void Update()
     {
         if (blockObject != null && blockObject.activeSelf)
         {
@@ -53,8 +53,9 @@ public class Block : Item
         }
     }
 
-    private void FixedUpdate()
+    public new void FixedUpdate()
     {
+        base.FixedUpdate();
         if (blockObject != null && blockObject.activeSelf)
         {
             BlockFixedUpdate();

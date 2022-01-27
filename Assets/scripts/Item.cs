@@ -130,7 +130,7 @@ public class Item : MonoBehaviour
         return true;
     }
 
-    private void FixedUpdate()
+    public void FixedUpdate()
     {
         if (!preventDespawn)
         {

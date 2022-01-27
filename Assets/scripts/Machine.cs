@@ -170,7 +170,7 @@ public class Machine : Block
     private bool wasSecondaryMachineEventActive = false;
     private GameObject lastSecondaryMachineEventCaller;
 
-    private void LateUpdate()
+    public void LateUpdate()
     {
         if (PrimaryMachineEventType != MachineEventType.disabled)
         {
