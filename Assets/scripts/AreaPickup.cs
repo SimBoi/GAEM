@@ -55,7 +55,7 @@ public class AreaPickup : Machine
             object[] message = new object[1]{
                 null
             };
-            hitCollider.SendMessageUpwards("GetItemRef", message, SendMessageOptions.DontRequireReceiver);
+            hitCollider.SendMessageUpwards("GetItemRefMsg", message, SendMessageOptions.DontRequireReceiver);
             Item item = (Item)message[0];
             if (item != null && item.CanBePickedUp())
             {

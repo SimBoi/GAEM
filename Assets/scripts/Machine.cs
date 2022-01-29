@@ -104,7 +104,7 @@ public class Machine : Block
         object[] message = new object[1]{
                 null
             };
-        parentChunk.SendMessageUpwards("GetLandRef", message);
+        parentChunk.SendMessageUpwards("GetLandRefMsg", message);
         Land land = (Land)message[0];
 
         foreach (Faces face in Enum.GetValues(typeof(Faces)))

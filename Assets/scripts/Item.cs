@@ -163,7 +163,7 @@ public class Item : MonoBehaviour
     }
 
     // message[0] = (Land)return
-    public void GetItemRef(object[] message)
+    public void GetItemRefMsg(object[] message)
     {
         message[0] = this;
     }

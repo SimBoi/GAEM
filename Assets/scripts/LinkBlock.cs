@@ -19,7 +19,7 @@ public class LinkBlock : Block
         object[] message = new object[1]{
                 null
             };
-        parentChunk.SendMessageUpwards("GetLandRef", message);
+        parentChunk.SendMessageUpwards("GetLandRefMsg", message);
         Land land = (Land)message[0];
 
         bool relinkNetwork = false;
@@ -94,7 +94,7 @@ public class LinkBlock : Block
         object[] message = new object[1]{
                 null
             };
-        SendMessageUpwards("GetLandRef", message);
+        SendMessageUpwards("GetLandRefMsg", message);
         Land land = (Land)message[0];
         Vector3Int landPos = Vector3Int.FloorToInt(land.transform.InverseTransformPoint(transform.position));
 

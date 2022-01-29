@@ -50,7 +50,7 @@ public class Land : MonoBehaviour
     }
 
     // message[0] = (Land)return
-    public void GetLandRef(object[] message)
+    public void GetLandRefMsg(object[] message)
     {
         message[0] = this;
     }

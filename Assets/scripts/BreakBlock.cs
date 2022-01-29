@@ -18,7 +18,7 @@ public class BreakBlock : ItemEvent
             object[] message = new object[1]{
                 null
             };
-            hitInfo.collider.SendMessageUpwards("GetLandRef", message, SendMessageOptions.DontRequireReceiver);
+            hitInfo.collider.SendMessageUpwards("GetLandRefMsg", message, SendMessageOptions.DontRequireReceiver);
             Land land = (Land)message[0];
 
             if (land != null)
