@@ -17,11 +17,14 @@ public class CharacterController : MonoBehaviour
     public Transform gunRaySpawnPoint;
 
     public Canvas canvas;
-    public Slider healthSlider;
+    public Slider healthSliderUI;
     public Gradient healthGradient;
     public Image healthFill;
-    public Image heldItemIcon;
+    public Image heldItemIconUI;
     public Sprite handIcon;
+    public GameObject inventoryUI;
+    public Item clickedItem = null;
+    public GameObject inventorySlotUIPrefab;
 
     private void Update()
     {
@@ -32,7 +35,8 @@ public class CharacterController : MonoBehaviour
 
         GetPlayerInput();
         PickupItemsNearby();
-        UpdateUI();
+        UpdateHealthUI();
+        UpdateHeldItemUI();
     }
 
     private bool wasThrowing = false;
@@ -97,6 +101,11 @@ public class CharacterController : MonoBehaviour
             }
         }
 
+        if (Input.GetAxisRaw("Inventory") == 1)
+        {
+            ToggleInventoryUI();
+        }
+
         GetThrowItemDown = false;
     }
 
@@ -117,20 +126,71 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-    public void UpdateUI()
+    public void UpdateHealthUI()
     {
-        healthSlider.maxValue = health.GetMaxHp();
-        healthSlider.value = health.GetHp();
-        healthFill.color = healthGradient.Evaluate(healthSlider.normalizedValue);
+        healthSliderUI.maxValue = health.GetMaxHp();
+        healthSliderUI.value = health.GetHp();
+        healthFill.color = healthGradient.Evaluate(healthSliderUI.normalizedValue);
         
+    }
+
+    public void UpdateHeldItemUI()
+    {
         if (inventory.heldItemIndex == -1)
         {
-            heldItemIcon.sprite = handIcon;
+            heldItemIconUI.sprite = handIcon;
         }
         else
         {
-            heldItemIcon.sprite = inventory.GetHeldItemRef().icon;
+            heldItemIconUI.sprite = inventory.GetHeldItemRef().icon;
         }
+    }
+
+    public void ToggleInventoryUI()
+    {
+        inventoryUI.SetActive(!inventoryUI.activeSelf);
+        if (inventoryUI.activeSelf)
+        {
+            // display inventory
+        }
+        else
+        {
+            foreach (Transform child in inventoryUI.transform)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+    }
+
+    // returns the new item icon to display in the slot
+    public Sprite OnClickInventorySlot(Inventory inventory, int slotIndex)
+    {
+        Sprite result = null;
+
+        Item previousClickedItem = clickedItem;
+        PlayerInventoryType inventoryType = this.inventory.GetInventoryType(inventory);
+        if (inventoryType != PlayerInventoryType.Null)
+        {
+            clickedItem = this.inventory.GetItemCopy(inventoryType, slotIndex);
+            this.inventory.DeleteItem(inventoryType, slotIndex);
+            if (previousClickedItem != null)
+            {
+                this.inventory.SetItemCopy(inventoryType, previousClickedItem, slotIndex, out _);
+                result = previousClickedItem.icon;
+            }
+        }
+        else
+        {
+            clickedItem = inventory.GetItemCopy(slotIndex);
+            inventory.DeleteItem(slotIndex);
+            if (previousClickedItem != null)
+            {
+                inventory.SetItemCopy(previousClickedItem, slotIndex, out _);
+                result = previousClickedItem.icon;
+            }
+        }
+
+        return result;
     }
 
     public void Die()

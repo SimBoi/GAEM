@@ -6,7 +6,8 @@ public enum PlayerInventoryType
 {
     Backpack,
     Hotbar,
-    Armor
+    Armor,
+    Null
 }
 
 public enum ArmorPiece
@@ -103,6 +104,22 @@ public class PlayerInventory : MonoBehaviour
         return InsertResult.Failure;
     }
 
+    public InsertResult SetItemCopy(PlayerInventoryType inventoryType, Item item, int index, out Item insertedItem)
+    {
+        if (inventoryType == PlayerInventoryType.Backpack)
+        {
+            return backpack.SetItemCopy(item, index, out insertedItem);
+        }
+        else if (inventoryType == PlayerInventoryType.Hotbar)
+        {
+            return hotbar.SetItemCopy(item, index, out insertedItem);
+        }
+        else
+        {
+            return armor.SetItemCopy(item, index, out insertedItem);
+        }
+    }
+
     //returns true on success, false on failure
     public bool EquipArmor(Item item, ArmorPiece armorPiece, float protection)
     {
@@ -160,16 +177,9 @@ public class PlayerInventory : MonoBehaviour
         return consumedStack;
     }
 
-    public bool ThrowHeldItem(int itemCount)
+    public Item ThrowHeldItem(int itemCount)
     {
-        int index = heldItemIndex;
-        if (GetHeldItemRef().GetStackSize() == 1)
-            LetGoOfHeldItem();
-        Item thrownItem = ThrowItem(PlayerInventoryType.Hotbar, index, itemCount);
-        if (thrownItem == null)
-            return false;
-        thrownItem.isHeld = false;
-        return true;
+        return ThrowItem(PlayerInventoryType.Hotbar, heldItemIndex, itemCount);
     }
 
     public Item ThrowItem(PlayerInventoryType inventoryType, int index, int itemCount)
@@ -180,6 +190,14 @@ public class PlayerInventory : MonoBehaviour
         }
         else if (inventoryType == PlayerInventoryType.Hotbar)
         {
+            if (index == heldItemIndex)
+            {
+                if (GetHeldItemRef().GetStackSize() == 1)
+                    LetGoOfHeldItem();
+                Item thrownItem = hotbar.ThrowItem(index, itemCount, transform.position);
+                thrownItem.isHeld = false;
+                return thrownItem;
+            }
             return hotbar.ThrowItem(index, itemCount, transform.position);
         }
         else
@@ -205,4 +223,46 @@ public class PlayerInventory : MonoBehaviour
         else
             return ref armor.GetItemRef(index);
     }*/
+
+    public Item GetItemCopy(PlayerInventoryType inventoryType, int index)
+    {
+        if (inventoryType == PlayerInventoryType.Backpack)
+        {
+            return backpack.GetItemCopy(index);
+        }
+        else if (inventoryType == PlayerInventoryType.Hotbar)
+        {
+            return hotbar.GetItemCopy(index);
+        }
+        else
+        {
+            return armor.GetItemCopy(index);
+        }
+    }
+
+    public bool DeleteItem(PlayerInventoryType inventoryType, int index)
+    {
+        if (inventoryType == PlayerInventoryType.Backpack)
+        {
+            return backpack.DeleteItem(index);
+        }
+        else if (inventoryType == PlayerInventoryType.Hotbar)
+        {
+            if (index == heldItemIndex)
+                LetGoOfHeldItem();
+            return hotbar.DeleteItem(index);
+        }
+        else
+        {
+            return armor.DeleteItem(index);
+        }
+    }
+
+    public PlayerInventoryType GetInventoryType(Inventory inventory)
+    {
+        if (inventory == backpack) return PlayerInventoryType.Backpack;
+        if (inventory == hotbar) return PlayerInventoryType.Hotbar;
+        if (inventory == hotbar) return PlayerInventoryType.Hotbar;
+        return PlayerInventoryType.Null;
+    }
 }
