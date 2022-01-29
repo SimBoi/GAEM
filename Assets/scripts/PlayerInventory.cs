@@ -47,6 +47,19 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
+    public Inventory GetInventory(PlayerInventoryType type)
+    {
+        if (type == PlayerInventoryType.Hotbar)
+        {
+            return hotbar;
+        }
+        if (type == PlayerInventoryType.Backpack)
+        {
+            return backpack;
+        }
+        return armor;
+    }
+
     public void SwitchToItem(int index)
     {
         if (index == heldItemIndex) return;
@@ -214,7 +227,7 @@ public class PlayerInventory : MonoBehaviour
         return false;
     }*/
 
-    /*public ref Item GetItemRef(PlayerInventoryType inventoryType, int index)
+    public ref Item GetItemRef(PlayerInventoryType inventoryType, int index)
     {
         if (inventoryType == PlayerInventoryType.Backpack)
             return ref backpack.GetItemRef(index);
@@ -222,7 +235,7 @@ public class PlayerInventory : MonoBehaviour
             return ref hotbar.GetItemRef(index);
         else
             return ref armor.GetItemRef(index);
-    }*/
+    }
 
     public Item GetItemCopy(PlayerInventoryType inventoryType, int index)
     {

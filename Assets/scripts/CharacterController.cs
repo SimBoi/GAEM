@@ -151,7 +151,13 @@ public class CharacterController : MonoBehaviour
         inventoryUI.SetActive(!inventoryUI.activeSelf);
         if (inventoryUI.activeSelf)
         {
-            // display inventory
+            for (int i = 0; i < inventory.hotbarSize; i++)
+            {
+                GameObject slot = Instantiate(inventorySlotUIPrefab, inventoryUI.transform);
+                slot.GetComponent<InventorySlotUI>().itemIcon.sprite = inventory.GetItemRef(PlayerInventoryType.Hotbar, i).icon;
+                slot.GetComponent<InventorySlotUI>().slotIndex = i;
+                slot.GetComponent<InventorySlotUI>().inventory = inventory.GetInventory(PlayerInventoryType.Hotbar);
+            }
         }
         else
         {
