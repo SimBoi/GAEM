@@ -62,6 +62,7 @@ public class CharacterMovement : MonoBehaviour
     public Vector3 relativeVelocity;
 
     // OTHER
+    public bool hasVoxelCollider;
     public float height = 2f;
     public float eyeHeight = 0.8f;
     public float skinWidth = 0.1f;
@@ -197,21 +198,49 @@ public class CharacterMovement : MonoBehaviour
     {
         RaycastHit hit;
         float radius = collider.radius - skinWidth;
-        float distance = (collider.height/2) + groundMaxDistance - radius;
+        float distance = hasVoxelCollider ? (collider.height / 2) + groundMaxDistance : (collider.height/2) + groundMaxDistance - radius;
 
-        bool groundedState = Physics.SphereCast(transform.position, radius, Vector3.down, out hit, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
-        if (groundedState)
+        if (hasVoxelCollider)
         {
-            float slopeAngle = Vector3.Angle(Vector3.up, hit.normal);
-            if (slopeAngle < slopeLimit)
+            if (Physics.SphereCast(transform.position, radius, Vector3.down, out hit, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             {
-                Vector3 counterForce = Vector3.RotateTowards(hit.normal, Vector3.down, -Mathf.PI/2, 0.0f) * Mathf.Sin(slopeAngle * Mathf.Deg2Rad) * Physics.gravity.magnitude * rb.mass; // -m*g*sin(slopeAngle)
-                rb.AddForce(counterForce, ForceMode.Force);
-                return GroundedState.Ground;
+                Vector3 collisionVector = hit.point - transform.position;
+                float distanceFromGround = collisionVector.magnitude * Mathf.Cos(Vector3.Angle(collisionVector, Vector3.down) * Mathf.Deg2Rad) - (height/2); // collisionDistance*cos(angle(rayDirection, collisionDirection)) - height/2
+                if (distanceFromGround <= groundMaxDistance)
+                {
+                    return GroundedState.Ground;
+                }
+                else
+                {
+                    return GroundedState.Air;
+                }
             }
-            else return GroundedState.Slope;
+            else
+            {
+                return GroundedState.Air;
+            }
         }
-        else return GroundedState.Air;
+        else
+        {
+            if (Physics.SphereCast(transform.position, radius, Vector3.down, out hit, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            {
+                float slopeAngle = Vector3.Angle(Vector3.up, hit.normal);
+                if (slopeAngle < slopeLimit)
+                {
+                    Vector3 counterForce = Vector3.RotateTowards(hit.normal, Vector3.down, -Mathf.PI / 2, 0.0f) * Mathf.Sin(slopeAngle * Mathf.Deg2Rad) * Physics.gravity.magnitude * rb.mass; // -m*g*sin(slopeAngle)
+                    rb.AddForce(counterForce, ForceMode.Force);
+                    return GroundedState.Ground;
+                }
+                else
+                {
+                    return GroundedState.Slope;
+                }
+            }
+            else
+            {
+                return GroundedState.Air;
+            }
+        }
     }
 
     Stance GetStance()
