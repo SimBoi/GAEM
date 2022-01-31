@@ -26,6 +26,9 @@ public class CharacterController : MonoBehaviour
     public Item clickedItem = null;
     public GameObject inventorySlotUIPrefab;
     public int maxInventoryRowSize;
+    public int padding = 100;
+    public int slotPadding = 100;
+    public int slotSideLength;
 
     private void Update()
     {
@@ -165,20 +168,23 @@ public class CharacterController : MonoBehaviour
         inventoryUI.SetActive(!inventoryUI.activeSelf);
         if (inventoryUI.activeSelf)
         {
-            float slotSideLength = inventorySlotUIPrefab.GetComponent<RectTransform>().rect.width;
-            float rowSize = Mathf.Min(maxInventoryRowSize, inventory.hotbarSize);
-            float columnSize = Mathf.Max(1, inventory.hotbarSize / rowSize);
-            Vector3 firstSlotPos = new Vector3(-(rowSize - 1) * slotSideLength / 2, (columnSize - 1) * slotSideLength / 2, 0);
+            float slotScale = slotSideLength/inventorySlotUIPrefab.GetComponent<RectTransform>().rect.width;
+            int rowSize = Mathf.Min(maxInventoryRowSize, inventory.hotbarSize);
+            int columnSize = Mathf.Max(1,1 +  (inventory.hotbarSize -1)/ rowSize);
+            Vector3 firstSlotPos = new Vector3(-((rowSize - 1) * slotSideLength + (rowSize - 1) * slotPadding )/ 2, ((columnSize - 1) * slotSideLength + (columnSize - 1) * slotPadding) / 2, 0);
+            Debug.Log(columnSize);
             for (int i = 0; i < inventory.hotbarSize; i++)
             {
                 InventorySlotUI slot = Instantiate(inventorySlotUIPrefab, inventoryUI.transform).GetComponent<InventorySlotUI>();
                 slot.controller = this;
                 slot.inventory = inventory.GetInventory(PlayerInventoryType.Hotbar);
                 slot.slotIndex = i;
+                slot.transform.localScale = new Vector3(slotScale, slotScale, 1);
                 if (inventory.IsSlotFilled(PlayerInventoryType.Hotbar, i))
                     slot.itemIcon.sprite = inventory.GetItemRef(PlayerInventoryType.Hotbar, i).icon;
-                slot.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(firstSlotPos.x + (i % rowSize) * slotSideLength, firstSlotPos.y - (i / rowSize) * slotSideLength, 0);
+                slot.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(firstSlotPos.x + (i % (int)rowSize) * (slotSideLength + slotPadding), firstSlotPos.y - (i / (int)rowSize) * (slotSideLength + slotPadding), 0);
             }
+            inventoryUI.GetComponent<RectTransform>().sizeDelta = new Vector2(rowSize * slotSideLength + 2f * padding + (rowSize + 1) *slotPadding, columnSize * slotSideLength + 2f * padding + (columnSize + 1) * slotPadding);
         }
         else
         {

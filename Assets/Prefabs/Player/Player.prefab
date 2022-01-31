@@ -326,7 +326,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   backpackSize: 0
-  hotbarSize: 2
+  hotbarSize: 10
   health: {fileID: 1828069676}
   heldItemPos: {fileID: 8080675862347148454}
   heldItemIndex: -1
@@ -389,7 +389,10 @@ MonoBehaviour:
   inventoryUI: {fileID: 4801825342254986078}
   clickedItem: {fileID: 0}
   inventorySlotUIPrefab: {fileID: 7684131997384950980, guid: 8579abc363a3dd7448aaa6d65bfe7f7b, type: 3}
-  maxInventoryRowSize: 1
+  maxInventoryRowSize: 4
+  padding: 100
+  slotPadding: 100
+  slotSideLength: 200
 --- !u!1 &2051427869652139020
 GameObject:
   m_ObjectHideFlags: 0
@@ -528,10 +531,10 @@ RectTransform:
   m_Father: {fileID: 4934780801591869237}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 1, y: 0}
-  m_SizeDelta: {x: -1317.398, y: -585.6909}
+  m_SizeDelta: {x: 602.60205, y: 494.30908}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7872122393660826145
 CanvasRenderer:
@@ -921,8 +924,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -128.5, y: 121.2}
-  m_SizeDelta: {x: 164.267, y: 164.267}
+  m_AnchoredPosition: {x: -128.5, y: 121.20001}
+  m_SizeDelta: {x: 164.26697, y: 164.26697}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1722949949456524263
 CanvasRenderer:
