@@ -25,6 +25,7 @@ public class CharacterController : MonoBehaviour
     public GameObject inventoryUI;
     public Item clickedItem = null;
     public GameObject inventorySlotUIPrefab;
+    public int maxInventoryRowSize;
 
     private void Update()
     {
@@ -39,26 +40,38 @@ public class CharacterController : MonoBehaviour
         UpdateHeldItemUI();
     }
 
-    private bool wasThrowing = false;
-    private bool GetThrowItemDown = false;
+    private bool getThrowItem = false;
+    private bool getThrowItemDown = false;
+    private bool getInventory = false;
+    private bool getInventoryDown = false;
     public void GetPlayerInput()
     {
         if (Input.GetAxisRaw("Throw Item") == 1)
         {
-            if (!wasThrowing)
-                GetThrowItemDown = true;
-            wasThrowing = true;
+            if (!getThrowItem)
+                getThrowItemDown = true;
+            getThrowItem = true;
         }
         else
         {
-            wasThrowing = false;
+            getThrowItem = false;
+        }
+        if (Input.GetAxisRaw("Inventory") == 1)
+        {
+            if (!getInventory)
+                getInventoryDown = true;
+            getInventory = true;
+        }
+        else
+        {
+            getInventory = false;
         }
 
         if (Input.GetAxisRaw("Hotbar Slot 0") == 1)
             inventory.SwitchToItem(0);
         else if (Input.GetAxisRaw("Hotbar Slot 1") == 1)
             inventory.SwitchToItem(1);
-        else if (GetThrowItemDown && inventory.heldItemIndex != -1)
+        else if (getThrowItemDown && inventory.heldItemIndex != -1)
             inventory.ThrowHeldItem(1);
         else if (inventory.heldItemIndex != -1)
         {
@@ -101,12 +114,13 @@ public class CharacterController : MonoBehaviour
             }
         }
 
-        if (Input.GetAxisRaw("Inventory") == 1)
+        if (getInventoryDown)
         {
             ToggleInventoryUI();
         }
 
-        GetThrowItemDown = false;
+        getThrowItemDown = false;
+        getInventoryDown = false;
     }
 
     public void PickupItemsNearby()
@@ -151,16 +165,28 @@ public class CharacterController : MonoBehaviour
         inventoryUI.SetActive(!inventoryUI.activeSelf);
         if (inventoryUI.activeSelf)
         {
+            float slotSideLength = inventorySlotUIPrefab.GetComponent<RectTransform>().rect.width;
+            float rowSize = Mathf.Min(maxInventoryRowSize, inventory.hotbarSize);
+            float columnSize = Mathf.Max(1, inventory.hotbarSize / rowSize);
+            Vector3 firstSlotPos = new Vector3(-(rowSize - 1) * slotSideLength / 2, (columnSize - 1) * slotSideLength / 2, 0);
             for (int i = 0; i < inventory.hotbarSize; i++)
             {
-                GameObject slot = Instantiate(inventorySlotUIPrefab, inventoryUI.transform);
-                slot.GetComponent<InventorySlotUI>().itemIcon.sprite = inventory.GetItemRef(PlayerInventoryType.Hotbar, i).icon;
-                slot.GetComponent<InventorySlotUI>().slotIndex = i;
-                slot.GetComponent<InventorySlotUI>().inventory = inventory.GetInventory(PlayerInventoryType.Hotbar);
+                InventorySlotUI slot = Instantiate(inventorySlotUIPrefab, inventoryUI.transform).GetComponent<InventorySlotUI>();
+                slot.controller = this;
+                slot.inventory = inventory.GetInventory(PlayerInventoryType.Hotbar);
+                slot.slotIndex = i;
+                if (inventory.IsSlotFilled(PlayerInventoryType.Hotbar, i))
+                    slot.itemIcon.sprite = inventory.GetItemRef(PlayerInventoryType.Hotbar, i).icon;
+                slot.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(firstSlotPos.x + (i % rowSize) * slotSideLength, firstSlotPos.y - (i / rowSize) * slotSideLength, 0);
             }
         }
         else
         {
+            if (clickedItem != null)
+            {
+                clickedItem.Spawn(false, transform.position);
+                clickedItem = null;
+            }
             foreach (Transform child in inventoryUI.transform)
             {
                 Destroy(child.gameObject);
@@ -177,7 +203,13 @@ public class CharacterController : MonoBehaviour
         PlayerInventoryType inventoryType = this.inventory.GetInventoryType(inventory);
         if (inventoryType != PlayerInventoryType.Null)
         {
-            clickedItem = this.inventory.GetItemCopy(inventoryType, slotIndex);
+            if (this.inventory.IsSlotFilled(inventoryType, slotIndex))
+            {
+                clickedItem = this.inventory.GetItemCopy(inventoryType, slotIndex);
+                clickedItem.isHeld = false;
+            }
+            else
+                clickedItem = null;
             this.inventory.DeleteItem(inventoryType, slotIndex);
             if (previousClickedItem != null)
             {
@@ -187,7 +219,10 @@ public class CharacterController : MonoBehaviour
         }
         else
         {
-            clickedItem = inventory.GetItemCopy(slotIndex);
+            if (inventory.IsSlotFilled(slotIndex))
+                clickedItem = inventory.GetItemCopy(slotIndex);
+            else
+                clickedItem = null;
             inventory.DeleteItem(slotIndex);
             if (previousClickedItem != null)
             {

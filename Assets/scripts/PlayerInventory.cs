@@ -72,7 +72,6 @@ public class PlayerInventory : MonoBehaviour
         {
             // spawn item to be held and update inventory to the new spawned item and update held item index
             Item spawnedItem = hotbar.GetItemRef(index).Spawn(true, heldItemPos.position, heldItemPos.rotation, heldItemPos);
-            spawnedItem.isHeld = true;
             spawnedItem.preventDespawn = true;
             spawnedItem.HoldEvent(gameObject);
             hotbar.DeleteItem(index);
@@ -226,6 +225,16 @@ public class PlayerInventory : MonoBehaviour
         if (backpack.InsertItemRef(item)) return true;
         return false;
     }*/
+
+    public bool IsSlotFilled(PlayerInventoryType inventoryType, int index)
+    {
+        if (inventoryType == PlayerInventoryType.Backpack)
+            return backpack.IsSlotFilled(index);
+        else if (inventoryType == PlayerInventoryType.Hotbar)
+            return hotbar.IsSlotFilled(index);
+        else
+            return armor.IsSlotFilled(index);
+    }
 
     public ref Item GetItemRef(PlayerInventoryType inventoryType, int index)
     {

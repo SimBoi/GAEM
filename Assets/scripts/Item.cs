@@ -112,6 +112,7 @@ public class Item : MonoBehaviour
 
         Item spawnedItem = newItem.GetComponent<Item>();
         spawnedItem.CopyFrom(this);
+        spawnedItem.isHeld = isHeld;
         spawnedItem.timeSinceSpawn = 0;
         if (isHeld && spawnedItem.ui != null)
         {
