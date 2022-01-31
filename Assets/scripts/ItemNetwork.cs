@@ -36,7 +36,7 @@ public class ItemNetwork : Network
                         {
                             if (inputPort.type == PortType.input && inputPort.linkedInventory != null)
                             {
-                                inputPort.linkedInventory.InsertItemCopy(item, out _);
+                                inputPort.linkedInventory.InsertItemCopy(item, out _, out _);
                                 if (item.GetStackSize() == 0)
                                 {
                                     outputPort.linkedInventory.DeleteItem(i);

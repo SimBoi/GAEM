@@ -83,7 +83,7 @@ public class PlayerInventory : MonoBehaviour
     public ref Item GetHeldItemRef()
     {
         return ref hotbar.GetItemRef(heldItemIndex);
-    }
+    } //////////////////////////////////////// change all references to character controller
 
     public void LetGoOfHeldItem()
     {
@@ -102,19 +102,20 @@ public class PlayerInventory : MonoBehaviour
     }
 
     // returns true on success, false if inventory is full
-    public InsertResult PickupItem(Item item)
+    public InsertResult PickupItem(Item item, out List<int> hotbarIndexes, out List<int> backpackIndexes)
     {
-        InsertResult hotbarResult = hotbar.PickupItem(item);
+        backpackIndexes = new List<int>();
+        InsertResult hotbarResult = hotbar.PickupItem(item, out hotbarIndexes);
         InsertResult backpackResult = InsertResult.Failure;
         if (hotbarResult != InsertResult.Success)
-            backpackResult = backpack.PickupItem(item);
+            backpackResult = backpack.PickupItem(item, out backpackIndexes);
 
         if (hotbarResult == InsertResult.Success || backpackResult == InsertResult.Success)
             return InsertResult.Success;
         if (hotbarResult == InsertResult.Partial || backpackResult == InsertResult.Partial)
             return InsertResult.Partial;
         return InsertResult.Failure;
-    }
+    } //////////////////////////////////////// change all references to character controller
 
     public InsertResult SetItemCopy(PlayerInventoryType inventoryType, Item item, int index, out Item insertedItem)
     {
@@ -135,12 +136,12 @@ public class PlayerInventory : MonoBehaviour
     //returns true on success, false on failure
     public bool EquipArmor(Item item, ArmorPiece armorPiece, float protection)
     {
-        if (armor.PickupItem(item, (int)armorPiece) == InsertResult.Failure)
+        if (armor.PickupItem(item, out _, (int)armorPiece) == InsertResult.Failure)
             return false;
 
         totalArmorProtection += protection;
         return true;
-    }
+    } //////////////////////////////////////// change all references to character controller
 
     public int GetStackSize(int index, PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar)
     {
@@ -152,12 +153,12 @@ public class PlayerInventory : MonoBehaviour
         {
             return backpack.GetStackSize(index);
         }
-    }
+    } //////////////////////////////////////// change all references to character controller
 
     public int GetTotalStackSize(Item item)
     {
         return hotbar.GetTotalStackSize(item) + backpack.GetTotalStackSize(item);
-    }
+    } //////////////////////////////////////// change all references to character controller
 
     // returns number of items consumed
     public int ConsumeFromStack(int stackToConsume, int index, PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar)
@@ -174,7 +175,7 @@ public class PlayerInventory : MonoBehaviour
         {
             return backpack.ConsumeFromStack(index, stackToConsume);
         }
-    }
+    } //////////////////////////////////////// change all references to character controller
 
     // returns number of items consumed
     public int ConsumeFromTotalStack(Item item, int stackToConsume)
@@ -187,7 +188,7 @@ public class PlayerInventory : MonoBehaviour
         consumedStack += hotbar.ConsumeFromTotalStack(item, stackToConsume - consumedStack);
         consumedStack += backpack.ConsumeFromTotalStack(item, stackToConsume - consumedStack);
         return consumedStack;
-    }
+    } //////////////////////////////////////// change all references to character controller
 
     public Item ThrowHeldItem(int itemCount)
     {

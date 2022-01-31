@@ -326,7 +326,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   backpackSize: 0
-  hotbarSize: 10
+  hotbarSize: 45
   health: {fileID: 1828069676}
   heldItemPos: {fileID: 8080675862347148454}
   heldItemIndex: -1
@@ -389,10 +389,10 @@ MonoBehaviour:
   inventoryUI: {fileID: 4801825342254986078}
   clickedItem: {fileID: 0}
   inventorySlotUIPrefab: {fileID: 7684131997384950980, guid: 8579abc363a3dd7448aaa6d65bfe7f7b, type: 3}
-  maxInventoryRowSize: 4
-  padding: 100
-  slotPadding: 100
-  slotSideLength: 200
+  maxInventoryRowSize: 10
+  inventoryPadding: 100
+  slotPadding: 25
+  slotSideLength: 100
 --- !u!1 &2051427869652139020
 GameObject:
   m_ObjectHideFlags: 0
@@ -516,7 +516,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2693560713738710894
 RectTransform:
   m_ObjectHideFlags: 0
@@ -564,8 +564,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 247013f50eab0da42bfbe3feb9b35f4a, type: 3}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: 1cad70cc391b8e24996ba951017d5136, type: 3}
+  m_Type: 2
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4

@@ -26,9 +26,12 @@ public class CharacterController : MonoBehaviour
     public Item clickedItem = null;
     public GameObject inventorySlotUIPrefab;
     public int maxInventoryRowSize;
-    public int padding = 100;
-    public int slotPadding = 100;
+    public int inventoryPadding = 100;
+    public int slotPadding = 25;
     public int slotSideLength;
+    private List<InventorySlotUI> hotbarUI = new List<InventorySlotUI>();
+    private List<InventorySlotUI> backpackUI = new List<InventorySlotUI>();
+    private List<InventorySlotUI> armorUI = new List<InventorySlotUI>();
 
     private void Update()
     {
@@ -138,7 +141,13 @@ public class CharacterController : MonoBehaviour
             Item item = (Item)message[0];
             if (item != null && item.CanBePickedUp())
             {
-                inventory.PickupItem(item);
+                List<int> hotbarIndexes;
+                List<int> backpackIndexes;
+                inventory.PickupItem(item, out hotbarIndexes, out backpackIndexes);
+                foreach (int index in hotbarIndexes)
+                    UpdateSlotUI(PlayerInventoryType.Hotbar, index);
+                foreach (int index in backpackIndexes)
+                    UpdateSlotUI(PlayerInventoryType.Backpack, index);
             }
         }
     }
@@ -163,28 +172,49 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    public void GenerateInventoryUI()
+    {
+        // clear old inventory ui
+        foreach (InventorySlotUI slot in hotbarUI)
+            Destroy(slot.gameObject);
+        foreach (InventorySlotUI slot in backpackUI)
+            Destroy(slot.gameObject);
+        foreach (InventorySlotUI slot in armorUI)
+            Destroy(slot.gameObject);
+        hotbarUI.Clear();
+        backpackUI.Clear();
+        armorUI.Clear();
+
+        // generate new ui
+        inventoryUI.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
+        float slotPrefabSideLength = inventorySlotUIPrefab.GetComponent<RectTransform>().rect.width;
+        float inventoryScale = slotSideLength / slotPrefabSideLength;
+        int rowSize = Mathf.Min(maxInventoryRowSize, inventory.hotbarSize);
+        int columnSize = Mathf.Max(1, 1 + (inventory.hotbarSize - 1) / rowSize);
+        Vector3 firstSlotPos = new Vector3(-((rowSize - 1) * slotPrefabSideLength + (rowSize - 1) * 2 * slotPadding) / 2, ((columnSize - 1) * slotPrefabSideLength + (columnSize - 1) * 2 * slotPadding) / 2, 0);
+        for (int i = 0; i < inventory.hotbarSize; i++)
+        {
+            InventorySlotUI slot = Instantiate(inventorySlotUIPrefab, inventoryUI.transform).GetComponent<InventorySlotUI>();
+            slot.controller = this;
+            slot.inventory = inventory.GetInventory(PlayerInventoryType.Hotbar);
+            slot.slotIndex = i;
+            slot.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(firstSlotPos.x + (i % (int)rowSize) * (slotPrefabSideLength + 2 * slotPadding), firstSlotPos.y - (i / (int)rowSize) * (slotPrefabSideLength + 2 * slotPadding), 0);
+            hotbarUI.Add(slot);
+            UpdateSlotUI(PlayerInventoryType.Hotbar, i);
+        }
+        inventoryUI.GetComponent<RectTransform>().sizeDelta = new Vector2(rowSize * slotPrefabSideLength + 2f * inventoryPadding + rowSize * 2 * slotPadding, columnSize * slotPrefabSideLength + 2f * inventoryPadding + columnSize * 2 * slotPadding);
+        inventoryUI.GetComponent<Transform>().localScale = new Vector3(inventoryScale, inventoryScale, 1);
+    }
+
     public void ToggleInventoryUI()
     {
         inventoryUI.SetActive(!inventoryUI.activeSelf);
         if (inventoryUI.activeSelf)
         {
-            float slotScale = slotSideLength/inventorySlotUIPrefab.GetComponent<RectTransform>().rect.width;
-            int rowSize = Mathf.Min(maxInventoryRowSize, inventory.hotbarSize);
-            int columnSize = Mathf.Max(1,1 +  (inventory.hotbarSize -1)/ rowSize);
-            Vector3 firstSlotPos = new Vector3(-((rowSize - 1) * slotSideLength + (rowSize - 1) * slotPadding )/ 2, ((columnSize - 1) * slotSideLength + (columnSize - 1) * slotPadding) / 2, 0);
-            Debug.Log(columnSize);
-            for (int i = 0; i < inventory.hotbarSize; i++)
+            if (inventoryUI.transform.childCount == 0)
             {
-                InventorySlotUI slot = Instantiate(inventorySlotUIPrefab, inventoryUI.transform).GetComponent<InventorySlotUI>();
-                slot.controller = this;
-                slot.inventory = inventory.GetInventory(PlayerInventoryType.Hotbar);
-                slot.slotIndex = i;
-                slot.transform.localScale = new Vector3(slotScale, slotScale, 1);
-                if (inventory.IsSlotFilled(PlayerInventoryType.Hotbar, i))
-                    slot.itemIcon.sprite = inventory.GetItemRef(PlayerInventoryType.Hotbar, i).icon;
-                slot.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(firstSlotPos.x + (i % (int)rowSize) * (slotSideLength + slotPadding), firstSlotPos.y - (i / (int)rowSize) * (slotSideLength + slotPadding), 0);
+                GenerateInventoryUI();
             }
-            inventoryUI.GetComponent<RectTransform>().sizeDelta = new Vector2(rowSize * slotSideLength + 2f * padding + (rowSize + 1) *slotPadding, columnSize * slotSideLength + 2f * padding + (columnSize + 1) * slotPadding);
         }
         else
         {
@@ -193,11 +223,21 @@ public class CharacterController : MonoBehaviour
                 clickedItem.Spawn(false, transform.position);
                 clickedItem = null;
             }
-            foreach (Transform child in inventoryUI.transform)
-            {
-                Destroy(child.gameObject);
-            }
         }
+    }
+
+    public void UpdateSlotUI(PlayerInventoryType inventoryType, int index)
+    {
+        InventorySlotUI slot;
+        if (inventoryType == PlayerInventoryType.Hotbar)
+            slot = hotbarUI[index];
+        else if (inventoryType == PlayerInventoryType.Backpack)
+            slot = backpackUI[index];
+        else
+            slot = armorUI[index];
+
+        if (inventory.IsSlotFilled(inventoryType, index))
+            slot.itemIcon.sprite = inventory.GetItemRef(inventoryType, index).icon;
     }
 
     // returns the new item icon to display in the slot

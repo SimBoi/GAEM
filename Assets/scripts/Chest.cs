@@ -22,7 +22,7 @@ public class Chest : Machine
         {
             if (inventories[0].IsSlotFilled(i))
             {
-                eventCaller.GetComponent<CharacterController>().inventory.PickupItem(inventories[0].GetItemRef(i));
+                eventCaller.GetComponent<CharacterController>().inventory.PickupItem(inventories[0].GetItemRef(i), out _, out _);
                 inventories[0].DeleteItem(i);
                 break;
             }

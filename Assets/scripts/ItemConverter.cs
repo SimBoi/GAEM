@@ -46,7 +46,7 @@ public class ItemConverter : Machine
             if (heldItem == inputItem && characterController.inventory.GetStackSize(heldItemIndex) >= cost)
             {
                 characterController.inventory.ConsumeFromStack(cost, heldItemIndex);
-                characterController.inventory.PickupItem(outputItem.Clone());
+                characterController.inventory.PickupItem(outputItem.Clone(), out _, out _);
             }
             else
             {

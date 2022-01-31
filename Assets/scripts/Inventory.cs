@@ -47,21 +47,22 @@ public class Inventory : MonoBehaviour
         items = new Item[size];
     }
 
-    // returns true on success, returns false if inventory is full
-    public InsertResult PickupItem(Item item, int index = -1) // if index is -1 item gets inserted in the first empty inventory space
+    // if index is -1 item gets inserted in the first empty inventory space, returns true on success, returns false if inventory is full
+    public InsertResult PickupItem(Item item, out List<int> changedIndexes, int index = -1)
     {
         InsertResult result;
         Item insertedItem;
 
         if (index == -1)
         {
-            result = InsertItemCopy(item, out insertedItem);
+            result = InsertItemCopy(item, out insertedItem, out changedIndexes);
             if (result != InsertResult.Success)
                 return result;
         }
         else
         {
             result = SetItemCopy(item, index, out insertedItem);
+            changedIndexes = new List<int> { index };
             if (result != InsertResult.Success)
                 return result;
         }
@@ -80,9 +81,10 @@ public class Inventory : MonoBehaviour
     }
     
     //returns true on success, false on failure (e.g. inventry is full)
-    public InsertResult InsertItemCopy(Item item, out Item insertedItem)
+    public InsertResult InsertItemCopy(Item item, out Item insertedItem, out List<int> changedIndexes)
     {
         insertedItem = null;
+        changedIndexes = new List<int>();
         InsertResult result = InsertResult.Failure;
 
         // check if there is a stack of the same item type and add item on top
@@ -91,6 +93,8 @@ public class Inventory : MonoBehaviour
             if (GetItemRef(i) == item)
             {
                 InsertResult currResult = SetItemCopy(item, i, out insertedItem);
+                if (currResult != InsertResult.Failure)
+                    changedIndexes.Add(i);
                 if (currResult == InsertResult.Partial)
                     result = InsertResult.Partial;
                 if (currResult == InsertResult.Success)
@@ -99,8 +103,13 @@ public class Inventory : MonoBehaviour
         }
         // add item to the first empty slot
         for (int i = 0; i < size; i++)
+        {
             if (SetItemCopy(item, i, out insertedItem) == InsertResult.Success)
+            {
+                changedIndexes.Add(i);
                 return InsertResult.Success;
+            }
+        }
 
         return result;
     }

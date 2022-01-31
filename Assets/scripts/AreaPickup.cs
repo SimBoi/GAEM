@@ -59,7 +59,7 @@ public class AreaPickup : Machine
             Item item = (Item)message[0];
             if (item != null && item.CanBePickedUp())
             {
-                inventories[0].PickupItem(item);
+                inventories[0].PickupItem(item, out _);
             }
         }
     }
@@ -70,7 +70,7 @@ public class AreaPickup : Machine
         {
             if (inventories[0].IsSlotFilled(i))
             {
-                eventCaller.GetComponent<CharacterController>().inventory.PickupItem(inventories[0].GetItemRef(i));
+                eventCaller.GetComponent<CharacterController>().inventory.PickupItem(inventories[0].GetItemRef(i), out _, out _);
                 inventories[0].DeleteItem(i);
                 break;
             }
