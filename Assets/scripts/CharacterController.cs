@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,18 +23,29 @@ public class CharacterController : MonoBehaviour
     public Image healthFill;
     public Image heldItemIconUI;
     public Sprite handIcon;
-    public GameObject inventoryUI;
-    public Item clickedItem = null;
+    public GameObject inventoryUIPrefab;
     public GameObject inventorySlotUIPrefab;
+    public GameObject playerInventoryUI;
+    private Item clickedItem = null;
+    public Image clickedItemUI;
+    public float clickedItemOpacity;
     public int maxInventoryRowSize;
-    public int inventoryPadding = 100;
-    public int slotPadding = 25;
+    public int paddingBetweenInventories = 25;
+    public int paddingAtinventoryBorders = 100;
+    public int paddingBetweenSlots = 25;
     public int slotSideLength;
-    private List<InventorySlotUI> hotbarUI = new List<InventorySlotUI>();
-    private List<InventorySlotUI> backpackUI = new List<InventorySlotUI>();
-    private List<InventorySlotUI> armorUI = new List<InventorySlotUI>();
+    public int clickedItemSideLength;
+    private List<List<InventorySlotUI>> inventoriesUI = new List<List<InventorySlotUI>>();
 
-    private void Update()
+    public void Start()
+    {
+        foreach (PlayerInventoryType inventoryType in Enum.GetValues(typeof(PlayerInventoryType)))
+            inventoriesUI.Add(new List<InventorySlotUI>());
+        float scale = clickedItemSideLength / (float)clickedItemUI.rectTransform.rect.width;
+        clickedItemUI.transform.localScale = new Vector3(scale, scale, scale);
+    }
+
+    public void Update()
     {
         if (health.GetHp() <= 0)
         {
@@ -44,6 +56,7 @@ public class CharacterController : MonoBehaviour
         PickupItemsNearby();
         UpdateHealthUI();
         UpdateHeldItemUI();
+        UpdateClickedItemUI();
     }
 
     private bool getThrowItem = false;
@@ -122,7 +135,7 @@ public class CharacterController : MonoBehaviour
 
         if (getInventoryDown)
         {
-            ToggleInventoryUI();
+            TogglePlayerInventoryUI();
         }
 
         getThrowItemDown = false;
@@ -166,48 +179,75 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-    public void GenerateInventoryUI()
+    public void UpdateClickedItemUI()
     {
-        // clear old inventory ui
-        foreach (InventorySlotUI slot in hotbarUI)
-            Destroy(slot.gameObject);
-        foreach (InventorySlotUI slot in backpackUI)
-            Destroy(slot.gameObject);
-        foreach (InventorySlotUI slot in armorUI)
-            Destroy(slot.gameObject);
-        hotbarUI.Clear();
-        backpackUI.Clear();
-        armorUI.Clear();
+        if (clickedItem != null)
+        {
+            clickedItemUI.sprite = clickedItem.icon;
+            clickedItemUI.color = new Color(1, 1, 1, clickedItemOpacity);
+            clickedItemUI.transform.position = Input.mousePosition;
+        }
+        else
+        {
+            clickedItemUI.sprite = null;
+            clickedItemUI.color = Color.clear;
+        }
+    }
 
-        // generate new ui
+    public void GeneratePlayerInventoryUI()
+    {
+        PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar;
+
+        // clear old inventory ui
+        if (inventoriesUI[(int)inventoryType].Count > 0)
+            Destroy(inventoriesUI[(int)inventoryType][0].transform.parent.gameObject);
+        inventoriesUI[(int)inventoryType].Clear();
+        
+        // generate new inventory ui
+        List<InventorySlotUI> slotsUI;
+        GameObject inventoryUI;
+        GenerateInventoryUI(this.inventory.GetInventory(inventoryType), out slotsUI, out inventoryUI);
+        inventoriesUI[(int)inventoryType] = slotsUI;
+        inventoryUI.transform.parent = playerInventoryUI.transform;
+
+        // set icons
+        for (int i = 0; i < inventoriesUI[(int)inventoryType].Count; i++)
+            UpdatePlayerInventorySlotUI(inventoryType, i);
+    }
+
+    public Vector2 GenerateInventoryUI(Inventory inventory, out List<InventorySlotUI> slotsUI, out GameObject inventoryUI)
+    {
+        slotsUI = new List<InventorySlotUI>();
+        inventoryUI = Instantiate(inventoryUIPrefab, canvas.transform);
         inventoryUI.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
         float slotPrefabSideLength = inventorySlotUIPrefab.GetComponent<RectTransform>().rect.width;
         float inventoryScale = slotSideLength / slotPrefabSideLength;
-        int rowSize = Mathf.Min(maxInventoryRowSize, inventory.hotbarSize);
-        int columnSize = Mathf.Max(1, 1 + (inventory.hotbarSize - 1) / rowSize);
-        Vector3 firstSlotPos = new Vector3(-((rowSize - 1) * slotPrefabSideLength + (rowSize - 1) * 2 * slotPadding) / 2, ((columnSize - 1) * slotPrefabSideLength + (columnSize - 1) * 2 * slotPadding) / 2, 0);
-        for (int i = 0; i < inventory.hotbarSize; i++)
+        int rowSize = Mathf.Min(maxInventoryRowSize, inventory.size);
+        int columnSize = Mathf.Max(1, 1 + (inventory.size - 1) / rowSize);
+        Vector3 firstSlotPos = new Vector3(-((rowSize - 1) * slotPrefabSideLength + (rowSize - 1) * 2 * paddingBetweenSlots) / 2, ((columnSize - 1) * slotPrefabSideLength + (columnSize - 1) * 2 * paddingBetweenSlots) / 2, 0);
+        for (int i = 0; i < inventory.size; i++)
         {
             InventorySlotUI slot = Instantiate(inventorySlotUIPrefab, inventoryUI.transform).GetComponent<InventorySlotUI>();
             slot.controller = this;
-            slot.inventory = inventory.GetInventory(PlayerInventoryType.Hotbar);
+            slot.inventory = inventory;
             slot.slotIndex = i;
-            slot.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(firstSlotPos.x + (i % (int)rowSize) * (slotPrefabSideLength + 2 * slotPadding), firstSlotPos.y - (i / (int)rowSize) * (slotPrefabSideLength + 2 * slotPadding), 0);
-            hotbarUI.Add(slot);
-            UpdateSlotUI(PlayerInventoryType.Hotbar, i);
+            slot.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(firstSlotPos.x + (i % (int)rowSize) * (slotPrefabSideLength + 2 * paddingBetweenSlots), firstSlotPos.y - (i / (int)rowSize) * (slotPrefabSideLength + 2 * paddingBetweenSlots), 0);
+            slotsUI.Add(slot);
         }
-        inventoryUI.GetComponent<RectTransform>().sizeDelta = new Vector2(rowSize * slotPrefabSideLength + 2f * inventoryPadding + rowSize * 2 * slotPadding, columnSize * slotPrefabSideLength + 2f * inventoryPadding + columnSize * 2 * slotPadding);
+        Vector2 size = new Vector2(rowSize * slotPrefabSideLength + 2f * paddingAtinventoryBorders + rowSize * 2 * paddingBetweenSlots, columnSize * slotPrefabSideLength + 2f * paddingAtinventoryBorders + columnSize * 2 * paddingBetweenSlots);
+        inventoryUI.GetComponent<RectTransform>().sizeDelta = size;
         inventoryUI.GetComponent<Transform>().localScale = new Vector3(inventoryScale, inventoryScale, 1);
+        return size * inventoryScale;
     }
 
-    public void ToggleInventoryUI()
+    public void TogglePlayerInventoryUI()
     {
-        inventoryUI.SetActive(!inventoryUI.activeSelf);
-        if (inventoryUI.activeSelf)
+        playerInventoryUI.SetActive(!playerInventoryUI.activeSelf);
+        if (playerInventoryUI.activeSelf)
         {
-            if (inventoryUI.transform.childCount == 0)
+            if (playerInventoryUI.transform.childCount == 0)
             {
-                GenerateInventoryUI();
+                GeneratePlayerInventoryUI();
             }
         }
         else
@@ -220,36 +260,25 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-    public void UpdateSlotUI(PlayerInventoryType inventoryType, int index)
+    public void UpdatePlayerInventorySlotUI(PlayerInventoryType inventoryType, int index)
     {
         InventorySlotUI slot;
-        if (inventoryType == PlayerInventoryType.Hotbar)
+
+        if (index >= inventoriesUI[(int)inventoryType].Count)
+            return;
+        slot = inventoriesUI[(int)inventoryType][index];
+
+
+        if (inventory.IsSlotFilled(inventoryType, index))
         {
-            if (hotbarUI.Count == 0)
-                GenerateInventoryUI();
-            if (index >= hotbarUI.Count)
-                return;
-            slot = hotbarUI[index];
-        }
-        else if (inventoryType == PlayerInventoryType.Backpack)
-        {
-            if (backpackUI.Count == 0)
-                GenerateInventoryUI();
-            if (index >= backpackUI.Count)
-                return;
-            slot = backpackUI[index];
+            slot.itemIcon.sprite = inventory.GetItemRef(inventoryType, index).icon;
+            slot.itemIcon.color = Color.white;
         }
         else
         {
-            if (armorUI.Count == 0)
-                GenerateInventoryUI();
-            if (index >= armorUI.Count)
-                return;
-            slot = armorUI[index];
+            slot.itemIcon.sprite = null;
+            slot.itemIcon.color = Color.clear;
         }
-
-        if (inventory.IsSlotFilled(inventoryType, index))
-            slot.itemIcon.sprite = inventory.GetItemRef(inventoryType, index).icon;
     }
 
     // returns the new item icon to display in the slot
@@ -288,6 +317,7 @@ public class CharacterController : MonoBehaviour
                 result = previousClickedItem.icon;
             }
         }
+        UpdatePlayerInventorySlotUI(inventoryType, slotIndex);
 
         return result;
     }
@@ -301,9 +331,9 @@ public class CharacterController : MonoBehaviour
     {
         InsertResult result = inventory.PickupItem(item, out hotbarIndexes, out backpackIndexes);
         foreach (int index in hotbarIndexes)
-            UpdateSlotUI(PlayerInventoryType.Hotbar, index);
+            UpdatePlayerInventorySlotUI(PlayerInventoryType.Hotbar, index);
         foreach (int index in backpackIndexes)
-            UpdateSlotUI(PlayerInventoryType.Backpack, index);
+            UpdatePlayerInventorySlotUI(PlayerInventoryType.Backpack, index);
         return result;
     }
 
@@ -311,7 +341,7 @@ public class CharacterController : MonoBehaviour
     {
         bool result = inventory.EquipArmor(item, armorPiece, protection);
         if (result)
-            UpdateSlotUI(PlayerInventoryType.Armor, (int)armorPiece);
+            UpdatePlayerInventorySlotUI(PlayerInventoryType.Armor, (int)armorPiece);
         return result;
     }
 
@@ -328,7 +358,7 @@ public class CharacterController : MonoBehaviour
     public int ConsumeFromStack(int stackToConsume, int index, PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar)
     {
         int result = inventory.ConsumeFromStack(stackToConsume, index, inventoryType);
-        UpdateSlotUI(inventoryType, index);
+        UpdatePlayerInventorySlotUI(inventoryType, index);
         return result;
     }
 
@@ -336,9 +366,9 @@ public class CharacterController : MonoBehaviour
     {
         int result = inventory.ConsumeFromTotalStack(item, stackToConsume, out hotbarIndexes, out backpackIndexes);
         foreach (int index in hotbarIndexes)
-            UpdateSlotUI(PlayerInventoryType.Hotbar, index);
+            UpdatePlayerInventorySlotUI(PlayerInventoryType.Hotbar, index);
         foreach (int index in backpackIndexes)
-            UpdateSlotUI(PlayerInventoryType.Backpack, index);
+            UpdatePlayerInventorySlotUI(PlayerInventoryType.Backpack, index);
         return result;
     }
 
