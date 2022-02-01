@@ -42,11 +42,11 @@ public class ItemConverter : Machine
             CharacterController characterController = eventCaller.GetComponent<CharacterController>();
             int heldItemIndex = characterController.inventory.heldItemIndex;
             if (heldItemIndex == -1) return;
-            Item heldItem = characterController.inventory.GetHeldItemRef();
-            if (heldItem == inputItem && characterController.inventory.GetStackSize(heldItemIndex) >= cost)
+            Item heldItem = characterController.GetHeldItemRef();
+            if (heldItem == inputItem && characterController.GetStackSize(heldItemIndex) >= cost)
             {
-                characterController.inventory.ConsumeFromStack(cost, heldItemIndex);
-                characterController.inventory.PickupItem(outputItem.Clone(), out _, out _);
+                characterController.ConsumeFromStack(cost, heldItemIndex);
+                characterController.PickupItem(outputItem.Clone(), out _, out _);
             }
             else
             {

@@ -141,13 +141,7 @@ public class CharacterController : MonoBehaviour
             Item item = (Item)message[0];
             if (item != null && item.CanBePickedUp())
             {
-                List<int> hotbarIndexes;
-                List<int> backpackIndexes;
-                inventory.PickupItem(item, out hotbarIndexes, out backpackIndexes);
-                foreach (int index in hotbarIndexes)
-                    UpdateSlotUI(PlayerInventoryType.Hotbar, index);
-                foreach (int index in backpackIndexes)
-                    UpdateSlotUI(PlayerInventoryType.Backpack, index);
+                PickupItem(item, out _, out _);
             }
         }
     }
@@ -230,11 +224,29 @@ public class CharacterController : MonoBehaviour
     {
         InventorySlotUI slot;
         if (inventoryType == PlayerInventoryType.Hotbar)
+        {
+            if (hotbarUI.Count == 0)
+                GenerateInventoryUI();
+            if (index >= hotbarUI.Count)
+                return;
             slot = hotbarUI[index];
+        }
         else if (inventoryType == PlayerInventoryType.Backpack)
+        {
+            if (backpackUI.Count == 0)
+                GenerateInventoryUI();
+            if (index >= backpackUI.Count)
+                return;
             slot = backpackUI[index];
+        }
         else
+        {
+            if (armorUI.Count == 0)
+                GenerateInventoryUI();
+            if (index >= armorUI.Count)
+                return;
             slot = armorUI[index];
+        }
 
         if (inventory.IsSlotFilled(inventoryType, index))
             slot.itemIcon.sprite = inventory.GetItemRef(inventoryType, index).icon;
@@ -277,6 +289,56 @@ public class CharacterController : MonoBehaviour
             }
         }
 
+        return result;
+    }
+
+    public ref Item GetHeldItemRef()
+    {
+        return ref inventory.GetHeldItemRef();
+    }
+
+    public InsertResult PickupItem(Item item, out List<int> hotbarIndexes, out List<int> backpackIndexes)
+    {
+        InsertResult result = inventory.PickupItem(item, out hotbarIndexes, out backpackIndexes);
+        foreach (int index in hotbarIndexes)
+            UpdateSlotUI(PlayerInventoryType.Hotbar, index);
+        foreach (int index in backpackIndexes)
+            UpdateSlotUI(PlayerInventoryType.Backpack, index);
+        return result;
+    }
+
+    public bool EquipArmor(Item item, ArmorPiece armorPiece, float protection)
+    {
+        bool result = inventory.EquipArmor(item, armorPiece, protection);
+        if (result)
+            UpdateSlotUI(PlayerInventoryType.Armor, (int)armorPiece);
+        return result;
+    }
+
+    public int GetStackSize(int index, PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar)
+    {
+        return inventory.GetStackSize(index, inventoryType);
+    }
+
+    public int GetTotalStackSize(Item item)
+    {
+        return inventory.GetTotalStackSize(item);
+    }
+
+    public int ConsumeFromStack(int stackToConsume, int index, PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar)
+    {
+        int result = inventory.ConsumeFromStack(stackToConsume, index, inventoryType);
+        UpdateSlotUI(inventoryType, index);
+        return result;
+    }
+
+    public int ConsumeFromTotalStack(Item item, int stackToConsume, out List<int> hotbarIndexes, out List<int> backpackIndexes)
+    {
+        int result = inventory.ConsumeFromTotalStack(item, stackToConsume, out hotbarIndexes, out backpackIndexes);
+        foreach (int index in hotbarIndexes)
+            UpdateSlotUI(PlayerInventoryType.Hotbar, index);
+        foreach (int index in backpackIndexes)
+            UpdateSlotUI(PlayerInventoryType.Backpack, index);
         return result;
     }
 

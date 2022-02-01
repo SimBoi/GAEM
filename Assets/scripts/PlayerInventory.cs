@@ -83,7 +83,7 @@ public class PlayerInventory : MonoBehaviour
     public ref Item GetHeldItemRef()
     {
         return ref hotbar.GetItemRef(heldItemIndex);
-    } //////////////////////////////////////// change all references to character controller
+    }
 
     public void LetGoOfHeldItem()
     {
@@ -115,7 +115,7 @@ public class PlayerInventory : MonoBehaviour
         if (hotbarResult == InsertResult.Partial || backpackResult == InsertResult.Partial)
             return InsertResult.Partial;
         return InsertResult.Failure;
-    } //////////////////////////////////////// change all references to character controller
+    }
 
     public InsertResult SetItemCopy(PlayerInventoryType inventoryType, Item item, int index, out Item insertedItem)
     {
@@ -141,7 +141,7 @@ public class PlayerInventory : MonoBehaviour
 
         totalArmorProtection += protection;
         return true;
-    } //////////////////////////////////////// change all references to character controller
+    }
 
     public int GetStackSize(int index, PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar)
     {
@@ -153,12 +153,12 @@ public class PlayerInventory : MonoBehaviour
         {
             return backpack.GetStackSize(index);
         }
-    } //////////////////////////////////////// change all references to character controller
+    }
 
     public int GetTotalStackSize(Item item)
     {
         return hotbar.GetTotalStackSize(item) + backpack.GetTotalStackSize(item);
-    } //////////////////////////////////////// change all references to character controller
+    }
 
     // returns number of items consumed
     public int ConsumeFromStack(int stackToConsume, int index, PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar)
@@ -175,20 +175,25 @@ public class PlayerInventory : MonoBehaviour
         {
             return backpack.ConsumeFromStack(index, stackToConsume);
         }
-    } //////////////////////////////////////// change all references to character controller
+    }
 
     // returns number of items consumed
-    public int ConsumeFromTotalStack(Item item, int stackToConsume)
+    public int ConsumeFromTotalStack(Item item, int stackToConsume, out List<int> hotbarIndexes, out List<int> backpackIndexes)
     {
         int consumedStack = 0;
+        bool consumedFromHeldItem = false;
         if (GetHeldItemRef() == item)
         {
             consumedStack += ConsumeFromStack(stackToConsume - consumedStack, heldItemIndex);
+            if (consumedStack != 0)
+                consumedFromHeldItem = true;
         }
-        consumedStack += hotbar.ConsumeFromTotalStack(item, stackToConsume - consumedStack);
-        consumedStack += backpack.ConsumeFromTotalStack(item, stackToConsume - consumedStack);
+        consumedStack += hotbar.ConsumeFromTotalStack(item, stackToConsume - consumedStack, out hotbarIndexes);
+        if (consumedFromHeldItem)
+            hotbarIndexes.Add(heldItemIndex);
+        consumedStack += backpack.ConsumeFromTotalStack(item, stackToConsume - consumedStack, out backpackIndexes);
         return consumedStack;
-    } //////////////////////////////////////// change all references to character controller
+    }
 
     public Item ThrowHeldItem(int itemCount)
     {

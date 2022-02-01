@@ -218,14 +218,18 @@ public class Inventory : MonoBehaviour
     }
 
     // returns number of items consumed
-    public int ConsumeFromTotalStack(Item item, int stackToConsume)
+    public int ConsumeFromTotalStack(Item item, int stackToConsume, out List<int> changedIndexes)
     {
+        changedIndexes = new List<int>();
         int consumedStack = 0;
         for (int i = 0; i < size; i++)
         {
             if (GetItemRef(i) == item)
             {
+                int prevConsumedStack = consumedStack;
                 consumedStack += ConsumeFromStack(i, stackToConsume - consumedStack);
+                if (prevConsumedStack != consumedStack)
+                    changedIndexes.Add(i);
                 if (consumedStack == stackToConsume)
                     break;
             }

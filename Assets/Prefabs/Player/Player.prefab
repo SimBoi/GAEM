@@ -326,7 +326,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   backpackSize: 0
-  hotbarSize: 45
+  hotbarSize: 23
   health: {fileID: 1828069676}
   heldItemPos: {fileID: 8080675862347148454}
   heldItemIndex: -1
@@ -389,7 +389,7 @@ MonoBehaviour:
   inventoryUI: {fileID: 4801825342254986078}
   clickedItem: {fileID: 0}
   inventorySlotUIPrefab: {fileID: 7684131997384950980, guid: 8579abc363a3dd7448aaa6d65bfe7f7b, type: 3}
-  maxInventoryRowSize: 10
+  maxInventoryRowSize: 4
   inventoryPadding: 100
   slotPadding: 25
   slotSideLength: 100

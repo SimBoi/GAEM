@@ -39,7 +39,7 @@ public class Gun : Item
 
     //gets set when calling an event
     private GameObject eventCaller = null;
-    private PlayerInventory inventory = null;
+    private CharacterController characterController = null;
     private MouseLook playerLook = null;
     private CharacterMovement playerMovement = null;
 
@@ -105,7 +105,7 @@ public class Gun : Item
     {
         this.eventCaller = eventCaller;
         CharacterController controller = eventCaller.GetComponent<CharacterController>();
-        this.inventory = controller.inventory;
+        this.characterController = controller;
         this.playerLook = controller.mouseLook;
         this.playerMovement = controller.characterMovement;
         this.raySpawnPoint = controller.gunRaySpawnPoint;
@@ -129,7 +129,7 @@ public class Gun : Item
             reloadTimer += Time.deltaTime;
             if (reloadTimer >= reloadTime)
             {
-                magazine += (ushort)inventory.ConsumeFromTotalStack(ammoType, magazineSize - magazine);
+                magazine += (ushort)characterController.ConsumeFromTotalStack(ammoType, magazineSize - magazine, out _, out _);
                 reloadTimer = 0;
                 isReloading = false;
             }
@@ -162,7 +162,7 @@ public class Gun : Item
 
     public void GetReloadKey()
     {
-        if (Input.GetButtonDown("Reload") && !isReloading && magazine < magazineSize && inventory.GetTotalStackSize(ammoType) > 0)
+        if (Input.GetButtonDown("Reload") && !isReloading && magazine < magazineSize && characterController.GetTotalStackSize(ammoType) > 0)
         {
             reloadTimer = 0;
             isReloading = true;

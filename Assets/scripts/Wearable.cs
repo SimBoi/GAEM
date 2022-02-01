@@ -35,7 +35,7 @@ public class Wearable : Item
 
     public override void SecondaryItemEvent(GameObject eventCaller)
     {
-        if (eventCaller.GetComponent<PlayerInventory>() != null)
-            eventCaller.GetComponent<PlayerInventory>().EquipArmor(this, armorPiece, armorStrength); ////////////////////// if item was held then destroy reference to this wearable
+        if (eventCaller.GetComponent<CharacterController>() != null)
+            eventCaller.GetComponent<CharacterController>().EquipArmor(this, armorPiece, armorStrength);
     }
 }
