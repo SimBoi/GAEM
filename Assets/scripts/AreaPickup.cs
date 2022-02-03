@@ -70,7 +70,7 @@ public class AreaPickup : Machine
         {
             if (inventories[0].IsSlotFilled(i))
             {
-                eventCaller.GetComponent<CharacterController>().PickupItem(inventories[0].GetItemRef(i), out _, out _);
+                eventCaller.GetComponent<PlayerInventory>().PickupItem(inventories[0].GetItemRef(i), out _, out _);
                 inventories[0].DeleteItem(i);
                 break;
             }

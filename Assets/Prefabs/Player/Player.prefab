@@ -400,8 +400,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d533366fc694d98489abff1d2c1bb645, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backpackSize: 0
-  hotbarSize: 24
+  backpackSize: 12
+  hotbarSize: 4
   health: {fileID: 1828069676}
   heldItemPos: {fileID: 8080675862347148454}
   heldItemIndex: -1

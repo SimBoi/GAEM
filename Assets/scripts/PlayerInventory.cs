@@ -6,8 +6,7 @@ public enum PlayerInventoryType
 {
     Backpack,
     Hotbar,
-    Armor,
-    Null
+    Armor
 }
 
 public enum ArmorPiece
@@ -101,7 +100,7 @@ public class PlayerInventory : MonoBehaviour
         heldItemIndex = -1;
     }
 
-    // returns true on success, false if inventory is full
+    // inserts a copy of the item into the hotbar/backpack and despawns it
     public InsertResult PickupItem(Item item, out List<int> hotbarIndexes, out List<int> backpackIndexes)
     {
         backpackIndexes = new List<int>();
@@ -129,17 +128,44 @@ public class PlayerInventory : MonoBehaviour
         }
         else
         {
-            return armor.SetItemCopy(item, index, out insertedItem);
+            return EquipArmor(item, (ArmorPiece)index, out insertedItem) ? InsertResult.Success : InsertResult.Failure;
+        }
+    }
+
+    public bool IsItemCompatible(PlayerInventoryType inventoryType, Item item, int index)
+    {
+        if (item == null)
+        {
+            return true;
+        }
+
+        if (inventoryType == PlayerInventoryType.Backpack)
+        {
+            return true;
+        }
+        else if (inventoryType == PlayerInventoryType.Hotbar)
+        {
+            return true;
+        }
+        else
+        {
+            if (item.GetType() != typeof(Wearable) || ((Wearable)item).armorPiece != (ArmorPiece)index)
+                return false;
+            return true;
         }
     }
 
     //returns true on success, false on failure
-    public bool EquipArmor(Item item, ArmorPiece armorPiece, float protection)
+    public bool EquipArmor(Item item, ArmorPiece armorPiece, out Item insertedItem)
     {
-        if (armor.PickupItem(item, out _, (int)armorPiece) == InsertResult.Failure)
+        insertedItem = null;
+
+        if (item.GetType() != typeof(Wearable) || ((Wearable)item).armorPiece != armorPiece)
+            return false;
+        if (armor.SetItemCopy(item, (int)armorPiece, out insertedItem) == InsertResult.Failure)
             return false;
 
-        totalArmorProtection += protection;
+        totalArmorProtection += ((Wearable)item).armorStrength;
         return true;
     }
 
@@ -286,11 +312,19 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-    public PlayerInventoryType GetInventoryType(Inventory inventory)
+    public bool DoesInventoryExist(Inventory inventory, out PlayerInventoryType inventoryType)
     {
-        if (inventory == backpack) return PlayerInventoryType.Backpack;
-        if (inventory == hotbar) return PlayerInventoryType.Hotbar;
-        if (inventory == hotbar) return PlayerInventoryType.Hotbar;
-        return PlayerInventoryType.Null;
+        inventoryType = PlayerInventoryType.Hotbar;
+
+        if (inventory == hotbar)
+            inventoryType = PlayerInventoryType.Hotbar;
+        else if (inventory == backpack)
+            inventoryType = PlayerInventoryType.Backpack;
+        else if (inventory == armor)
+            inventoryType = PlayerInventoryType.Armor;
+        else
+            return false;
+
+        return true;
     }
 }

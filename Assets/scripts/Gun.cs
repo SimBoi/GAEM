@@ -129,7 +129,7 @@ public class Gun : Item
             reloadTimer += Time.deltaTime;
             if (reloadTimer >= reloadTime)
             {
-                magazine += (ushort)characterController.ConsumeFromTotalStack(ammoType, magazineSize - magazine, out _, out _);
+                magazine += (ushort)characterController.inventory.ConsumeFromTotalStack(ammoType, magazineSize - magazine, out _, out _);
                 reloadTimer = 0;
                 isReloading = false;
             }
@@ -162,7 +162,7 @@ public class Gun : Item
 
     public void GetReloadKey()
     {
-        if (Input.GetButtonDown("Reload") && !isReloading && magazine < magazineSize && characterController.GetTotalStackSize(ammoType) > 0)
+        if (Input.GetButtonDown("Reload") && !isReloading && magazine < magazineSize && characterController.inventory.GetTotalStackSize(ammoType) > 0)
         {
             reloadTimer = 0;
             isReloading = true;

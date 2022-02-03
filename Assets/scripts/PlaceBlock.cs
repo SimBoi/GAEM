@@ -27,8 +27,8 @@ public class PlaceBlock : ItemEvent
                 //if (land.AddBlock(landBlockCoords, (short)block.blockID, Quaternion.LookRotation(hitInfo.normal)))
                 if (land.AddBlock(landBlockCoords, (short)block.blockID))
                 {
-                    CharacterController characterController = eventCaller.GetComponent<CharacterController>();
-                    characterController.ConsumeFromStack(1, characterController.inventory.heldItemIndex);
+                    PlayerInventory playerInventory = eventCaller.GetComponent<PlayerInventory>();
+                    playerInventory.ConsumeFromStack(1, playerInventory.heldItemIndex);
                 }
             }
         }

@@ -39,8 +39,8 @@ public class Portal : Machine
     {
         if (eventCaller.GetComponent<CharacterController>() != null)
         {
-            CharacterController characterController = eventCaller.GetComponent<CharacterController>();
-            int heldItemIndex = characterController.inventory.heldItemIndex;
+            PlayerInventory characterController = eventCaller.GetComponent<PlayerInventory>();
+            int heldItemIndex = characterController.heldItemIndex;
             if (heldItemIndex == -1) return;
             Item heldItem = characterController.GetHeldItemRef();
             if (heldItem == inputItem && characterController.GetStackSize(heldItemIndex) >= cost)

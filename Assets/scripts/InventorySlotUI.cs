@@ -10,8 +10,22 @@ public class InventorySlotUI : MonoBehaviour
     public CharacterController controller;
     public Image itemIcon;
 
+    public void LateUpdate()
+    {
+        if (inventory.IsSlotFilled(slotIndex))
+        {
+            itemIcon.sprite = inventory.GetItemRef(slotIndex).icon;
+            itemIcon.color = Color.white;
+        }
+        else
+        {
+            itemIcon.sprite = null;
+            itemIcon.color = Color.clear;
+        }
+    }
+
     public void OnClick()
     {
-        itemIcon.sprite = controller.OnClickInventorySlot(inventory, slotIndex);
+        controller.OnClickInventorySlot(inventory, slotIndex);
     }
 }
