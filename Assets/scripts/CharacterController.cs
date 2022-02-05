@@ -25,24 +25,25 @@ public class CharacterController : MonoBehaviour
     public Sprite handIcon;
     public GameObject inventoryUIPrefab;
     public GameObject inventorySlotUIPrefab;
+    public GameObject inventoriesUIParent;
     public GameObject playerInventoryUI;
     private Item clickedItem = null;
     public Image clickedItemUI;
     public float clickedItemOpacity;
     public int maxInventoryRowSize;
-    public int paddingBetweenInventories = 25;
-    public int paddingAtinventoryBorders = 100;
+    public int paddingBetweenInventoryGroups = 100;
+    public int paddingBetweenInventories = 100;
+    public int paddingAtInventoryBorders = 100;
     public int paddingBetweenSlots = 25;
-    public int slotSideLength;
-    public int clickedItemSideLength;
+    public float inventoryUIScale;
     private List<List<InventorySlotUI>> inventoriesUI = new List<List<InventorySlotUI>>();
+    private GameObject machineUI = null;
 
     public void Start()
     {
         foreach (PlayerInventoryType inventoryType in Enum.GetValues(typeof(PlayerInventoryType)))
             inventoriesUI.Add(new List<InventorySlotUI>());
-        float scale = clickedItemSideLength / (float)clickedItemUI.rectTransform.rect.width;
-        clickedItemUI.transform.localScale = new Vector3(scale, scale, scale);
+        clickedItemUI.transform.localScale = new Vector3(inventoryUIScale, inventoryUIScale, inventoryUIScale);
     }
 
     public void Update()
@@ -135,7 +136,7 @@ public class CharacterController : MonoBehaviour
 
         if (getInventoryDown)
         {
-            TogglePlayerInventoryUI();
+            ToggleInventoriesUI();
         }
 
         getThrowItemDown = false;
@@ -196,7 +197,10 @@ public class CharacterController : MonoBehaviour
 
     public void GeneratePlayerInventoryUI()
     {
-        float totalHeight = 0;
+        inventoriesUIParent.transform.localScale = new Vector3(1, 1, 1);
+
+        float totalHeight = paddingBetweenInventories;
+        float totalWidth = paddingBetweenInventories;
         List<Vector2> dimentions = new List<Vector2>();
         foreach (PlayerInventoryType inventoryType in Enum.GetValues(typeof(PlayerInventoryType)))
         {
@@ -209,25 +213,48 @@ public class CharacterController : MonoBehaviour
             List<InventorySlotUI> slotsUI;
             GameObject inventoryUI;
             dimentions.Add(GenerateInventoryUI(this.inventory.GetInventory(inventoryType), out slotsUI, out inventoryUI));
-            totalHeight += dimentions[(int)inventoryType].y;
+            totalHeight += dimentions[(int)inventoryType].y + paddingBetweenInventories;
+            totalWidth = Mathf.Max(totalWidth, dimentions[(int)inventoryType].x + paddingBetweenInventories);
             if (inventoryUI != null)
-            {
                 inventoriesUI[(int)inventoryType] = slotsUI;
-                inventoryUI.transform.parent = playerInventoryUI.transform;
-            }
         }
 
-        float doneHeight = 0;
+        float yPos = totalHeight / 2;
         foreach (PlayerInventoryType inventoryType in Enum.GetValues(typeof(PlayerInventoryType)))
         {
             if (inventoriesUI[(int)inventoryType].Count > 0)
             {
-                float yPos = (totalHeight / 2) - doneHeight - ((int)inventoryType * paddingBetweenInventories) - (dimentions[(int)inventoryType].y / 2);
+                yPos -= paddingBetweenInventories + (dimentions[(int)inventoryType].y / 2);
                 inventoriesUI[(int)inventoryType][0].transform.parent.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, yPos, 0);
-                doneHeight += dimentions[(int)inventoryType].y;
+                yPos -= (dimentions[(int)inventoryType].y / 2);
             }
         }
 
+        Vector2 size = new Vector2(totalWidth + 2 * paddingBetweenInventories, totalHeight);
+        playerInventoryUI.GetComponent<RectTransform>().sizeDelta = size;
+
+        inventoriesUIParent.transform.localScale = new Vector3(inventoryUIScale, inventoryUIScale, 1);
+    }
+
+    public void GenerateMachineUI(RectTransform machineUITemplate)
+    {
+        inventoriesUIParent.transform.localScale = new Vector3(1, 1, 1);
+        machineUI = Instantiate(machineUITemplate.gameObject, inventoriesUIParent.transform);
+        setupMachineSlotUI(machineUI.transform);
+        machineUI.SetActive(true);
+        machineUI.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0.5f);
+        machineUI.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0.5f);
+        machineUI.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
+        machineUI.GetComponent<RectTransform>().ForceUpdateRectTransforms();
+        inventoriesUIParent.transform.localScale = new Vector3(inventoryUIScale, inventoryUIScale, 1);
+    }
+
+    public void setupMachineSlotUI(Transform machineUIElement)
+    {
+        if (machineUIElement.GetComponent<MachineSlotUI>() != null)
+            machineUIElement.GetComponent<MachineSlotUI>().controller = this;
+        foreach (Transform child in machineUIElement)
+            setupMachineSlotUI(child);
     }
 
     public Vector2 GenerateInventoryUI(Inventory inventory, out List<InventorySlotUI> slotsUI, out GameObject inventoryUI)
@@ -238,10 +265,8 @@ public class CharacterController : MonoBehaviour
             inventoryUI = null;
             return Vector2.zero;
         }
-        inventoryUI = Instantiate(inventoryUIPrefab, canvas.transform);
-        inventoryUI.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
+        inventoryUI = Instantiate(inventoryUIPrefab, playerInventoryUI.transform);
         float slotPrefabSideLength = inventorySlotUIPrefab.GetComponent<RectTransform>().rect.width;
-        float inventoryScale = slotSideLength / slotPrefabSideLength;
         int rowSize = Mathf.Min(maxInventoryRowSize, inventory.size);
         int columnSize = Mathf.Max(1, 1 + (inventory.size - 1) / rowSize);
         Vector3 firstSlotPos = new Vector3(-((rowSize - 1) * slotPrefabSideLength + (rowSize - 1) * 2 * paddingBetweenSlots) / 2, ((columnSize - 1) * slotPrefabSideLength + (columnSize - 1) * 2 * paddingBetweenSlots) / 2, 0);
@@ -254,24 +279,43 @@ public class CharacterController : MonoBehaviour
             slot.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(firstSlotPos.x + (i % (int)rowSize) * (slotPrefabSideLength + 2 * paddingBetweenSlots), firstSlotPos.y - (i / (int)rowSize) * (slotPrefabSideLength + 2 * paddingBetweenSlots), 0);
             slotsUI.Add(slot);
         }
-        Vector2 size = new Vector2(rowSize * slotPrefabSideLength + 2f * paddingAtinventoryBorders + rowSize * 2 * paddingBetweenSlots, columnSize * slotPrefabSideLength + 2f * paddingAtinventoryBorders + columnSize * 2 * paddingBetweenSlots);
+        Vector2 size = new Vector2(rowSize * slotPrefabSideLength + 2 * paddingAtInventoryBorders + rowSize * 2 * paddingBetweenSlots, columnSize * slotPrefabSideLength + 2f * paddingAtInventoryBorders + columnSize * 2 * paddingBetweenSlots);
         inventoryUI.GetComponent<RectTransform>().sizeDelta = size;
-        inventoryUI.GetComponent<Transform>().localScale = new Vector3(inventoryScale, inventoryScale, 1);
-        return size * inventoryScale;
+        return size;
     }
 
-    public void TogglePlayerInventoryUI()
+    public void ToggleInventoriesUI(RectTransform machineUITemplate = null)
     {
-        playerInventoryUI.SetActive(!playerInventoryUI.activeSelf);
-        if (playerInventoryUI.activeSelf)
+        inventoriesUIParent.SetActive(!inventoriesUIParent.activeSelf);
+        if (inventoriesUIParent.activeSelf)
         {
             if (playerInventoryUI.transform.childCount == 0)
-            {
                 GeneratePlayerInventoryUI();
+
+            if (machineUITemplate != null)
+            {
+                GenerateMachineUI(machineUITemplate);
+                inventoriesUIParent.transform.localScale = new Vector3(1, 1, 1);
+                float height = machineUI.GetComponent<RectTransform>().sizeDelta.y + playerInventoryUI.GetComponent<RectTransform>().sizeDelta.y + paddingBetweenInventoryGroups;
+                float yPos = height / 2 - machineUI.GetComponent<RectTransform>().sizeDelta.y / 2;
+                machineUI.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, yPos, 0);
+                yPos -= machineUI.GetComponent<RectTransform>().sizeDelta.y / 2 + playerInventoryUI.GetComponent<RectTransform>().sizeDelta.y / 2 + paddingBetweenInventoryGroups;
+                playerInventoryUI.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, yPos, 0);
+                inventoriesUIParent.transform.localScale = new Vector3(inventoryUIScale, inventoryUIScale, 1);
+            }
+            else
+            {
+                playerInventoryUI.GetComponent<RectTransform>().anchoredPosition = Vector3.zero;
             }
         }
         else
         {
+            if (machineUI != null)
+            {
+                Destroy(machineUI);
+                machineUI = null;
+            }
+
             if (clickedItem != null)
             {
                 clickedItem.Spawn(false, transform.position);

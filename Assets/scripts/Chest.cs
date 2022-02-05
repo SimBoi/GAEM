@@ -18,14 +18,6 @@ public class Chest : Machine
 
     public override void PrimaryMachineEvent(GameObject eventCaller)
     {
-        for (int i = 0; i < inventories[0].size; i++)
-        {
-            if (inventories[0].IsSlotFilled(i))
-            {
-                eventCaller.GetComponent<PlayerInventory>().PickupItem(inventories[0].GetItemRef(i), out _, out _);
-                inventories[0].DeleteItem(i);
-                break;
-            }
-        }
+        eventCaller.GetComponent<CharacterController>().ToggleInventoriesUI(machineUI);
     }
 }

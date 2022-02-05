@@ -5,13 +5,16 @@ using UnityEngine.UI;
 
 public class InventorySlotUI : MonoBehaviour
 {
-    public Inventory inventory;
-    public int slotIndex;
-    public CharacterController controller;
     public Image itemIcon;
+    public int slotIndex;
+    [HideInInspector] public Inventory inventory;
+    [HideInInspector] public CharacterController controller;
 
     public void LateUpdate()
     {
+        if (inventory == null)
+            return;
+
         if (inventory.IsSlotFilled(slotIndex))
         {
             itemIcon.sprite = inventory.GetItemRef(slotIndex).icon;

@@ -13,8 +13,21 @@ public enum MachineEventType
 public class Machine : Block
 {
     public int[] inventorySizes;
+    public RectTransform machineUI;
     public Port[] ports;
     [HideInInspector] public Inventory[] inventories;
+
+    public void Start()
+    {
+        GameObject tmp = GenerateMachineUI();
+        if (tmp != null)
+            machineUI = tmp.GetComponent<RectTransform>();
+    }
+
+    public virtual GameObject GenerateMachineUI()
+    {
+        return null;
+    }
 
     public void CopyFrom(Machine source)
     {
