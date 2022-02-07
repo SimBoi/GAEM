@@ -2127,6 +2127,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 39983591, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 21.8
+      objectReference: {fileID: 0}
     - target: {fileID: 898818831, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: m_LocalPosition.y
       value: 3
@@ -2139,9 +2143,37 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138168, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: chunkSizeY
+      value: 16
+      objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138169, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: m_Name
       value: land
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: landSize
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: noiseScale
+      value: 0.07
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: perlinOffset.x
+      value: 99
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: perlinOffset.y
+      value: 256
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: perlinOffset.z
+      value: 51
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: randomizeNoiseOffset
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138175, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: m_RootOrder
