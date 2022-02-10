@@ -50,22 +50,45 @@ public class ChunkGenerator : MonoBehaviour
             Generate();
     }
 
-    public float hillHeight = 1;
+    public float surface_max = 1;
+    public float surface_min = 1;
     public bool randomizeNoiseOffset;
     public Vector3 perlinOffset;
     public float noiseScale = 1f;
+    public float landRadiusInChunks = 100;
 
     public void Generate()
-    { 
+    {
         if (randomizeNoiseOffset)
         {
             perlinOffset = new Vector3(Random.Range(0, 256), Random.Range(0, 256), Random.Range(0, 256));
         }
+        
+        float[,] distanceMap = new float[landSize * land.chunkSizeX, landSize * land.chunkSizeZ];
+        float landSizeInBlocks = landSize * land.chunkSizeX;
+
+        for (int x = 0; x < landSizeInBlocks; x++)
+        {
+            for (int z = 0; z < landSizeInBlocks; z++)
+            {
+                distanceMap[x, z] = Mathf.Min(
+                    Mathf.Abs(x - land.transform.position.x),
+                    Mathf.Abs(z - land.transform.position.z),
+                    Mathf.Abs(x - landSize * land.chunkSizeX),
+                    Mathf.Abs(z - landSize * land.chunkSizeZ)
+                    );
+            }
+        }
+        
         for (int x = 0; x < landSize * land.chunkSizeX; x++)
         {
             for (int z = 0; z < landSize * land.chunkSizeZ; z++)
             {
-                float generated = 10 * hillHeight * Mathf.PerlinNoise(((float)x + perlinOffset.x) * noiseScale, ((float)z + perlinOffset.z) * noiseScale);
+                float generated = Mathf.Abs(Mathf.PerlinNoise(((float)x + perlinOffset.x) * noiseScale, ((float)z + perlinOffset.z) * noiseScale));
+                generated = surface_min + (surface_max - surface_min) * generated;
+                generated = generated * distanceMap[x, z]/ (landSizeInBlocks/2);
+                generated = Mathf.Min(generated, land.chunkSizeY);
+                generated = Mathf.Max(generated, 0);    
                 land.AddBlock(Vector3Int.FloorToInt(new Vector3(x, generated % (land.chunkSizeY - 1), z)), (short)2);
             }
         }

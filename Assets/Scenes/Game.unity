@@ -2145,7 +2145,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138168, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: chunkSizeY
-      value: 16
+      value: 256
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138169, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: m_Name
@@ -2153,27 +2153,43 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: landSize
-      value: 10
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: hillHeight
-      value: 2.5
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: landRadius
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: noiseScale
-      value: 0.07
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: surface_max
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: surface_min
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: perlinOffset.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: perlinOffset.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: perlinOffset.z
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: landRadiusInChunks
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: randomizeNoiseOffset
