@@ -49,7 +49,8 @@ public class ChunkGenerator : MonoBehaviour
         else
             Generate();
     }
-  
+
+    public float hillHeight = 1;
     public bool randomizeNoiseOffset;
     public Vector3 perlinOffset;
     public float noiseScale = 1f;
@@ -64,7 +65,7 @@ public class ChunkGenerator : MonoBehaviour
         {
             for (int z = 0; z < landSize * land.chunkSizeZ; z++)
             {
-                float generated = 10 * Mathf.PerlinNoise(((float)x + perlinOffset.x) * noiseScale, ((float)z + perlinOffset.z) * noiseScale);
+                float generated = 10 * hillHeight * Mathf.PerlinNoise(((float)x + perlinOffset.x) * noiseScale, ((float)z + perlinOffset.z) * noiseScale);
                 land.AddBlock(Vector3Int.FloorToInt(new Vector3(x, generated % (land.chunkSizeY - 1), z)), (short)2);
             }
         }
