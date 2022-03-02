@@ -2152,8 +2152,16 @@ PrefabInstance:
       value: land
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: Gen3d
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: landSize
       value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: seaLevel
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: hillHeight
@@ -2176,6 +2184,10 @@ PrefabInstance:
       value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: surfaceRange
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: perlinOffset.x
       value: 0
       objectReference: {fileID: 0}
@@ -2188,12 +2200,32 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: maxSurfaceHeight
+      value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: landRadiusInChunks
       value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: minDistanceFromEdge
+      value: 400
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: randomizeNoiseOffset
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: terrainShapeFrequency
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: landShapeFrequencyPercentage
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: minDistanceFromEdgePercetage
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138175, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: m_RootOrder

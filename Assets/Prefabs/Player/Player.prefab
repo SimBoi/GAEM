@@ -361,7 +361,7 @@ MonoBehaviour:
   smoothedObject: {fileID: 2051427869652139019}
   eyeTransform: {fileID: 1949629238}
   relativeVelocity: {x: 0, y: 0, z: 0}
-  hasVoxelCollider: 0
+  hasVoxelCollider: 1
   height: 2
   eyeHeight: 0.8
   skinWidth: 0.1
@@ -1066,7 +1066,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &64139034572785493
 Transform:
   m_ObjectHideFlags: 0

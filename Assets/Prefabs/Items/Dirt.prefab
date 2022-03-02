@@ -105,11 +105,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8164447933402656398}
-  - component: {fileID: 6860486424626803581}
+  - component: {fileID: -8949647335920626501}
   - component: {fileID: -4544310723011560390}
   - component: {fileID: -30830473682224474}
   m_Layer: 0
-  m_Name: Dogecoin Minter
+  m_Name: Dirt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -131,7 +131,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6860486424626803581
+--- !u!114 &-8949647335920626501
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -140,11 +140,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 8164447933402656395}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3cf49432732155249ba7cfe9555936a9, type: 3}
+  m_Script: {fileID: 11500000, guid: 1a3b00f0dd32ed2429be728b20d3b39f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
-  name: Dogecoin Minter
+  itemPrefabs: {fileID: 0}
+  name: Dirt
   id: 4
   maxStackSize: 64
   maxDurability: 1
@@ -157,19 +157,13 @@ MonoBehaviour:
   timeSinceSpawn: 0
   isHeld: 0
   isDestroyed: 0
+  icon: {fileID: 0}
   ui: {fileID: 0}
   blockID: 1
   stiffness: 1
-  hasCustomMesh: 1
-  itemObject: {fileID: 1362694357772957986}
-  blockObject: {fileID: 9192997310427570172}
-  inventorySizes: 
-  inventories: []
-  PrimaryMachineEventType: 1
-  SecondaryMachineEventType: 0
-  inputItem: {fileID: 2483047963270853810, guid: 3ef3be445a1b0e34bb9a73c70cf4782b, type: 3}
-  outputItem: {fileID: 8181782636717577039, guid: a2858dbd47a742e4ba14469be27baed1, type: 3}
-  cost: 1
+  hasCustomMesh: 0
+  itemObject: {fileID: 0}
+  blockObject: {fileID: 0}
 --- !u!114 &-4544310723011560390
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -200,7 +194,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   eventType: 2
-  block: {fileID: 6860486424626803581}
+  block: {fileID: -8949647335920626501}
   maxDistance: 3
   prevCoords: {x: 0, y: 0, z: 0}
 --- !u!1 &9192997310427570172
