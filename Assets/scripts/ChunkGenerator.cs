@@ -99,7 +99,7 @@ public class ChunkGenerator : MonoBehaviour
         {
             for (int z = 0; z < blockSize; z++)
             {
-                float landShapeNoise = Mathf.Clamp(Mathf.PerlinNoise((float)(x + seed) * landShapeFrequency, (float)(z + seed) * landShapeFrequency), 0, 1);
+                float landShapeNoise = Mathf.Clamp(Mathf.PerlinNoise(seed + x * landShapeFrequency, seed + z * landShapeFrequency), 0, 1);
                 landShapeHeightMap[x, z] = landShapeNoise * minSurfaceHeight;
             }
         }
@@ -112,97 +112,103 @@ public class ChunkGenerator : MonoBehaviour
         {
             for (int z = 0; z < blockSize; z++)
             {
-                float terrainShapeNoise = Mathf.Clamp(Mathf.PerlinNoise((float)x * terrainShapeFrequency, (float)z * terrainShapeFrequency), 0, 1);
+                float terrainShapeNoise = Mathf.Clamp(Mathf.PerlinNoise(x * terrainShapeFrequency, z * terrainShapeFrequency), 0, 1);
                 terrainShapeHeightMap[x, z] = terrainShapeNoise * (float)surfaceRange;
             }
         }
     }
 
     public int worms = 1;
-    public int wormLength = 50;
-    public float wormNoiseFrequency = 1;
-    public int wormScale = 1;
+    public int wormMinLength = 25;
+    public int wormMaxLength = 50;
+    public int wormStepLength = 1;
+    public float wormHorizontalFrequency = 0.00824556f;
+    public float wormVerticalFrequency = 0.00824556f;
+    public float flatWormChance = 2;
+    public float maxWormHorizontalRotation = 0.15f;
+    public float maxWormVerticalRotation = 0.15f;
 
     //public void GenerateCave(Vector3Int chunkStartPosition, int chunkWidth, int maxHeight)
     public void GenerateCave()
     {
         int blockSize = landSize * land.chunkSizeX;
-        
+
         for (int wormCount = worms; wormCount > 0; wormCount--)
         {
-            int x = (int)Random.Range(0, blockSize);
-            int y = (int)Random.Range(0, blockSize);
-            int z = (int)Random.Range(0, blockSize);
+            Vector3 wormPos = new Vector3(Random.Range(0, blockSize), Random.Range(0, land.chunkSizeY), Random.Range(0, blockSize));
+            land.AddBlock(Vector3Int.FloorToInt(wormPos), (short)1);
+            int wormLength = Random.Range(wormMinLength, wormMaxLength);
 
-            float wx = Mathf.Clamp(Mathf.PerlinNoise(x * wormNoiseFrequency, x * wormNoiseFrequency), 0, 1);
-            float wy = Mathf.Clamp(Mathf.PerlinNoise(y * wormNoiseFrequency, y * wormNoiseFrequency), 0, 1);
-            float wz = Mathf.Clamp(Mathf.PerlinNoise(z * wormNoiseFrequency, z * wormNoiseFrequency), 0, 1);
-
-            for (int wormLengthCount = wormLength; wormLengthCount > 0; wormLengthCount--)
+            float yRotationSeed = Random.Range(0f, 10000f);
+            float xRotationSeed = Random.Range(0f, 10000f);
+            float yRotation = Random.Range(-Mathf.PI, Mathf.PI);
+            float xRotation = Random.Range(-Mathf.PI / 2, Mathf.PI / 2);
+            for (int wormStep = 0; wormStep < wormLength; wormStep += wormStepLength)
             {
-                Debug.Log(new Vector3Int(x, y, z));
+                yRotation += PerlinNoise(wormStep, 0, yRotationSeed, maxWormHorizontalRotation, wormHorizontalFrequency, 3) - maxWormHorizontalRotation / 2;
+                xRotation += PerlinNoise(wormStep, 0, xRotationSeed, maxWormVerticalRotation, wormVerticalFrequency, 3) - maxWormVerticalRotation / 2;
+                if (yRotation > Mathf.PI) yRotation -= 2 * Mathf.PI;
+                else if (yRotation < -Mathf.PI) yRotation += 2 * Mathf.PI;
+                if (xRotation > Mathf.PI) xRotation -= 2 * Mathf.PI;
+                else if (xRotation < -Mathf.PI) xRotation += 2 * Mathf.PI;
 
-                wx = Mathf.Clamp(Mathf.PerlinNoise(x * wx * wormNoiseFrequency, x * (1 / wx) * wormNoiseFrequency), 0, 1);
-                wy = Mathf.Clamp(Mathf.PerlinNoise(y * wy * wormNoiseFrequency, y * (1 / wy) * wormNoiseFrequency), 0, 1);
-                wz = Mathf.Clamp(Mathf.PerlinNoise(z * wz * wormNoiseFrequency, z * (1 / wz) * wormNoiseFrequency), 0, 1);
+                Vector3 stepDirection = new Vector3(
+                    Mathf.Sin(yRotation) * Mathf.Cos(xRotation),
+                    Mathf.Sin(xRotation),
+                    Mathf.Cos(yRotation) * Mathf.Cos(xRotation)
+                );
+                stepDirection.y = Mathf.Pow(Mathf.Abs(stepDirection.y), flatWormChance) * Mathf.Sign(stepDirection.y);
+                wormPos += stepDirection.normalized * wormStepLength;
 
-                x = Mathf.Clamp(WormMovement(wx, x), 0, blockSize);
-                y = Mathf.Clamp(WormMovement(wy, y), 0, 256);
-                z = Mathf.Clamp(WormMovement(wz, z), 0, blockSize);
-
-                for (int xcord = x - (int)wormScale / 2; xcord <= x + wormScale / 2; xcord++)
-                {
-                    for (int ycord = y - (int)wormScale / 2; ycord <= y + wormScale / 2; ycord++)
-                    {
-                        for (int zcord = z - (int)wormScale / 2; zcord <= z + wormScale / 2; zcord++)
-                        {
-                            Vector3Int coordVector = new Vector3Int(Mathf.Clamp(xcord,0, blockSize), Mathf.Clamp(ycord, 0, blockSize), Mathf.Clamp(zcord, 0, blockSize));
-                            land.AddBlock(coordVector, (short)2);
-                        }
-                    }
-                }
+                Vector3Int wormPosInt = Vector3Int.FloorToInt(wormPos);
+                if (wormPosInt.y >= land.chunkSizeY || wormPosInt.x >= blockSize || wormPosInt.z >= blockSize || wormPosInt.y < 0 || wormPosInt.x < 0 || wormPosInt.z < 0)
+                    break;
+                land.AddBlock(wormPosInt, (short)2);
             }
         }
     }
 
-    public int WormMovement(float noise , int currPos)
+    public float PerlinNoise(float x, float y, float seed, float amplitude, float frequency, int octaves)
     {
-        if (noise > 0.5) return currPos + 1;
-        if (noise <= 0.5) return currPos - 1;
-        return currPos - 1;
+        float noise = 0;
+        for (int i = 1; i <= octaves; i++)
+        {
+            noise += Mathf.PerlinNoise(frequency * i * x + i * seed, frequency * i * y + i * seed) / i;
+        }
+        return Mathf.Clamp(noise, 0, 1) * amplitude;
     }
 
-        /*    public void Generate3d()
+    /*    public void Generate3d()
+        {
+            if (randomizeNoiseOffset)
             {
-                if (randomizeNoiseOffset)
+                perlinOffset = new Vector3(Random.Range(0, 9999), Random.Range(0, 9999), Random.Range(0, 9999));
+            }
+            for (int x = 0; x < blockSize; x++)
+            {
+                for (int y = 0; y < landSize * land.chunkSizeY; y++)
                 {
-                    perlinOffset = new Vector3(Random.Range(0, 9999), Random.Range(0, 9999), Random.Range(0, 9999));
-                }
-                for (int x = 0; x < blockSize; x++)
-                {
-                    for (int y = 0; y < landSize * land.chunkSizeY; y++)
+                    for (int z = 0; z < landSize * land.chunkSizeZ; z++)
                     {
-                        for (int z = 0; z < landSize * land.chunkSizeZ; z++)
-                        {
-                            float generated = GenerateNoise(((float)x + perlinOffset.x) * noiseScale, ((float)y + perlinOffset.y)* noiseScale, ((float)z + perlinOffset.z) * noiseScale);
-                            if (generated > 0.5f) land.AddBlock(new Vector3Int(x,y,z), (short)2);
-                        }
+                        float generated = GenerateNoise(((float)x + perlinOffset.x) * noiseScale, ((float)y + perlinOffset.y)* noiseScale, ((float)z + perlinOffset.z) * noiseScale);
+                        if (generated > 0.5f) land.AddBlock(new Vector3Int(x,y,z), (short)2);
                     }
                 }
             }
+        }
 
-            public float GenerateNoise(float x, float y, float z)
-            {
-                float XY = Mathf.PerlinNoise(x, y);
-                float YZ = Mathf.PerlinNoise(y, z);
-                float ZX = Mathf.PerlinNoise(z, x);
+        public float GenerateNoise(float x, float y, float z)
+        {
+            float XY = PerlinNoise(x, y);
+            float YZ = PerlinNoise(y, z);
+            float ZX = PerlinNoise(z, x);
 
-                float YX = Mathf.PerlinNoise(y, z);
-                float ZY = Mathf.PerlinNoise(z, y);
-                float XZ = Mathf.PerlinNoise(x, z);
+            float YX = PerlinNoise(y, z);
+            float ZY = PerlinNoise(z, y);
+            float XZ = PerlinNoise(x, z);
 
-                float val = (XY + YZ + ZX + YX + ZY + XZ)/6f;
-                return val;
-            }
-        */
-    }
+            float val = (XY + YZ + ZX + YX + ZY + XZ)/6f;
+            return val;
+        }
+    */
+}
