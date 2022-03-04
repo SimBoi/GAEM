@@ -127,6 +127,9 @@ public class ChunkGenerator : MonoBehaviour
     public float flatWormChance = 2;
     public float maxWormHorizontalRotation = 0.15f;
     public float maxWormVerticalRotation = 0.15f;
+    public int minWormRadius = 1;
+    public int maxWormRadius = 4;
+    public float wormRadiusFrequency = 0.00824556f;
 
     //public void GenerateCave(Vector3Int chunkStartPosition, int chunkWidth, int maxHeight)
     public void GenerateCave()
@@ -158,7 +161,19 @@ public class ChunkGenerator : MonoBehaviour
                 Vector3Int wormPosInt = Vector3Int.FloorToInt(wormPos);
                 if (wormPosInt.y >= land.chunkSizeY || wormPosInt.x >= blockSize || wormPosInt.z >= blockSize || wormPosInt.y < 0 || wormPosInt.x < 0 || wormPosInt.z < 0)
                     break;
-                land.AddBlock(wormPosInt, (short)2);
+
+                int radius = (int)(PerlinNoise(wormStep, 0, seed + 135.79f, maxWormRadius - minWormRadius, wormRadiusFrequency, 2) + minWormRadius);
+                for (int r = 0; r <= radius; r++)
+                    for (float theta = -Mathf.PI/2; theta <= Mathf.PI/2; theta += 0.3f)
+                        for (float phi = -Mathf.PI; phi <= Mathf.PI; phi += 0.3f)
+                        {
+                            Vector3 sphereCoords = new Vector3(
+                                Mathf.Sin(phi) * Mathf.Cos(theta),
+                                Mathf.Sin(theta),
+                                Mathf.Cos(phi) * Mathf.Cos(theta)
+                            ) * r;
+                            land.AddBlock(wormPosInt + Vector3Int.FloorToInt(sphereCoords), (short)2);
+                        }
             }
         }
     }
