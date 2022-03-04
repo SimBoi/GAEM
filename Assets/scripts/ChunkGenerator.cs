@@ -50,6 +50,7 @@ public class ChunkGenerator : MonoBehaviour
     public int maxSurfaceHeight;
     public int surfaceRange;
     public int seaLevel;
+    public float seed;
 
     public async void Generate()
     {
@@ -92,7 +93,6 @@ public class ChunkGenerator : MonoBehaviour
 
     public async Task CalcLandShapeHeightMap(int blockSize, float[,] landShapeHeightMap)
     {
-        int seed = Random.Range(1000, 10000);
         float landShapeFrequency = landShapeFrequencyPercentage * 5 / blockSize;
         int minSurfaceHeight = maxSurfaceHeight - surfaceRange;
         for (int x = 0; x < blockSize; x++)
@@ -142,22 +142,17 @@ public class ChunkGenerator : MonoBehaviour
             float yRotationSeed = Random.Range(0f, 10000f);
             float xRotationSeed = Random.Range(0f, 10000f);
             float yRotation = Random.Range(-Mathf.PI, Mathf.PI);
-            float xRotation = Random.Range(-Mathf.PI / 2, Mathf.PI / 2);
+            float xRotation = 0;//Random.Range(-Mathf.PI / 2, Mathf.PI / 2);
             for (int wormStep = 0; wormStep < wormLength; wormStep += wormStepLength)
             {
-                yRotation += PerlinNoise(wormStep, 0, yRotationSeed, maxWormHorizontalRotation, wormHorizontalFrequency, 3) - maxWormHorizontalRotation / 2;
-                xRotation += PerlinNoise(wormStep, 0, xRotationSeed, maxWormVerticalRotation, wormVerticalFrequency, 3) - maxWormVerticalRotation / 2;
-                if (yRotation > Mathf.PI) yRotation -= 2 * Mathf.PI;
-                else if (yRotation < -Mathf.PI) yRotation += 2 * Mathf.PI;
-                if (xRotation > Mathf.PI) xRotation -= 2 * Mathf.PI;
-                else if (xRotation < -Mathf.PI) xRotation += 2 * Mathf.PI;
-
+                yRotation += PerlinNoise(wormStep, 0, seed, maxWormHorizontalRotation, wormHorizontalFrequency, 3) - PerlinNoise(wormStep, 0, seed + 123.45f, maxWormHorizontalRotation, wormHorizontalFrequency, 3);
+                xRotation = PerlinNoise(wormStep, 0, seed + 678.91f, maxWormVerticalRotation, wormVerticalFrequency, 3) - PerlinNoise(wormStep, 0, seed + 234.56f, maxWormVerticalRotation, wormVerticalFrequency, 3);
+                xRotation = Mathf.Pow(Mathf.Abs(xRotation), flatWormChance) * Mathf.Sign(xRotation);
                 Vector3 stepDirection = new Vector3(
                     Mathf.Sin(yRotation) * Mathf.Cos(xRotation),
                     Mathf.Sin(xRotation),
                     Mathf.Cos(yRotation) * Mathf.Cos(xRotation)
                 );
-                stepDirection.y = Mathf.Pow(Mathf.Abs(stepDirection.y), flatWormChance) * Mathf.Sign(stepDirection.y);
                 wormPos += stepDirection.normalized * wormStepLength;
 
                 Vector3Int wormPosInt = Vector3Int.FloorToInt(wormPos);
