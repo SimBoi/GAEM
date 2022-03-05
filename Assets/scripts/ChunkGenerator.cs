@@ -50,7 +50,7 @@ public class ChunkGenerator : MonoBehaviour
     public int maxSurfaceHeight;
     public int surfaceRange;
     public int seaLevel;
-    public float seed;
+    public long seed;
 
     public async void Generate()
     {
@@ -99,8 +99,7 @@ public class ChunkGenerator : MonoBehaviour
         {
             for (int z = 0; z < blockSize; z++)
             {
-                float landShapeNoise = Mathf.Clamp(Mathf.PerlinNoise(seed + x * landShapeFrequency, seed + z * landShapeFrequency), 0, 1);
-                landShapeHeightMap[x, z] = landShapeNoise * minSurfaceHeight;
+                landShapeHeightMap[x, z] = Noise2D(x, z, seed, minSurfaceHeight / 2, landShapeFrequency, 1) + minSurfaceHeight / 2;
             }
         }
     }
@@ -112,8 +111,7 @@ public class ChunkGenerator : MonoBehaviour
         {
             for (int z = 0; z < blockSize; z++)
             {
-                float terrainShapeNoise = Mathf.Clamp(Mathf.PerlinNoise(x * terrainShapeFrequency, z * terrainShapeFrequency), 0, 1);
-                terrainShapeHeightMap[x, z] = terrainShapeNoise * (float)surfaceRange;
+                terrainShapeHeightMap[x, z] = Noise2D(x, z, seed, surfaceRange / 2, terrainShapeFrequency, 3) + surfaceRange / 2;
             }
         }
     }
@@ -148,8 +146,8 @@ public class ChunkGenerator : MonoBehaviour
             float xRotation = 0;//Random.Range(-Mathf.PI / 2, Mathf.PI / 2);
             for (int wormStep = 0; wormStep < wormLength; wormStep += wormStepLength)
             {
-                yRotation += PerlinNoise(wormStep, 0, seed, maxWormHorizontalRotation, wormHorizontalFrequency, 3) - PerlinNoise(wormStep, 0, seed + 123.45f, maxWormHorizontalRotation, wormHorizontalFrequency, 3);
-                xRotation = PerlinNoise(wormStep, 0, seed + 678.91f, maxWormVerticalRotation, wormVerticalFrequency, 3) - PerlinNoise(wormStep, 0, seed + 234.56f, maxWormVerticalRotation, wormVerticalFrequency, 3);
+                yRotation += Noise2D(wormStep, 0, seed, maxWormHorizontalRotation, wormHorizontalFrequency, 3);
+                xRotation = Noise2D(wormStep, 0, seed + 123, maxWormVerticalRotation, wormVerticalFrequency, 3);
                 xRotation = Mathf.Pow(Mathf.Abs(xRotation), flatWormChance) * Mathf.Sign(xRotation);
                 Vector3 stepDirection = new Vector3(
                     Mathf.Sin(yRotation) * Mathf.Cos(xRotation),
@@ -162,7 +160,7 @@ public class ChunkGenerator : MonoBehaviour
                 if (wormPosInt.y >= land.chunkSizeY || wormPosInt.x >= blockSize || wormPosInt.z >= blockSize || wormPosInt.y < 0 || wormPosInt.x < 0 || wormPosInt.z < 0)
                     break;
 
-                int radius = (int)(PerlinNoise(wormStep, 0, seed + 135.79f, maxWormRadius - minWormRadius, wormRadiusFrequency, 2) + minWormRadius);
+                int radius = (int)(Noise2D(wormStep, 0, seed + 456, maxWormRadius - minWormRadius, wormRadiusFrequency, 2) + minWormRadius);
                 for (int r = 0; r <= radius; r++)
                     for (float theta = -Mathf.PI/2; theta <= Mathf.PI/2; theta += 0.3f)
                         for (float phi = -Mathf.PI; phi <= Mathf.PI; phi += 0.3f)
@@ -178,14 +176,17 @@ public class ChunkGenerator : MonoBehaviour
         }
     }
 
-    public float PerlinNoise(float x, float y, float seed, float amplitude, float frequency, int octaves)
+    public float Noise2D(float x, float y, long seed, float amplitude, float frequency, int octaves)
     {
         float noise = 0;
+        float fractalAmplitude = 0;
         for (int i = 1; i <= octaves; i++)
         {
-            noise += Mathf.PerlinNoise(frequency * i * x + i * seed, frequency * i * y + i * seed) / i;
+            float currentAmplitude = Mathf.Pow(0.5f, i-1);
+            noise += OpenSimplex2S.Noise2(i * seed, frequency * i * x, frequency * i * y) * currentAmplitude;
+            fractalAmplitude += currentAmplitude;
         }
-        return Mathf.Clamp(noise, 0, 1) * amplitude;
+        return Mathf.Clamp(noise, -fractalAmplitude, fractalAmplitude) * amplitude / fractalAmplitude;
     }
 
     /*    public void Generate3d()
