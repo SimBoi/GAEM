@@ -37,7 +37,7 @@ public class Land : MonoBehaviour
         return chunk.RemoveBlock(LandToChunkCoords(coords), spawnItem);
     }
 
-    public bool AddBlock(Vector3Int coords, short blockID, Quaternion rotation = default)
+    public bool AddBlock(Vector3Int coords, short blockID, Quaternion rotation = default, bool generateMesh = true)
     {
         if (coords.y > chunkSizeY) return false;
 
@@ -46,7 +46,15 @@ public class Land : MonoBehaviour
             InitChunk(chunkIndex);
         Chunk chunk = chunks[chunkIndex].GetComponent<Chunk>();
 
-        return chunk.AddBlock(coords, blockID, rotation);
+        return chunk.AddBlock(coords, blockID, rotation, generateMesh);
+    }
+
+    public void regenerateMesh()
+    {
+        foreach (KeyValuePair<Vector2Int, GameObject> chunk in chunks)
+        {
+            chunk.Value.GetComponent<Chunk>().requiresMeshGeneration = true;
+        }
     }
 
     // message[0] = (Land)return

@@ -61,16 +61,6 @@ public class Chunk : MonoBehaviour
         meshFilter = GetComponent<MeshFilter>();
 
         blockIDs = new short[sizeX, sizeY, sizeZ];
-        for (int x = 0; x < sizeX; x++)
-        {
-            for (int y = 0; y < sizeY; y++)
-            {
-                for (int z = 0; z < sizeZ; z++)
-                {
-                    blockIDs[x, y, z] = 0;
-                }
-            }
-        }
 
         requiresMeshGeneration = true;
     }
@@ -99,12 +89,12 @@ public class Chunk : MonoBehaviour
             {
                 for (int z = 0; z < sizeZ; z++)
                 {
-                    Vector3Int offset = new Vector3Int(x, y, z);
                     if (blockIDs[x, y, z] == 0) continue;
 
                     Vector3Int pos = new Vector3Int(x, y, z);
                     if (!itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh)
                     {
+                        Vector3Int offset = new Vector3Int(x, y, z);
                         GenerateBlock_Top(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Up), pos);
                         GenerateBlock_Right(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Right), pos);
                         GenerateBlock_Left(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Left), pos);
@@ -321,11 +311,13 @@ public class Chunk : MonoBehaviour
         return false;
     }
 
-    public bool AddBlock(Vector3Int landPos, short blockID, Quaternion rotation = default)
+    public bool AddBlock(Vector3Int landPos, short blockID, Quaternion rotation = default, bool generateMesh = true)
     {
         Vector3Int pos = new Vector3Int(landPos.x % sizeX, landPos.y % sizeY, landPos.z % sizeZ);
         if (blockIDs[pos.x, pos.y, pos.z] == 0)
         {
+            if (blockID == 0) return true;
+
             blockIDs[pos.x, pos.y, pos.z] = blockID;
             if (itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh)
             {
@@ -333,7 +325,7 @@ public class Chunk : MonoBehaviour
                 Block customBlock = (Block)itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().PlaceCustomBlock(spawnPos, rotation, this, landPos);
                 customBlocks.Add(pos, customBlock);
             }
-            else
+            else if (generateMesh)
             {
                 requiresMeshGeneration = true;
             }

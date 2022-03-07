@@ -2144,12 +2144,24 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138168, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: chunkSizeX
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138168, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: chunkSizeY
       value: 256
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138168, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: chunkSizeZ
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138169, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: m_Name
       value: land
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: seed
+      value: 1006
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: Gen3d
@@ -2157,7 +2169,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: worms
-      value: 10
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: GenCave
@@ -2165,7 +2177,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: landSize
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: seaLevel
@@ -2196,8 +2208,12 @@ PrefabInstance:
       value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: maxWormRadius
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: minWormRadius
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: wormMaxLength
@@ -2242,6 +2258,10 @@ PrefabInstance:
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: minDistanceFromEdge
       value: 400
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: terrainShapeOctaves
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: randomizeNoiseOffset
