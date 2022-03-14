@@ -127,7 +127,9 @@ public class Chunk : MonoBehaviour
         vertices.Add(new Vector3(1, 1, 1) + offset);
         vertices.Add(new Vector3(1, 1, 0) + offset);
         vertices.Add(new Vector3(0, 1, 0) + offset);
+        vertices.Add(new Vector3(Random.Range(0.2f, 0.8f), Random.Range(0.8f, 1.1f), Random.Range(0.2f, 0.8f)) + offset);
 
+        normals.Add(Vector3.up);
         normals.Add(Vector3.up);
         normals.Add(Vector3.up);
         normals.Add(Vector3.up);
@@ -137,14 +139,24 @@ public class Chunk : MonoBehaviour
         uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
         uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
         uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
+        uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
 
         indices.Add(currentIndex + 0);
         indices.Add(currentIndex + 1);
+        indices.Add(currentIndex + 4);
+
+        indices.Add(currentIndex + 1);
         indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 0);
+        indices.Add(currentIndex + 4);
+
+        indices.Add(currentIndex + 4);
         indices.Add(currentIndex + 2);
         indices.Add(currentIndex + 3);
-        currentIndex += 4;
+
+        indices.Add(currentIndex + 0);
+        indices.Add(currentIndex + 4);
+        indices.Add(currentIndex + 3);
+        currentIndex += 5;
     }
 
     void GenerateBlock_Right(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
