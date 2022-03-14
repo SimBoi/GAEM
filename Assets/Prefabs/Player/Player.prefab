@@ -365,7 +365,7 @@ MonoBehaviour:
   height: 2
   eyeHeight: 0.8
   skinWidth: 0.1
-  groundMaxDistance: 0.02
+  groundMaxDistance: 0.1
   slopeLimit: 36
   groundedState: 0
   stance: 0

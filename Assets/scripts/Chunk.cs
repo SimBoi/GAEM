@@ -127,7 +127,8 @@ public class Chunk : MonoBehaviour
         vertices.Add(new Vector3(1, 1, 1) + offset);
         vertices.Add(new Vector3(1, 1, 0) + offset);
         vertices.Add(new Vector3(0, 1, 0) + offset);
-        vertices.Add(new Vector3(Random.Range(0.2f, 0.8f), Random.Range(0.8f, 1.1f), Random.Range(0.2f, 0.8f)) + offset);
+        Vector2 midUV = new Vector2(Random.Range(0.2f, 0.8f), Random.Range(0.2f, 0.8f));
+        vertices.Add(new Vector3(midUV.x, Random.Range(0.9f, 1.2f), midUV.y) + offset);
 
         normals.Add(Vector3.up);
         normals.Add(Vector3.up);
@@ -139,7 +140,7 @@ public class Chunk : MonoBehaviour
         uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
         uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
         uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
-        uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
+        uvs.Add(new Vector2(blockUVs.xMin + (blockUVs.xMax - blockUVs.xMin) * midUV.x, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midUV.y));
 
         indices.Add(currentIndex + 0);
         indices.Add(currentIndex + 1);
@@ -156,6 +157,7 @@ public class Chunk : MonoBehaviour
         indices.Add(currentIndex + 0);
         indices.Add(currentIndex + 4);
         indices.Add(currentIndex + 3);
+
         currentIndex += 5;
     }
 
@@ -166,7 +168,10 @@ public class Chunk : MonoBehaviour
         vertices.Add(new Vector3(1, 1, 1) + offset);
         vertices.Add(new Vector3(1, 0, 1) + offset);
         vertices.Add(new Vector3(1, 0, 0) + offset);
+        Vector2 midUV = new Vector2(Random.Range(0.2f, 0.8f), Random.Range(0.2f, 0.8f));
+        vertices.Add(new Vector3(Random.Range(0.9f, 1.2f), midUV.x, midUV.y) + offset);
 
+        normals.Add(Vector3.right);
         normals.Add(Vector3.right);
         normals.Add(Vector3.right);
         normals.Add(Vector3.right);
@@ -176,14 +181,24 @@ public class Chunk : MonoBehaviour
         uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
         uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
         uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
+        uvs.Add(new Vector2(blockUVs.xMin + (blockUVs.xMax - blockUVs.xMin) * midUV.y, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midUV.x));
 
         indices.Add(currentIndex + 0);
         indices.Add(currentIndex + 1);
+        indices.Add(currentIndex + 4);
+
+        indices.Add(currentIndex + 1);
         indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 0);
-        indices.Add(currentIndex + 2);
+        indices.Add(currentIndex + 4);
+
         indices.Add(currentIndex + 3);
-        currentIndex += 4;
+        indices.Add(currentIndex + 4);
+        indices.Add(currentIndex + 2);
+
+        indices.Add(currentIndex + 3);
+        indices.Add(currentIndex + 0);
+        indices.Add(currentIndex + 4);
+        currentIndex += 5;
     }
 
     void GenerateBlock_Left(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
@@ -193,7 +208,10 @@ public class Chunk : MonoBehaviour
         vertices.Add(new Vector3(0, 1, 0) + offset);
         vertices.Add(new Vector3(0, 0, 0) + offset);
         vertices.Add(new Vector3(0, 0, 1) + offset);
+        Vector2 midUV = new Vector2(Random.Range(0.2f, 0.8f), Random.Range(0.2f, 0.8f));
+        vertices.Add(new Vector3(Random.Range(-0.2f, 0.1f), midUV.x, midUV.y) + offset);
 
+        normals.Add(Vector3.left);
         normals.Add(Vector3.left);
         normals.Add(Vector3.left);
         normals.Add(Vector3.left);
@@ -203,14 +221,25 @@ public class Chunk : MonoBehaviour
         uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
         uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
         uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
+        uvs.Add(new Vector2(blockUVs.xMax - (blockUVs.xMax - blockUVs.xMin) * midUV.y, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midUV.x));
 
         indices.Add(currentIndex + 0);
         indices.Add(currentIndex + 1);
+        indices.Add(currentIndex + 4);
+
+        indices.Add(currentIndex + 1);
         indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 0);
+        indices.Add(currentIndex + 4);
+
         indices.Add(currentIndex + 2);
         indices.Add(currentIndex + 3);
-        currentIndex += 4;
+        indices.Add(currentIndex + 4);
+
+        indices.Add(currentIndex + 3);
+        indices.Add(currentIndex + 0);
+        indices.Add(currentIndex + 4);
+
+        currentIndex += 5;
     }
 
     void GenerateBlock_Forward(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
@@ -220,7 +249,10 @@ public class Chunk : MonoBehaviour
         vertices.Add(new Vector3(0, 1, 1) + offset);
         vertices.Add(new Vector3(0, 0, 1) + offset);
         vertices.Add(new Vector3(1, 0, 1) + offset);
+        Vector2 midUV = new Vector2(Random.Range(0.2f, 0.8f), Random.Range(0.2f, 0.8f));
+        vertices.Add(new Vector3( midUV.x, midUV.y, Random.Range(0.9f, 1.2f)) + offset);
 
+        normals.Add(Vector3.forward);
         normals.Add(Vector3.forward);
         normals.Add(Vector3.forward);
         normals.Add(Vector3.forward);
@@ -230,14 +262,25 @@ public class Chunk : MonoBehaviour
         uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
         uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
         uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
+        uvs.Add(new Vector2(blockUVs.xMax - (blockUVs.xMax - blockUVs.xMin) * midUV.x, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midUV.y));
 
         indices.Add(currentIndex + 0);
         indices.Add(currentIndex + 1);
+        indices.Add(currentIndex + 4);
+
+        indices.Add(currentIndex + 1);
         indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 0);
+        indices.Add(currentIndex + 4);
+
+        indices.Add(currentIndex + 4);
         indices.Add(currentIndex + 2);
         indices.Add(currentIndex + 3);
-        currentIndex += 4;
+
+        indices.Add(currentIndex + 0);
+        indices.Add(currentIndex + 4);
+        indices.Add(currentIndex + 3);
+
+        currentIndex += 5;
     }
 
     void GenerateBlock_Back(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
@@ -247,7 +290,10 @@ public class Chunk : MonoBehaviour
         vertices.Add(new Vector3(1, 1, 0) + offset);
         vertices.Add(new Vector3(1, 0, 0) + offset);
         vertices.Add(new Vector3(0, 0, 0) + offset);
+        Vector2 midUV = new Vector2(Random.Range(0.2f, 0.8f), Random.Range(0.2f, 0.8f));
+        vertices.Add(new Vector3(midUV.x, midUV.y, Random.Range(-0.2f, 0.1f)) + offset);
 
+        normals.Add(Vector3.back);
         normals.Add(Vector3.back);
         normals.Add(Vector3.back);
         normals.Add(Vector3.back);
@@ -257,14 +303,25 @@ public class Chunk : MonoBehaviour
         uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
         uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
         uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
+        uvs.Add(new Vector2(blockUVs.xMin + (blockUVs.xMax - blockUVs.xMin) * midUV.x, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midUV.y));
 
         indices.Add(currentIndex + 0);
         indices.Add(currentIndex + 1);
+        indices.Add(currentIndex + 4);
+
+        indices.Add(currentIndex + 1);
         indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 0);
+        indices.Add(currentIndex + 4);
+
+        indices.Add(currentIndex + 4);
         indices.Add(currentIndex + 2);
         indices.Add(currentIndex + 3);
-        currentIndex += 4;
+
+        indices.Add(currentIndex + 0);
+        indices.Add(currentIndex + 4);
+        indices.Add(currentIndex + 3);
+
+        currentIndex += 5;
     }
 
     void GenerateBlock_Bottom(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
@@ -274,7 +331,10 @@ public class Chunk : MonoBehaviour
         vertices.Add(new Vector3(1, 0, 0) + offset);
         vertices.Add(new Vector3(1, 0, 1) + offset);
         vertices.Add(new Vector3(0, 0, 1) + offset);
+        Vector2 midUV = new Vector2(Random.Range(0.2f, 0.8f), Random.Range(0.2f, 0.8f));
+        vertices.Add(new Vector3(midUV.x, Random.Range(-0.2f, 0.1f), midUV.y) + offset);
 
+        normals.Add(Vector3.down);
         normals.Add(Vector3.down);
         normals.Add(Vector3.down);
         normals.Add(Vector3.down);
@@ -284,14 +344,25 @@ public class Chunk : MonoBehaviour
         uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
         uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
         uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
+        uvs.Add(new Vector2(blockUVs.xMin + (blockUVs.xMax - blockUVs.xMin) * midUV.x, blockUVs.yMax - (blockUVs.yMax - blockUVs.yMin) * midUV.y));
 
         indices.Add(currentIndex + 0);
         indices.Add(currentIndex + 1);
+        indices.Add(currentIndex + 4);
+
+        indices.Add(currentIndex + 1);
         indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 0);
+        indices.Add(currentIndex + 4);
+
+        indices.Add(currentIndex + 4);
         indices.Add(currentIndex + 2);
         indices.Add(currentIndex + 3);
-        currentIndex += 4;
+
+        indices.Add(currentIndex + 0);
+        indices.Add(currentIndex + 4);
+        indices.Add(currentIndex + 3);
+
+        currentIndex += 5;
     }
 
     public bool RemoveBlock(Vector3Int pos, bool spawnItem = false)
