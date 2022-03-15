@@ -18,7 +18,6 @@ public class Chunk : MonoBehaviour
     public BlockToItemID blockToItemID;
     public MeshRenderer meshRenderer;
     public MeshFilter meshFilter;
-    public MeshCollider meshCollider;
     public int sizeX = 16;
     public int sizeY = 16;
     public int sizeZ = 16;
@@ -40,7 +39,7 @@ public class Chunk : MonoBehaviour
         }
         return Vector3Int.back;
     }
-    
+
     static public Faces GetOppositeFace(Faces face)
     {
         switch (face)
@@ -57,7 +56,6 @@ public class Chunk : MonoBehaviour
     public void WakeUp()
     {
         meshRenderer = GetComponent<MeshRenderer>();
-        meshCollider = GetComponent<MeshCollider>();
         meshFilter = GetComponent<MeshFilter>();
 
         blockIDs = new short[sizeX, sizeY, sizeZ];
@@ -75,6 +73,7 @@ public class Chunk : MonoBehaviour
 
     void GenerateMesh()
     {
+        // generate MeshFilter
         Mesh newMesh = new Mesh();
         List<Vector3> vertices = new List<Vector3>();
         List<Vector3> normals = new List<Vector3>();
@@ -111,10 +110,88 @@ public class Chunk : MonoBehaviour
         newMesh.SetUVs(0, uvs);
         newMesh.SetIndices(indices, MeshTopology.Triangles, 0);
         newMesh.RecalculateTangents();
-
         meshFilter.mesh = newMesh;
-        meshCollider.sharedMesh = newMesh;
-        // Set Texture
+
+        //Delete old colliders
+        while (gameObject.GetComponent<BoxCollider>() != null)
+            Destroy(gameObject.GetComponent<BoxCollider>());
+
+        //Generate new colliders
+        bool[,,] availableBlocks = new bool[sizeX, sizeY, sizeZ];
+        for (int x = 0; x < sizeX; x++)
+            for (int y = 0; y < sizeY; y++)
+                for (int z = 0; z < sizeZ; z++)
+                    if (blockIDs[x, y, z] != 0)
+                        availableBlocks[x, y, z] = true;
+
+        for (int x = 0; x < sizeX; x++)
+        {
+            for (int y = 0; y < sizeY; y++)
+            {
+                for (int z = 0; z < sizeZ; z++)
+                {
+                    if (!availableBlocks[x, y, z])
+                        continue;
+
+                    int boxScaleX = 1, boxScaleY = 1, boxScaleZ = 1;
+                    while (y + boxScaleY < sizeY && availableBlocks[x, y + boxScaleY, z])
+                    {
+                        availableBlocks[x, y + boxScaleY, z] = false;
+                        boxScaleY++;
+                    }
+                    while (x + boxScaleX < sizeX)
+                    {
+                        bool breakLoop = false;
+                        for (int i = 0; i < boxScaleY; i++)
+                        {
+                            if (!availableBlocks[x + boxScaleX, y + i, z])
+                            {
+                                breakLoop = true;
+                                break;
+                            }
+                        }
+                        if (breakLoop == true)
+                            break;
+
+                        for (int i = 0; i < boxScaleY; i++)
+                        {
+                            availableBlocks[x + boxScaleX, y + i, z] = false;
+                        }
+                        boxScaleX++;
+                    }
+                    while (z + boxScaleZ < sizeZ)
+                    {
+                        bool breakLoop = false;
+                        for (int i = 0; i < boxScaleY; i++)
+                        {
+                            for (int j = 0; j < boxScaleX; j++)
+                            {
+                                if (!availableBlocks[x + j, y + i, z + boxScaleZ])
+                                {
+                                    breakLoop = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (breakLoop == true)
+                            break;
+
+                        for (int i = 0; i < boxScaleY; i++)
+                        {
+                            for (int j = 0; j < boxScaleX; j++)
+                            {
+                                availableBlocks[x + j, y + i, z + boxScaleZ] = false;
+                            }
+                        }
+                        boxScaleZ++;
+                    }
+
+                    BoxCollider newBoxCollider = gameObject.AddComponent<BoxCollider>();
+                    newBoxCollider.size = new Vector3(boxScaleX, boxScaleY, boxScaleZ);
+                    newBoxCollider.center = new Vector3(x + boxScaleX / 2f, y + boxScaleY / 2f, z + boxScaleZ / 2f);
+                }
+            }
+        }
 
         requiresMeshGeneration = false;
     }

@@ -8,7 +8,6 @@ public class ChunkGenerator : MonoBehaviour
 {
     public Land land;
     public int landSize;
-    public bool GenCave;
 
     public short[,,] generatedBlockIDs;
 
@@ -39,7 +38,7 @@ public class ChunkGenerator : MonoBehaviour
         int blockSize = landSize * land.chunkSizeX;
 
         generatedBlockIDs = new short[blockSize, land.chunkSizeY, blockSize];
-        Random.seed = (int)seed;
+        Random.InitState((int)seed);
 
         await GenerateSurfaceAsync();
         FillBelowSurface();

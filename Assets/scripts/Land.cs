@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Land : MonoBehaviour
 {
-    public Vector3Int LandPosition = new Vector3Int(0, 0, 0);
     public int vertexLength;
     public Vector2Int resolution;
     public int chunkSizeX = 16;
@@ -13,14 +12,9 @@ public class Land : MonoBehaviour
     public GameObject chunkPrefab;
     public Dictionary<Vector2Int, GameObject> chunks = new Dictionary<Vector2Int, GameObject>();
 
-    private void Start()
-    {
-        transform.position = LandPosition;
-    }
-
     public void InitChunk(Vector2Int coords)
     {
-        chunks.Add(coords, Instantiate(chunkPrefab, new Vector3Int(coords.x * chunkSizeX, 0, coords.y * chunkSizeZ), transform.rotation, gameObject.transform));
+        chunks.Add(coords, Instantiate(chunkPrefab, transform.position + new Vector3Int(coords.x * chunkSizeX, 0, coords.y * chunkSizeZ), transform.rotation, gameObject.transform));
         chunks[coords].GetComponent<Chunk>().resolution = resolution;
         chunks[coords].GetComponent<Chunk>().vertexLength = vertexLength;
         chunks[coords].GetComponent<Chunk>().sizeX = chunkSizeX;
