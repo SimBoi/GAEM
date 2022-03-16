@@ -8,6 +8,7 @@ public class ChunkGenerator : MonoBehaviour
 {
     public Land land;
     public int landSize;
+    public int landHeight;
 
     public short[,,] generatedBlockIDs;
 
@@ -37,7 +38,7 @@ public class ChunkGenerator : MonoBehaviour
     {
         int blockSize = landSize * land.chunkSizeX;
 
-        generatedBlockIDs = new short[blockSize, land.chunkSizeY, blockSize];
+        generatedBlockIDs = new short[blockSize, landHeight, blockSize];
         Random.InitState((int)seed);
 
         await GenerateSurfaceAsync();
@@ -46,7 +47,7 @@ public class ChunkGenerator : MonoBehaviour
         Task[] tasks = new Task[worms];
         for (int i = 0; i < worms; i++)
         {
-            Vector3 wormPos = new Vector3(Random.Range(0, blockSize), Random.Range(0, land.chunkSizeY), Random.Range(0, blockSize));
+            Vector3 wormPos = new Vector3(Random.Range(0, blockSize), Random.Range(0, landHeight), Random.Range(0, blockSize));
             int wormLength = Random.Range(wormMinLength, wormMaxLength);
             int rSeed = Random.Range(0, 10000);
             int ySeed = Random.Range(0, 10000);
@@ -149,7 +150,7 @@ public class ChunkGenerator : MonoBehaviour
         {
             for (int z = 0; z < blockSize; z++)
             {
-                for (int y = land.chunkSizeY - 2; y >= 0; y--)
+                for (int y = landHeight - 2; y >= 0; y--)
                 {
                     if (generatedBlockIDs[x, y + 1, z] != 0)
                         generatedBlockIDs[x, y, z] = (short)1;
@@ -175,7 +176,7 @@ public class ChunkGenerator : MonoBehaviour
             wormPos += stepDirection.normalized * wormStepLength;
 
             Vector3Int wormPosInt = Vector3Int.FloorToInt(wormPos);
-            if (wormPosInt.y >= land.chunkSizeY || wormPosInt.x >= blockSize || wormPosInt.z >= blockSize || wormPosInt.y < 0 || wormPosInt.x < 0 || wormPosInt.z < 0)
+            if (wormPosInt.y >= landHeight || wormPosInt.x >= blockSize || wormPosInt.z >= blockSize || wormPosInt.y < 0 || wormPosInt.x < 0 || wormPosInt.z < 0)
                 break;
 
             int radius = (int)(Noise2D(wormStep, 0, rSeed, maxWormRadius - minWormRadius, wormRadiusFrequency, 2) + minWormRadius);
@@ -191,7 +192,7 @@ public class ChunkGenerator : MonoBehaviour
                             Mathf.Cos(phi) * Mathf.Cos(theta)
                         ) * r;
                         Vector3Int blockCoords = wormPosInt + Vector3Int.FloorToInt(sphereCoords);
-                        if (blockCoords.y >= land.chunkSizeY || blockCoords.x >= blockSize || blockCoords.z >= blockSize || blockCoords.y < 0 || blockCoords.x < 0 || blockCoords.z < 0)
+                        if (blockCoords.y >= landHeight || blockCoords.x >= blockSize || blockCoords.z >= blockSize || blockCoords.y < 0 || blockCoords.x < 0 || blockCoords.z < 0)
                             continue;
                         generatedBlockIDs[blockCoords.x, blockCoords.y, blockCoords.z] = (short)0;
                     }
@@ -204,11 +205,11 @@ public class ChunkGenerator : MonoBehaviour
     {
         int blockSize = landSize * land.chunkSizeX;
 
-        for (int x = 0; x < blockSize / 2; x++)
+        for (int x = 0; x < blockSize; x++)
         {
-            for (int z = 0; z < blockSize/ 2; z++)
+            for (int z = 0; z < blockSize; z++)
             {
-                for (int y = 0; y < land.chunkSizeY; y++)
+                for (int y = 0; y < landHeight; y++)
                 {
                     land.AddBlock(new Vector3Int(x, y, z), generatedBlockIDs[x, y, z], default(Quaternion), false);
                 }

@@ -27,7 +27,7 @@ public class BreakBlock : ItemEvent
                 Vector3Int chunkBlockCoords = new Vector3Int(landBlockCoords.x % land.chunkSizeX, landBlockCoords.y % land.chunkSizeY, landBlockCoords.z % land.chunkSizeZ);
                 if (landBlockCoords != prevCoords) timer = 0;
 
-                float blockStiffness = land.chunks[new Vector2Int((int)landBlockCoords.x/ land.chunkSizeX, (int)landBlockCoords.z/ land.chunkSizeZ)].GetComponent<Chunk>().GetStiffness(chunkBlockCoords);
+                float blockStiffness = land.chunks[new Vector3Int((int)landBlockCoords.x/ land.chunkSizeX, (int)landBlockCoords.y / land.chunkSizeY, (int)landBlockCoords.z/ land.chunkSizeZ)].GetComponent<Chunk>().GetStiffness(chunkBlockCoords);
                 if (timer >= blockStiffness / efficiency)
                 {
                     land.RemoveBlock(landBlockCoords, true);

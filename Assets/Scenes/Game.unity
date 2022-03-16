@@ -2292,6 +2292,10 @@ PrefabInstance:
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: landHeight
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: landRadius
       value: 40
       objectReference: {fileID: 0}
@@ -2349,7 +2353,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: maxSurfaceHeight
-      value: 11
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: landRadiusInChunks

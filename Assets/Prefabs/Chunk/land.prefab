@@ -168,7 +168,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f7b47d5e62516545bbd7a83b929343e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LandPosition: {x: 0, y: 0, z: 0}
   vertexLength: 386
   resolution: {x: 3088, y: 772}
   chunkSizeX: 16
@@ -189,3 +188,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   land: {fileID: 1691645546888138168}
   landSize: 2
+  landHeight: 256
+  minDistanceFromEdgePercetage: 0
+  landShapeFrequencyPercentage: 0
+  terrainShapeFrequency: 0
+  terrainShapeOctaves: 0
+  maxSurfaceHeight: 0
+  surfaceRange: 0
+  seaLevel: 0
+  seed: 0
+  worms: 1
+  wormMinLength: 25
+  wormMaxLength: 50
+  wormStepLength: 1
+  wormHorizontalFrequency: 0.00824556
+  wormVerticalFrequency: 0.00824556
+  flatWormChance: 2
+  maxWormHorizontalRotation: 0.15
+  maxWormVerticalRotation: 0.15
+  minWormRadius: 1
+  maxWormRadius: 4
+  wormRadiusFrequency: 0.00824556

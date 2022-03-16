@@ -10,11 +10,11 @@ public class Land : MonoBehaviour
     public int chunkSizeY = 16;
     public int chunkSizeZ = 16;
     public GameObject chunkPrefab;
-    public Dictionary<Vector2Int, GameObject> chunks = new Dictionary<Vector2Int, GameObject>();
+    public Dictionary<Vector3Int, GameObject> chunks = new Dictionary<Vector3Int, GameObject>();
 
-    public void InitChunk(Vector2Int coords)
+    public void InitChunk(Vector3Int coords)
     {
-        chunks.Add(coords, Instantiate(chunkPrefab, transform.position + new Vector3Int(coords.x * chunkSizeX, 0, coords.y * chunkSizeZ), transform.rotation, gameObject.transform));
+        chunks.Add(coords, Instantiate(chunkPrefab, transform.position + new Vector3Int(coords.x * chunkSizeX, coords.y * chunkSizeY, coords.z * chunkSizeZ), transform.rotation, gameObject.transform));
         chunks[coords].GetComponent<Chunk>().resolution = resolution;
         chunks[coords].GetComponent<Chunk>().vertexLength = vertexLength;
         chunks[coords].GetComponent<Chunk>().sizeX = chunkSizeX;
@@ -26,16 +26,13 @@ public class Land : MonoBehaviour
 
     public bool RemoveBlock(Vector3Int coords, bool spawnItem = false)
     {
-        if (coords.y > chunkSizeY) return false;
-        Chunk chunk = chunks[new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ)].GetComponent<Chunk>();
+        Chunk chunk = chunks[new Vector3Int(coords.x / chunkSizeX, coords.y / chunkSizeY, coords.z / chunkSizeZ)].GetComponent<Chunk>();
         return chunk.RemoveBlock(LandToChunkCoords(coords), spawnItem);
     }
 
     public bool AddBlock(Vector3Int coords, short blockID, Quaternion rotation = default, bool generateMesh = true)
     {
-        if (coords.y > chunkSizeY) return false;
-
-        Vector2Int chunkIndex = new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ);
+        Vector3Int chunkIndex = new Vector3Int(coords.x / chunkSizeX, coords.y / chunkSizeY, coords.z / chunkSizeZ);
         if (!chunks.ContainsKey(chunkIndex))
             InitChunk(chunkIndex);
         Chunk chunk = chunks[chunkIndex].GetComponent<Chunk>();
@@ -45,7 +42,7 @@ public class Land : MonoBehaviour
 
     public void regenerateMesh()
     {
-        foreach (KeyValuePair<Vector2Int, GameObject> chunk in chunks)
+        foreach (KeyValuePair<Vector3Int, GameObject> chunk in chunks)
         {
             chunk.Value.GetComponent<Chunk>().requiresMeshGeneration = true;
         }
@@ -61,7 +58,7 @@ public class Land : MonoBehaviour
     {
         if (coords.y > chunkSizeY) return 0;
 
-        Vector2Int chunkIndex = new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ);
+        Vector3Int chunkIndex = new Vector3Int(coords.x / chunkSizeX, coords.y / chunkSizeY, coords.z / chunkSizeZ);
         if (!chunks.ContainsKey(chunkIndex))
             return 0;
         Chunk chunk = chunks[chunkIndex].GetComponent<Chunk>();
@@ -74,7 +71,7 @@ public class Land : MonoBehaviour
     {
         if (coords.y > chunkSizeY) return null;
 
-        Vector2Int chunkIndex = new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ);
+        Vector3Int chunkIndex = new Vector3Int(coords.x / chunkSizeX, coords.y / chunkSizeY, coords.z / chunkSizeZ);
         if (!chunks.ContainsKey(chunkIndex))
             return null;
         Chunk chunk = chunks[chunkIndex].GetComponent<Chunk>();
