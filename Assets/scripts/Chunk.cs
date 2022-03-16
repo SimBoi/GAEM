@@ -68,6 +68,7 @@ public class Chunk : MonoBehaviour
         if (requiresMeshGeneration)
         {
             GenerateMesh();
+            requiresMeshGeneration = false;
         }
     }
 
@@ -76,7 +77,6 @@ public class Chunk : MonoBehaviour
         // generate MeshFilter
         Mesh newMesh = new Mesh();
         List<Vector3> vertices = new List<Vector3>();
-        List<Vector3> normals = new List<Vector3>();
         List<Vector2> uvs = new List<Vector2>();
         List<int> indices = new List<int>();
 
@@ -94,27 +94,27 @@ public class Chunk : MonoBehaviour
                     if (!itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh)
                     {
                         Vector3Int offset = new Vector3Int(x, y, z);
-                        GenerateBlock_Top(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Up), pos);
-                        GenerateBlock_Right(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Right), pos);
-                        GenerateBlock_Left(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Left), pos);
-                        GenerateBlock_Forward(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Front), pos);
-                        GenerateBlock_Back(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Back), pos);
-                        GenerateBlock_Bottom(ref currentIndex, offset, vertices, normals, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Down), pos);
+                        GenerateBlock_Top(ref currentIndex, offset, vertices, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Up), pos);
+                        GenerateBlock_Right(ref currentIndex, offset, vertices, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Right), pos);
+                        GenerateBlock_Left(ref currentIndex, offset, vertices, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Left), pos);
+                        GenerateBlock_Forward(ref currentIndex, offset, vertices, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Front), pos);
+                        GenerateBlock_Back(ref currentIndex, offset, vertices, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Back), pos);
+                        GenerateBlock_Bottom(ref currentIndex, offset, vertices, uvs, indices, GetFaceTexture(blockIDs[x, y, z], Faces.Down), pos);
                     }
                 }
             }
         }
 
         newMesh.SetVertices(vertices);
-        newMesh.SetNormals(normals);
         newMesh.SetUVs(0, uvs);
         newMesh.SetIndices(indices, MeshTopology.Triangles, 0);
+        newMesh.RecalculateNormals();
         newMesh.RecalculateTangents();
         meshFilter.mesh = newMesh;
 
         //Delete old colliders
         while (gameObject.GetComponent<BoxCollider>() != null)
-            Destroy(gameObject.GetComponent<BoxCollider>());
+            DestroyImmediate(gameObject.GetComponent<BoxCollider>());
 
         //Generate new colliders
         bool[,,] availableBlocks = new bool[sizeX, sizeY, sizeZ];
@@ -196,250 +196,335 @@ public class Chunk : MonoBehaviour
         requiresMeshGeneration = false;
     }
 
-    void GenerateBlock_Top(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
+    void GenerateBlock_Top(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
     {
         //manyake
         if (pos.y + 1 < sizeY && blockIDs[pos.x, pos.y + 1, pos.z] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y + 1, pos.z])].GetComponent<Block>().hasCustomMesh) return;
-        vertices.Add(new Vector3(0, 1, 1) + offset);
-        vertices.Add(new Vector3(1, 1, 1) + offset);
-        vertices.Add(new Vector3(1, 1, 0) + offset);
-        vertices.Add(new Vector3(0, 1, 0) + offset);
+        List<Vector3> mainVertices = new List<Vector3>();
+        mainVertices.Add(new Vector3(0, 1, 1) + offset);
+        mainVertices.Add(new Vector3(1, 1, 1) + offset);
+        mainVertices.Add(new Vector3(1, 1, 0) + offset);
+        mainVertices.Add(new Vector3(0, 1, 0) + offset);
         Vector2 midUV = new Vector2(Random.Range(0.2f, 0.8f), Random.Range(0.2f, 0.8f));
-        vertices.Add(new Vector3(midUV.x, Random.Range(0.9f, 1.2f), midUV.y) + offset);
+        mainVertices.Add(new Vector3(midUV.x, Random.Range(0.9f, 1.2f), midUV.y) + offset);
 
-        normals.Add(Vector3.up);
-        normals.Add(Vector3.up);
-        normals.Add(Vector3.up);
-        normals.Add(Vector3.up);
-        normals.Add(Vector3.up);
+        List<Vector2> mainUvs = new List<Vector2>();
+        mainUvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMax));
+        mainUvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
+        mainUvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
+        mainUvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
+        mainUvs.Add(new Vector2(blockUVs.xMin + (blockUVs.xMax - blockUVs.xMin) * midUV.x, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midUV.y));
 
-        uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMax));
-        uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
-        uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
-        uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
-        uvs.Add(new Vector2(blockUVs.xMin + (blockUVs.xMax - blockUVs.xMin) * midUV.x, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midUV.y));
+        vertices.Add(mainVertices[0]);
+        vertices.Add(mainVertices[1]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[0]);
+        uvs.Add(mainUvs[1]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 0);
-        indices.Add(currentIndex + 1);
-        indices.Add(currentIndex + 4);
+        vertices.Add(mainVertices[1]);
+        vertices.Add(mainVertices[2]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[1]);
+        uvs.Add(mainUvs[2]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 1);
-        indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 4);
+        vertices.Add(mainVertices[4]);
+        vertices.Add(mainVertices[2]);
+        vertices.Add(mainVertices[3]);
+        uvs.Add(mainUvs[4]);
+        uvs.Add(mainUvs[2]);
+        uvs.Add(mainUvs[3]);
 
-        indices.Add(currentIndex + 4);
-        indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 3);
+        vertices.Add(mainVertices[0]);
+        vertices.Add(mainVertices[4]);
+        vertices.Add(mainVertices[3]);
+        uvs.Add(mainUvs[0]);
+        uvs.Add(mainUvs[4]);
+        uvs.Add(mainUvs[3]);
 
-        indices.Add(currentIndex + 0);
-        indices.Add(currentIndex + 4);
-        indices.Add(currentIndex + 3);
-
-        currentIndex += 5;
+        for (int i = 0; i < 4; i++)
+        {
+            indices.Add(currentIndex);
+            indices.Add(currentIndex + 1);
+            indices.Add(currentIndex + 2);
+            currentIndex += 3;
+        }
     }
 
-    void GenerateBlock_Right(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
+    void GenerateBlock_Right(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
     {
         if (pos.x + 1 < sizeX && blockIDs[pos.x + 1, pos.y, pos.z] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x + 1, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh) return;
-        vertices.Add(new Vector3(1, 1, 0) + offset);
-        vertices.Add(new Vector3(1, 1, 1) + offset);
-        vertices.Add(new Vector3(1, 0, 1) + offset);
-        vertices.Add(new Vector3(1, 0, 0) + offset);
+        List<Vector3> mainVertices = new List<Vector3>();
+        mainVertices.Add(new Vector3(1, 1, 0) + offset);
+        mainVertices.Add(new Vector3(1, 1, 1) + offset);
+        mainVertices.Add(new Vector3(1, 0, 1) + offset);
+        mainVertices.Add(new Vector3(1, 0, 0) + offset);
         Vector2 midUV = new Vector2(Random.Range(0.2f, 0.8f), Random.Range(0.2f, 0.8f));
-        vertices.Add(new Vector3(Random.Range(0.9f, 1.2f), midUV.x, midUV.y) + offset);
+        mainVertices.Add(new Vector3(Random.Range(0.9f, 1.2f), midUV.x, midUV.y) + offset);
 
-        normals.Add(Vector3.right);
-        normals.Add(Vector3.right);
-        normals.Add(Vector3.right);
-        normals.Add(Vector3.right);
-        normals.Add(Vector3.right);
+        List<Vector2> mainUvs = new List<Vector2>();
+        mainUvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMax));
+        mainUvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
+        mainUvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
+        mainUvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
+        mainUvs.Add(new Vector2(blockUVs.xMin + (blockUVs.xMax - blockUVs.xMin) * midUV.y, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midUV.x));
 
-        uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMax));
-        uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
-        uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
-        uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
-        uvs.Add(new Vector2(blockUVs.xMin + (blockUVs.xMax - blockUVs.xMin) * midUV.y, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midUV.x));
+        vertices.Add(mainVertices[0]);
+        vertices.Add(mainVertices[1]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[0]);
+        uvs.Add(mainUvs[1]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 0);
-        indices.Add(currentIndex + 1);
-        indices.Add(currentIndex + 4);
+        vertices.Add(mainVertices[1]);
+        vertices.Add(mainVertices[2]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[1]);
+        uvs.Add(mainUvs[2]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 1);
-        indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 4);
+        vertices.Add(mainVertices[3]);
+        vertices.Add(mainVertices[4]);
+        vertices.Add(mainVertices[2]);
+        uvs.Add(mainUvs[3]);
+        uvs.Add(mainUvs[4]);
+        uvs.Add(mainUvs[2]);
 
-        indices.Add(currentIndex + 3);
-        indices.Add(currentIndex + 4);
-        indices.Add(currentIndex + 2);
+        vertices.Add(mainVertices[3]);
+        vertices.Add(mainVertices[0]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[3]);
+        uvs.Add(mainUvs[0]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 3);
-        indices.Add(currentIndex + 0);
-        indices.Add(currentIndex + 4);
-        currentIndex += 5;
+        for (int i = 0; i < 4; i++)
+        {
+            indices.Add(currentIndex);
+            indices.Add(currentIndex + 1);
+            indices.Add(currentIndex + 2);
+            currentIndex += 3;
+        }
     }
 
-    void GenerateBlock_Left(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
+    void GenerateBlock_Left(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
     {
         if (pos.x - 1 >= 0 && blockIDs[pos.x - 1, pos.y, pos.z] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x - 1, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh) return;
-        vertices.Add(new Vector3(0, 1, 1) + offset);
-        vertices.Add(new Vector3(0, 1, 0) + offset);
-        vertices.Add(new Vector3(0, 0, 0) + offset);
-        vertices.Add(new Vector3(0, 0, 1) + offset);
-        Vector2 midUV = new Vector2(Random.Range(0.2f, 0.8f), Random.Range(0.2f, 0.8f));
-        vertices.Add(new Vector3(Random.Range(-0.2f, 0.1f), midUV.x, midUV.y) + offset);
+        List<Vector3> mainVertices = new List<Vector3>();
+        mainVertices.Add(new Vector3(0, 1, 1) + offset);
+        mainVertices.Add(new Vector3(0, 1, 0) + offset);
+        mainVertices.Add(new Vector3(0, 0, 0) + offset);
+        mainVertices.Add(new Vector3(0, 0, 1) + offset);
+        Vector2 midVertex = new Vector2(Random.Range(0.2f, 0.8f), Random.Range(0.2f, 0.8f));
+        mainVertices.Add(new Vector3(Random.Range(-0.2f, 0.1f), midVertex.x, midVertex.y) + offset);
 
-        normals.Add(Vector3.left);
-        normals.Add(Vector3.left);
-        normals.Add(Vector3.left);
-        normals.Add(Vector3.left);
-        normals.Add(Vector3.left);
+        List<Vector2> mainUvs = new List<Vector2>();
+        mainUvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMax));
+        mainUvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
+        mainUvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
+        mainUvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
+        mainUvs.Add(new Vector2(blockUVs.xMax - (blockUVs.xMax - blockUVs.xMin) * midVertex.y, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midVertex.x));
 
-        uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMax));
-        uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
-        uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
-        uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
-        uvs.Add(new Vector2(blockUVs.xMax - (blockUVs.xMax - blockUVs.xMin) * midUV.y, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midUV.x));
+        vertices.Add(mainVertices[0]);
+        vertices.Add(mainVertices[1]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[0]);
+        uvs.Add(mainUvs[1]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 0);
-        indices.Add(currentIndex + 1);
-        indices.Add(currentIndex + 4);
+        vertices.Add(mainVertices[1]);
+        vertices.Add(mainVertices[2]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[1]);
+        uvs.Add(mainUvs[2]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 1);
-        indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 4);
+        vertices.Add(mainVertices[2]);
+        vertices.Add(mainVertices[3]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[2]);
+        uvs.Add(mainUvs[3]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 3);
-        indices.Add(currentIndex + 4);
+        vertices.Add(mainVertices[3]);
+        vertices.Add(mainVertices[0]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[3]);
+        uvs.Add(mainUvs[0]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 3);
-        indices.Add(currentIndex + 0);
-        indices.Add(currentIndex + 4);
-
-        currentIndex += 5;
+        for (int i = 0; i < 4; i++)
+        {
+            indices.Add(currentIndex);
+            indices.Add(currentIndex + 1);
+            indices.Add(currentIndex + 2);
+            currentIndex += 3;
+        }
     }
 
-    void GenerateBlock_Forward(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
+    void GenerateBlock_Forward(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
     {
         if (pos.z + 1 < sizeZ && blockIDs[pos.x, pos.y, pos.z + 1] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z + 1])].GetComponent<Block>().hasCustomMesh) return;
-        vertices.Add(new Vector3(1, 1, 1) + offset);
-        vertices.Add(new Vector3(0, 1, 1) + offset);
-        vertices.Add(new Vector3(0, 0, 1) + offset);
-        vertices.Add(new Vector3(1, 0, 1) + offset);
+        List<Vector3> mainVertices = new List<Vector3>();
+        mainVertices.Add(new Vector3(1, 1, 1) + offset);
+        mainVertices.Add(new Vector3(0, 1, 1) + offset);
+        mainVertices.Add(new Vector3(0, 0, 1) + offset);
+        mainVertices.Add(new Vector3(1, 0, 1) + offset);
         Vector2 midUV = new Vector2(Random.Range(0.2f, 0.8f), Random.Range(0.2f, 0.8f));
-        vertices.Add(new Vector3( midUV.x, midUV.y, Random.Range(0.9f, 1.2f)) + offset);
+        mainVertices.Add(new Vector3( midUV.x, midUV.y, Random.Range(0.9f, 1.2f)) + offset);
 
-        normals.Add(Vector3.forward);
-        normals.Add(Vector3.forward);
-        normals.Add(Vector3.forward);
-        normals.Add(Vector3.forward);
-        normals.Add(Vector3.forward);
+        List<Vector2> mainUvs = new List<Vector2>();
+        mainUvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMax));
+        mainUvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
+        mainUvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
+        mainUvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
+        mainUvs.Add(new Vector2(blockUVs.xMax - (blockUVs.xMax - blockUVs.xMin) * midUV.x, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midUV.y));
 
-        uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMax));
-        uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
-        uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
-        uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
-        uvs.Add(new Vector2(blockUVs.xMax - (blockUVs.xMax - blockUVs.xMin) * midUV.x, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midUV.y));
+        vertices.Add(mainVertices[0]);
+        vertices.Add(mainVertices[1]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[0]);
+        uvs.Add(mainUvs[1]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 0);
-        indices.Add(currentIndex + 1);
-        indices.Add(currentIndex + 4);
+        vertices.Add(mainVertices[1]);
+        vertices.Add(mainVertices[2]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[1]);
+        uvs.Add(mainUvs[2]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 1);
-        indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 4);
+        vertices.Add(mainVertices[4]);
+        vertices.Add(mainVertices[2]);
+        vertices.Add(mainVertices[3]);
+        uvs.Add(mainUvs[4]);
+        uvs.Add(mainUvs[2]);
+        uvs.Add(mainUvs[3]);
 
-        indices.Add(currentIndex + 4);
-        indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 3);
+        vertices.Add(mainVertices[0]);
+        vertices.Add(mainVertices[4]);
+        vertices.Add(mainVertices[3]);
+        uvs.Add(mainUvs[0]);
+        uvs.Add(mainUvs[4]);
+        uvs.Add(mainUvs[3]);
 
-        indices.Add(currentIndex + 0);
-        indices.Add(currentIndex + 4);
-        indices.Add(currentIndex + 3);
-
-        currentIndex += 5;
+        for (int i = 0; i < 4; i++)
+        {
+            indices.Add(currentIndex);
+            indices.Add(currentIndex + 1);
+            indices.Add(currentIndex + 2);
+            currentIndex += 3;
+        }
     }
 
-    void GenerateBlock_Back(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
+    void GenerateBlock_Back(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
     {
         if (pos.z - 1 >= 0 && blockIDs[pos.x, pos.y, pos.z - 1] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z - 1])].GetComponent<Block>().hasCustomMesh) return;
-        vertices.Add(new Vector3(0, 1, 0) + offset);
-        vertices.Add(new Vector3(1, 1, 0) + offset);
-        vertices.Add(new Vector3(1, 0, 0) + offset);
-        vertices.Add(new Vector3(0, 0, 0) + offset);
+        List<Vector3> mainVertices = new List<Vector3>();
+        mainVertices.Add(new Vector3(0, 1, 0) + offset);
+        mainVertices.Add(new Vector3(1, 1, 0) + offset);
+        mainVertices.Add(new Vector3(1, 0, 0) + offset);
+        mainVertices.Add(new Vector3(0, 0, 0) + offset);
         Vector2 midUV = new Vector2(Random.Range(0.2f, 0.8f), Random.Range(0.2f, 0.8f));
-        vertices.Add(new Vector3(midUV.x, midUV.y, Random.Range(-0.2f, 0.1f)) + offset);
+        mainVertices.Add(new Vector3(midUV.x, midUV.y, Random.Range(-0.2f, 0.1f)) + offset);
 
-        normals.Add(Vector3.back);
-        normals.Add(Vector3.back);
-        normals.Add(Vector3.back);
-        normals.Add(Vector3.back);
-        normals.Add(Vector3.back);
+        List<Vector2> mainUvs = new List<Vector2>();
+        mainUvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMax));
+        mainUvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
+        mainUvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
+        mainUvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
+        mainUvs.Add(new Vector2(blockUVs.xMin + (blockUVs.xMax - blockUVs.xMin) * midUV.x, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midUV.y));
 
-        uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMax));
-        uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
-        uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
-        uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
-        uvs.Add(new Vector2(blockUVs.xMin + (blockUVs.xMax - blockUVs.xMin) * midUV.x, blockUVs.yMin + (blockUVs.yMax - blockUVs.yMin) * midUV.y));
+        vertices.Add(mainVertices[0]);
+        vertices.Add(mainVertices[1]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[0]);
+        uvs.Add(mainUvs[1]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 0);
-        indices.Add(currentIndex + 1);
-        indices.Add(currentIndex + 4);
+        vertices.Add(mainVertices[1]);
+        vertices.Add(mainVertices[2]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[1]);
+        uvs.Add(mainUvs[2]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 1);
-        indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 4);
+        vertices.Add(mainVertices[4]);
+        vertices.Add(mainVertices[2]);
+        vertices.Add(mainVertices[3]);
+        uvs.Add(mainUvs[4]);
+        uvs.Add(mainUvs[2]);
+        uvs.Add(mainUvs[3]);
 
-        indices.Add(currentIndex + 4);
-        indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 3);
+        vertices.Add(mainVertices[0]);
+        vertices.Add(mainVertices[4]);
+        vertices.Add(mainVertices[3]);
+        uvs.Add(mainUvs[0]);
+        uvs.Add(mainUvs[4]);
+        uvs.Add(mainUvs[3]);
 
-        indices.Add(currentIndex + 0);
-        indices.Add(currentIndex + 4);
-        indices.Add(currentIndex + 3);
-
-        currentIndex += 5;
+        for (int i = 0; i < 4; i++)
+        {
+            indices.Add(currentIndex);
+            indices.Add(currentIndex + 1);
+            indices.Add(currentIndex + 2);
+            currentIndex += 3;
+        }
     }
 
-    void GenerateBlock_Bottom(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
+    void GenerateBlock_Bottom(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
     {
         if (pos.y - 1 >= 0 && blockIDs[pos.x, pos.y - 1, pos.z] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y - 1, pos.z])].GetComponent<Block>().hasCustomMesh) return;
-        vertices.Add(new Vector3(0, 0, 0) + offset);
-        vertices.Add(new Vector3(1, 0, 0) + offset);
-        vertices.Add(new Vector3(1, 0, 1) + offset);
-        vertices.Add(new Vector3(0, 0, 1) + offset);
+        List<Vector3> mainVertices = new List<Vector3>();
+        mainVertices.Add(new Vector3(0, 0, 0) + offset);
+        mainVertices.Add(new Vector3(1, 0, 0) + offset);
+        mainVertices.Add(new Vector3(1, 0, 1) + offset);
+        mainVertices.Add(new Vector3(0, 0, 1) + offset);
         Vector2 midUV = new Vector2(Random.Range(0.2f, 0.8f), Random.Range(0.2f, 0.8f));
-        vertices.Add(new Vector3(midUV.x, Random.Range(-0.2f, 0.1f), midUV.y) + offset);
+        mainVertices.Add(new Vector3(midUV.x, Random.Range(-0.2f, 0.1f), midUV.y) + offset);
 
-        normals.Add(Vector3.down);
-        normals.Add(Vector3.down);
-        normals.Add(Vector3.down);
-        normals.Add(Vector3.down);
-        normals.Add(Vector3.down);
+        List<Vector2> mainUvs = new List<Vector2>();
+        mainUvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMax));
+        mainUvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
+        mainUvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
+        mainUvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
+        mainUvs.Add(new Vector2(blockUVs.xMin + (blockUVs.xMax - blockUVs.xMin) * midUV.x, blockUVs.yMax - (blockUVs.yMax - blockUVs.yMin) * midUV.y));
 
-        uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMax));
-        uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMax));
-        uvs.Add(new Vector2(blockUVs.xMax, blockUVs.yMin));
-        uvs.Add(new Vector2(blockUVs.xMin, blockUVs.yMin));
-        uvs.Add(new Vector2(blockUVs.xMin + (blockUVs.xMax - blockUVs.xMin) * midUV.x, blockUVs.yMax - (blockUVs.yMax - blockUVs.yMin) * midUV.y));
+        vertices.Add(mainVertices[0]);
+        vertices.Add(mainVertices[1]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[0]);
+        uvs.Add(mainUvs[1]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 0);
-        indices.Add(currentIndex + 1);
-        indices.Add(currentIndex + 4);
+        vertices.Add(mainVertices[1]);
+        vertices.Add(mainVertices[2]);
+        vertices.Add(mainVertices[4]);
+        uvs.Add(mainUvs[1]);
+        uvs.Add(mainUvs[2]);
+        uvs.Add(mainUvs[4]);
 
-        indices.Add(currentIndex + 1);
-        indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 4);
+        vertices.Add(mainVertices[4]);
+        vertices.Add(mainVertices[2]);
+        vertices.Add(mainVertices[3]);
+        uvs.Add(mainUvs[4]);
+        uvs.Add(mainUvs[2]);
+        uvs.Add(mainUvs[3]);
 
-        indices.Add(currentIndex + 4);
-        indices.Add(currentIndex + 2);
-        indices.Add(currentIndex + 3);
+        vertices.Add(mainVertices[0]);
+        vertices.Add(mainVertices[4]);
+        vertices.Add(mainVertices[3]);
+        uvs.Add(mainUvs[0]);
+        uvs.Add(mainUvs[4]);
+        uvs.Add(mainUvs[3]);
 
-        indices.Add(currentIndex + 0);
-        indices.Add(currentIndex + 4);
-        indices.Add(currentIndex + 3);
-
-        currentIndex += 5;
+        for (int i = 0; i < 4; i++)
+        {
+            indices.Add(currentIndex);
+            indices.Add(currentIndex + 1);
+            indices.Add(currentIndex + 2);
+            currentIndex += 3;
+        }
     }
 
     public bool RemoveBlock(Vector3Int pos, bool spawnItem = false)

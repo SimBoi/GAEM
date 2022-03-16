@@ -2245,7 +2245,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138168, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: chunkSizeY
-      value: 256
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138168, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: chunkSizeZ
@@ -2277,11 +2277,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: landSize
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: seaLevel
-      value: 60
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: m_Enabled
@@ -2309,7 +2309,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: surfaceRange
-      value: 50
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: maxWormRadius
@@ -2349,7 +2349,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: maxSurfaceHeight
-      value: 200
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: landRadiusInChunks
