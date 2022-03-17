@@ -14,6 +14,7 @@ public enum Faces
 
 public class Chunk : MonoBehaviour
 {
+    public Land parentLand;
     public ItemPrefabs itemPrefabs;
     public BlockToItemID blockToItemID;
     public MeshRenderer meshRenderer;
@@ -199,7 +200,8 @@ public class Chunk : MonoBehaviour
     void GenerateBlock_Top(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
     {
         //manyake
-        if (pos.y + 1 < sizeY && blockIDs[pos.x, pos.y + 1, pos.z] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y + 1, pos.z])].GetComponent<Block>().hasCustomMesh) return;
+        short neighborBlockID = parentLand.GetBlockID(Vector3Int.FloorToInt(transform.localPosition) + pos + Vector3Int.up);
+        if (neighborBlockID != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(neighborBlockID)].GetComponent<Block>().hasCustomMesh) return;
         List<Vector3> mainVertices = new List<Vector3>();
         mainVertices.Add(new Vector3(0, 1, 1) + offset);
         mainVertices.Add(new Vector3(1, 1, 1) + offset);
@@ -254,7 +256,8 @@ public class Chunk : MonoBehaviour
 
     void GenerateBlock_Right(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
     {
-        if (pos.x + 1 < sizeX && blockIDs[pos.x + 1, pos.y, pos.z] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x + 1, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh) return;
+        short neighborBlockID = parentLand.GetBlockID(Vector3Int.FloorToInt(transform.localPosition) + pos + Vector3Int.right);
+        if (neighborBlockID != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(neighborBlockID)].GetComponent<Block>().hasCustomMesh) return;
         List<Vector3> mainVertices = new List<Vector3>();
         mainVertices.Add(new Vector3(1, 1, 0) + offset);
         mainVertices.Add(new Vector3(1, 1, 1) + offset);
@@ -309,7 +312,8 @@ public class Chunk : MonoBehaviour
 
     void GenerateBlock_Left(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
     {
-        if (pos.x - 1 >= 0 && blockIDs[pos.x - 1, pos.y, pos.z] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x - 1, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh) return;
+        short neighborBlockID = parentLand.GetBlockID(Vector3Int.FloorToInt(transform.localPosition) + pos + Vector3Int.left);
+        if (neighborBlockID != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(neighborBlockID)].GetComponent<Block>().hasCustomMesh) return;
         List<Vector3> mainVertices = new List<Vector3>();
         mainVertices.Add(new Vector3(0, 1, 1) + offset);
         mainVertices.Add(new Vector3(0, 1, 0) + offset);
@@ -364,7 +368,8 @@ public class Chunk : MonoBehaviour
 
     void GenerateBlock_Forward(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
     {
-        if (pos.z + 1 < sizeZ && blockIDs[pos.x, pos.y, pos.z + 1] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z + 1])].GetComponent<Block>().hasCustomMesh) return;
+        short neighborBlockID = parentLand.GetBlockID(Vector3Int.FloorToInt(transform.localPosition) + pos + Vector3Int.forward);
+        if (neighborBlockID != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(neighborBlockID)].GetComponent<Block>().hasCustomMesh) return;
         List<Vector3> mainVertices = new List<Vector3>();
         mainVertices.Add(new Vector3(1, 1, 1) + offset);
         mainVertices.Add(new Vector3(0, 1, 1) + offset);
@@ -419,7 +424,8 @@ public class Chunk : MonoBehaviour
 
     void GenerateBlock_Back(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
     {
-        if (pos.z - 1 >= 0 && blockIDs[pos.x, pos.y, pos.z - 1] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z - 1])].GetComponent<Block>().hasCustomMesh) return;
+        short neighborBlockID = parentLand.GetBlockID(Vector3Int.FloorToInt(transform.localPosition) + pos + Vector3Int.back);
+        if (neighborBlockID != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(neighborBlockID)].GetComponent<Block>().hasCustomMesh) return;
         List<Vector3> mainVertices = new List<Vector3>();
         mainVertices.Add(new Vector3(0, 1, 0) + offset);
         mainVertices.Add(new Vector3(1, 1, 0) + offset);
@@ -474,7 +480,8 @@ public class Chunk : MonoBehaviour
 
     void GenerateBlock_Bottom(ref int currentIndex, Vector3Int offset, List<Vector3> vertices, List<Vector2> uvs, List<int> indices, Rect blockUVs, Vector3Int pos)
     {
-        if (pos.y - 1 >= 0 && blockIDs[pos.x, pos.y - 1, pos.z] != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y - 1, pos.z])].GetComponent<Block>().hasCustomMesh) return;
+        short neighborBlockID = parentLand.GetBlockID(Vector3Int.FloorToInt(transform.localPosition) + pos + Vector3Int.down);
+        if (neighborBlockID != 0 && !itemPrefabs.prefabs[blockToItemID.Convert(neighborBlockID)].GetComponent<Block>().hasCustomMesh) return;
         List<Vector3> mainVertices = new List<Vector3>();
         mainVertices.Add(new Vector3(0, 0, 0) + offset);
         mainVertices.Add(new Vector3(1, 0, 0) + offset);

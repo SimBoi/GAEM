@@ -1023,6 +1023,7 @@ GameObject:
   - component: {fileID: 832530788}
   - component: {fileID: 832530787}
   - component: {fileID: 832530786}
+  - component: {fileID: 832530790}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -1107,6 +1108,39 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 18
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &832530790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832530785}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a3b00f0dd32ed2429be728b20d3b39f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemPrefabs: {fileID: 0}
+  name: 
+  id: 0
+  maxStackSize: 0
+  maxDurability: 0
+  spawnDurability: 0
+  stackSize: 0
+  health: {fileID: 0}
+  preventDespawn: 0
+  despawnTime: 300
+  pickupDelay: 0
+  timeSinceSpawn: 0
+  isHeld: 0
+  isDestroyed: 0
+  icon: {fileID: 0}
+  ui: {fileID: 0}
+  blockID: 0
+  stiffness: 1
+  hasCustomMesh: 0
+  itemObject: {fileID: 0}
+  blockObject: {fileID: 0}
 --- !u!4 &898818831 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 898818831, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
@@ -2277,7 +2311,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: landSize
-      value: 20
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: seaLevel

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,24 +21,48 @@ public class Land : MonoBehaviour
         chunks[coords].GetComponent<Chunk>().sizeX = chunkSizeX;
         chunks[coords].GetComponent<Chunk>().sizeY = chunkSizeY;
         chunks[coords].GetComponent<Chunk>().sizeZ = chunkSizeZ;
+        chunks[coords].GetComponent<Chunk>().parentLand = this;
         chunks[coords].GetComponent<Chunk>().WakeUp();
         return;
     }
 
     public bool RemoveBlock(Vector3Int coords, bool spawnItem = false)
     {
-        Chunk chunk = chunks[new Vector3Int(coords.x / chunkSizeX, coords.y / chunkSizeY, coords.z / chunkSizeZ)].GetComponent<Chunk>();
-        return chunk.RemoveBlock(LandToChunkCoords(coords), spawnItem);
+        Vector3Int chunkIndex = new Vector3Int(CDiv(coords.x , chunkSizeX), CDiv(coords.y , chunkSizeY), CDiv(coords.z , chunkSizeZ));
+        Chunk chunk = chunks[chunkIndex].GetComponent<Chunk>();
+        bool result = chunk.RemoveBlock(LandToChunkCoords(coords), spawnItem);
+        foreach (Faces face in Enum.GetValues(typeof(Faces)))
+        {
+            Vector3Int neighborBlockCoords = Chunk.FaceToDirection(face) + coords;
+            Vector3Int neighborChunkIndex = new Vector3Int(CDiv(neighborBlockCoords.x, chunkSizeX), CDiv(neighborBlockCoords.y, chunkSizeY), CDiv(neighborBlockCoords.z, chunkSizeZ));
+            if (neighborChunkIndex == chunkIndex) continue;
+            Chunk neighborChunk = chunks[neighborChunkIndex].GetComponent<Chunk>();
+            neighborChunk.requiresMeshGeneration = true;
+        }
+
+        return result;
     }
 
     public bool AddBlock(Vector3Int coords, short blockID, Quaternion rotation = default, bool generateMesh = true)
     {
-        Vector3Int chunkIndex = new Vector3Int(coords.x / chunkSizeX, coords.y / chunkSizeY, coords.z / chunkSizeZ);
+        Vector3Int chunkIndex = new Vector3Int(CDiv(coords.x, chunkSizeX), CDiv(coords.y, chunkSizeY), CDiv(coords.z, chunkSizeZ));
         if (!chunks.ContainsKey(chunkIndex))
             InitChunk(chunkIndex);
         Chunk chunk = chunks[chunkIndex].GetComponent<Chunk>();
 
-        return chunk.AddBlock(coords, blockID, rotation, generateMesh);
+        bool result = chunk.AddBlock(coords, blockID, rotation, generateMesh);
+        if (generateMesh)
+        {
+            foreach (Faces face in Enum.GetValues(typeof(Faces)))
+            {
+                Vector3Int neighborBlockCoords = Chunk.FaceToDirection(face) + coords;
+                Vector3Int neighborChunkIndex = new Vector3Int(CDiv(neighborBlockCoords.x, chunkSizeX), CDiv(neighborBlockCoords.y, chunkSizeY), CDiv(neighborBlockCoords.z, chunkSizeZ));
+                if (neighborChunkIndex == chunkIndex) continue;
+                Chunk neighborChunk = chunks[neighborChunkIndex].GetComponent<Chunk>();
+                neighborChunk.requiresMeshGeneration = true;
+            }
+        }
+        return result;
     }
 
     public void regenerateMesh()
@@ -48,7 +73,7 @@ public class Land : MonoBehaviour
         }
     }
 
-    // message[0] = (Land)return
+   // message[0] = (Land)return
     public void GetLandRefMsg(object[] message)
     {
         message[0] = this;
@@ -56,9 +81,7 @@ public class Land : MonoBehaviour
 
     public short GetBlockID(Vector3Int coords)
     {
-        if (coords.y > chunkSizeY) return 0;
-
-        Vector3Int chunkIndex = new Vector3Int(coords.x / chunkSizeX, coords.y / chunkSizeY, coords.z / chunkSizeZ);
+        Vector3Int chunkIndex = new Vector3Int(CDiv(coords.x, chunkSizeX), CDiv(coords.y, chunkSizeY), CDiv(coords.z, chunkSizeZ));
         if (!chunks.ContainsKey(chunkIndex))
             return 0;
         Chunk chunk = chunks[chunkIndex].GetComponent<Chunk>();
@@ -71,7 +94,7 @@ public class Land : MonoBehaviour
     {
         if (coords.y > chunkSizeY) return null;
 
-        Vector3Int chunkIndex = new Vector3Int(coords.x / chunkSizeX, coords.y / chunkSizeY, coords.z / chunkSizeZ);
+        Vector3Int chunkIndex = new Vector3Int(CDiv(coords.x, chunkSizeX), CDiv(coords.y, chunkSizeY), CDiv(coords.z, chunkSizeZ));
         if (!chunks.ContainsKey(chunkIndex))
             return null;
         Chunk chunk = chunks[chunkIndex].GetComponent<Chunk>();
@@ -87,6 +110,21 @@ public class Land : MonoBehaviour
 
     public Vector3Int LandToChunkCoords(Vector3Int coords)
     {
-        return new Vector3Int(coords.x % chunkSizeX, coords.y % chunkSizeY, coords.z % chunkSizeZ);
+        return new Vector3Int(CMod(coords.x, chunkSizeX), CMod(coords.y, chunkSizeY), CMod(coords.z, chunkSizeZ));
+    }
+
+    int CMod(int x, int m)
+    {
+        return (x % m + m) % m;
+    }
+
+    int CDiv(int x, int m)
+    {
+        int result = x / m;
+        if (x * m < 0)
+        {
+            result -= 1;
+        }
+        return result;
     }
 }
