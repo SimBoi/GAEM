@@ -18,6 +18,7 @@ public class CharacterController : MonoBehaviour
     public Transform gunRaySpawnPoint;
 
     public Canvas canvas;
+    public GameObject pauseUI;
     public Slider healthSliderUI;
     public Gradient healthGradient;
     public Image healthFill;
@@ -48,9 +49,14 @@ public class CharacterController : MonoBehaviour
 
     public void Update()
     {
+        if (transform.position.y < -5)
+        {
+            health.DealDamage(100 * Time.deltaTime);
+        }
+
         if (health.GetHp() <= 0)
         {
-            Die();
+            Die(gameObject);
         }
 
         GetPlayerInput();
@@ -64,83 +70,110 @@ public class CharacterController : MonoBehaviour
     private bool getThrowItemDown = false;
     private bool getInventory = false;
     private bool getInventoryDown = false;
+    private bool getPause = false;
+    private bool getPauseDown = false;
     public void GetPlayerInput()
     {
-        if (Input.GetAxisRaw("Throw Item") == 1)
+        if (Input.GetAxisRaw("Cancel") == 1)
         {
-            if (!getThrowItem)
-                getThrowItemDown = true;
-            getThrowItem = true;
+            if (!getPause)
+                getPauseDown = true;
+            getPause = true;
         }
         else
         {
-            getThrowItem = false;
+            getPause = false;
         }
-        if (Input.GetAxisRaw("Inventory") == 1)
+        if (getPauseDown)
         {
-            if (!getInventory)
-                getInventoryDown = true;
-            getInventory = true;
-        }
-        else
-        {
-            getInventory = false;
-        }
-
-        if (Input.GetAxisRaw("Hotbar Slot 0") == 1)
-            inventory.SwitchToItem(0);
-        else if (Input.GetAxisRaw("Hotbar Slot 1") == 1)
-            inventory.SwitchToItem(1);
-        else if (getThrowItemDown && inventory.heldItemIndex != -1)
-            inventory.ThrowHeldItem(1);
-        else if (inventory.heldItemIndex != -1)
-        {
-            Item heldItem = inventory.GetHeldItemRef();
-
-            if (heldItem.GetType() == typeof(Gun))
+            if (inventoriesUIParent.activeSelf)
             {
-                if (Input.GetAxisRaw("Fire1") == 1)
-                    ((Gun)heldItem).GetFireKey();
-                if (Input.GetAxisRaw("Fire2") == 1)
-                    ((Gun)heldItem).GetADSKey();
-                if (Input.GetAxisRaw("Reload") == 1)
-                    ((Gun)heldItem).GetReloadKey();
+                ToggleInventoriesUI();
             }
             else
             {
-                if (Input.GetAxisRaw("Fire1") == 1 && inventory.heldItemIndex != -1)
-                    heldItem.PrimaryItemEvent(gameObject);
-                if (Input.GetAxisRaw("Fire2") == 1 && inventory.heldItemIndex != -1)
-                    heldItem.SecondaryItemEvent(gameObject);
+                TogglePauseMenu();
             }
         }
 
-        if (Input.GetAxisRaw("Interact1") == 1)
+        if (!pauseUI.activeSelf)
         {
-            Transform origin = eyePosition.transform;
-            RaycastHit hitInfo;
-            if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, interactDistance))
+            if (Input.GetAxisRaw("Throw Item") == 1)
             {
-                hitInfo.collider.SendMessageUpwards("PrimaryInteractEvent", gameObject, SendMessageOptions.DontRequireReceiver);
+                if (!getThrowItem)
+                    getThrowItemDown = true;
+                getThrowItem = true;
             }
-        }
-        if (Input.GetAxisRaw("Interact2") == 1)
-        {
-            Transform origin = eyePosition.transform;
-            RaycastHit hitInfo;
-            if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, interactDistance))
+            else
             {
-                hitInfo.collider.SendMessageUpwards("SecondaryInteractEvent", gameObject, SendMessageOptions.DontRequireReceiver);
+                getThrowItem = false;
             }
-        }
+            if (Input.GetAxisRaw("Inventory") == 1)
+            {
+                if (!getInventory)
+                    getInventoryDown = true;
+                getInventory = true;
+            }
+            else
+            {
+                getInventory = false;
+            }
+            if (getInventoryDown)
+            {
+                ToggleInventoriesUI();
+            }
 
-        if (getInventoryDown)
-        {
-            ToggleInventoriesUI();
+            if (Input.GetAxisRaw("Hotbar Slot 0") == 1)
+                inventory.SwitchToItem(0);
+            else if (Input.GetAxisRaw("Hotbar Slot 1") == 1)
+                inventory.SwitchToItem(1);
+            else if (getThrowItemDown && inventory.heldItemIndex != -1)
+                inventory.ThrowHeldItem(1);
+            else if (inventory.heldItemIndex != -1)
+            {
+                Item heldItem = inventory.GetHeldItemRef();
+
+                if (heldItem.GetType() == typeof(Gun))
+                {
+                    if (Input.GetAxisRaw("Fire1") == 1)
+                        ((Gun)heldItem).GetFireKey();
+                    if (Input.GetAxisRaw("Fire2") == 1)
+                        ((Gun)heldItem).GetADSKey();
+                    if (Input.GetAxisRaw("Reload") == 1)
+                        ((Gun)heldItem).GetReloadKey();
+                }
+                else
+                {
+                    if (Input.GetAxisRaw("Fire1") == 1 && inventory.heldItemIndex != -1)
+                        heldItem.PrimaryItemEvent(gameObject);
+                    if (Input.GetAxisRaw("Fire2") == 1 && inventory.heldItemIndex != -1)
+                        heldItem.SecondaryItemEvent(gameObject);
+                }
+            }
+
+            if (Input.GetAxisRaw("Interact1") == 1)
+            {
+                Transform origin = eyePosition.transform;
+                RaycastHit hitInfo;
+                if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, interactDistance))
+                {
+                    hitInfo.collider.SendMessageUpwards("PrimaryInteractEvent", gameObject, SendMessageOptions.DontRequireReceiver);
+                }
+            }
+            if (Input.GetAxisRaw("Interact2") == 1)
+            {
+                Transform origin = eyePosition.transform;
+                RaycastHit hitInfo;
+                if (Physics.Raycast(origin.position, origin.TransformDirection(Vector3.forward), out hitInfo, interactDistance))
+                {
+                    hitInfo.collider.SendMessageUpwards("SecondaryInteractEvent", gameObject, SendMessageOptions.DontRequireReceiver);
+                }
+            }
         }
 
         getThrowItemDown = false;
         getInventoryDown = false;
+        getPauseDown = false;
     }
 
     public void PickupItemsNearby()
@@ -289,6 +322,9 @@ public class CharacterController : MonoBehaviour
         inventoriesUIParent.SetActive(!inventoriesUIParent.activeSelf);
         if (inventoriesUIParent.activeSelf)
         {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
             if (playerInventoryUI.transform.childCount == 0)
                 GeneratePlayerInventoryUI();
 
@@ -310,6 +346,9 @@ public class CharacterController : MonoBehaviour
         }
         else
         {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+
             if (machineUI != null)
             {
                 Destroy(machineUI);
@@ -369,8 +408,25 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-    public void Die()
+    public void TogglePauseMenu()
+    {
+        pauseUI.SetActive(!pauseUI.activeSelf);
+        if (pauseUI.activeSelf)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+    }
+
+    public void Die(GameObject caller)
     {
         Destroy(gameObject);
+        GameObject gameManager = GameObject.Find("GameManager");
+        if (caller != gameManager) gameManager.GetComponent<GameManager>().KillPlayer();
     }
 }

@@ -19,16 +19,11 @@ public class GameManager : MonoBehaviour
         spawnUI.SetActive(true);
     }
 
-    private void Update()
-    {
-        if(activePlayer != null && activePlayer.transform.position.y < -5)
-        {
-            KillPlayer();
-        }
-    }
-
     public void Spawn()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         int i = Random.Range(0, spawnPoints.Length);
         activePlayer = Instantiate(playerPrefab, spawnPoints[i].position, spawnPoints[i].rotation);
         spawnUI.SetActive(false);
@@ -37,16 +32,22 @@ public class GameManager : MonoBehaviour
 
     public void KillPlayer()
     {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
         if (activePlayer != null)
         {
-            activePlayer.GetComponent<CharacterController>().Die();
-            activePlayer = null;
+            activePlayer.GetComponent<CharacterController>().Die(gameObject);
         }
+        activePlayer = null;
         respawnUI.SetActive(true);
     }
 
     public void ReturnToMainMenu()
     {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
         KillPlayer();
         SceneManager.LoadScene(mainMenuScene);
     }
