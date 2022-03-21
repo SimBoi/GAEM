@@ -223,7 +223,7 @@ public class Gun : Item
 
     private void SpawnBulletHole(RaycastHit hit)
     {
-        Instantiate(testBulletHole, hit.point, hit.transform.rotation);
+        //Instantiate(testBulletHole, hit.point, hit.transform.rotation);
     }
 
     private void DealDamage(Collider collider, float dmg)
