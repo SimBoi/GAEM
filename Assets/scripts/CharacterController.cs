@@ -98,6 +98,7 @@ public class CharacterController : MonoBehaviour
 
         if (!pauseUI.activeSelf)
         {
+            // gen button down handlers
             if (Input.GetAxisRaw("Throw Item") == 1)
             {
                 if (!getThrowItem)
@@ -123,13 +124,18 @@ public class CharacterController : MonoBehaviour
                 ToggleInventoriesUI();
             }
 
+            // mouse look inputs
+            if (!inventoriesUIParent.activeSelf)
+                mouseLook.changeDirection(Input.GetAxis("Mouse Y"), Input.GetAxis("Mouse X"));
+
+            // inventory and item inputs
             if (Input.GetAxisRaw("Hotbar Slot 0") == 1)
                 inventory.SwitchToItem(0);
             else if (Input.GetAxisRaw("Hotbar Slot 1") == 1)
                 inventory.SwitchToItem(1);
             else if (getThrowItemDown && inventory.heldItemIndex != -1)
                 inventory.ThrowHeldItem(1);
-            else if (inventory.heldItemIndex != -1)
+            else if (inventory.heldItemIndex != -1 && !inventoriesUIParent.activeSelf)
             {
                 Item heldItem = inventory.GetHeldItemRef();
 
@@ -151,6 +157,7 @@ public class CharacterController : MonoBehaviour
                 }
             }
 
+            // machine inputs
             if (Input.GetAxisRaw("Interact1") == 1)
             {
                 Transform origin = eyePosition.transform;
@@ -171,6 +178,7 @@ public class CharacterController : MonoBehaviour
             }
         }
 
+        // get button down handlers reset
         getThrowItemDown = false;
         getInventoryDown = false;
         getPauseDown = false;

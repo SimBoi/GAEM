@@ -17,8 +17,9 @@ public class MouseLook : MonoBehaviour
 
     private void Update()
     {
-        lookDegrees += new Vector2(Input.GetAxis("Mouse Y"), Input.GetAxis("Mouse X")) * sensitivity;
-        
+        // enable when you want inputs handled directly from the script
+        //lookDegrees += new Vector2(Input.GetAxis("Mouse Y"), Input.GetAxis("Mouse X")) * sensitivity;
+
         if (fovTarget == defaultFov)
         {
             if (characterCamera.fieldOfView < defaultFov)
@@ -36,6 +37,11 @@ public class MouseLook : MonoBehaviour
             }
         }
         fovTarget = defaultFov;
+    }
+
+    public void changeDirection(float xRotation, float yRotation)
+    {
+        lookDegrees += new Vector2(xRotation, yRotation) * sensitivity;
     }
 
     private void LateUpdate()

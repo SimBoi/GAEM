@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum WeaponType
 {
@@ -36,6 +37,7 @@ public class Gun : Item
     public Transform raySpawnPoint;
     public GameObject crosshairUI;
     public GameObject reloadUI;
+    public GameObject ammoUI;
 
     //gets set when calling an event
     private GameObject eventCaller = null;
@@ -120,28 +122,34 @@ public class Gun : Item
         reloadTimer = 0;
     }
 
-    private void Update()
+    public void Update()
     {
-        if (isReloading)
+        if (isHeld)
         {
-            crosshairUI.SetActive(false);
-            reloadUI.SetActive(true);
-            reloadTimer += Time.deltaTime;
-            if (reloadTimer >= reloadTime)
+            if (isReloading)
             {
-                magazine += (ushort)characterController.inventory.ConsumeFromTotalStack(ammoType, magazineSize - magazine, out _, out _);
-                reloadTimer = 0;
-                isReloading = false;
+                crosshairUI.SetActive(false);
+                reloadUI.SetActive(true);
+                ammoUI.SetActive(false);
+                reloadTimer += Time.deltaTime;
+                if (reloadTimer >= reloadTime)
+                {
+                    magazine += (ushort)characterController.inventory.ConsumeFromTotalStack(ammoType, magazineSize - magazine, out _, out _);
+                    reloadTimer = 0;
+                    isReloading = false;
+                }
             }
-        }
-        else
-        {
-            crosshairUI.SetActive(true);
-            reloadUI.SetActive(false);
+            else
+            {
+                crosshairUI.SetActive(true);
+                reloadUI.SetActive(false);
+                ammoUI.SetActive(true);
+                ammoUI.GetComponent<Text>().text = magazine + " / " + characterController.inventory.GetTotalStackSize(ammoType);
+            }
         }
     }
 
-    private void LateUpdate()
+    public void LateUpdate()
     {
         isAiming = false;
     }
