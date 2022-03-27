@@ -39,6 +39,8 @@ public class CharacterController : MonoBehaviour
     public float inventoryUIScale;
     private List<List<InventorySlotUI>> inventoriesUI = new List<List<InventorySlotUI>>();
     private GameObject machineUI = null;
+    public GameObject fpsArms;
+    public RuntimeAnimatorController defaultFpsArmsAnimatorController;
 
     public void Start()
     {
@@ -64,6 +66,7 @@ public class CharacterController : MonoBehaviour
         UpdateHealthUI();
         UpdateHeldItemUI();
         UpdateClickedItemUI();
+        UpdateHeldItemAnimationController();
     }
 
     private bool getThrowItem = false;
@@ -428,6 +431,21 @@ public class CharacterController : MonoBehaviour
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+        }
+    }
+
+    public void UpdateHeldItemAnimationController()
+    {
+        if (inventory.heldItemIndex == -1)
+        {
+            fpsArms.GetComponent<Animator>().runtimeAnimatorController = defaultFpsArmsAnimatorController;
+        }
+        else
+        {
+            if (inventory.GetHeldItemRef().fpsArmsAnimatorOverrideController != null)
+                fpsArms.GetComponent<Animator>().runtimeAnimatorController = inventory.GetHeldItemRef().fpsArmsAnimatorOverrideController;
+            else
+                fpsArms.GetComponent<Animator>().runtimeAnimatorController = defaultFpsArmsAnimatorController;
         }
     }
 
