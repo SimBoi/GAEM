@@ -12,6 +12,7 @@ public enum MachineEventType
 
 public class Machine : Block
 {
+    [Header("Machine Properties")]
     public int[] inventorySizes;
     public RectTransform machineUI;
     public Port[] ports;

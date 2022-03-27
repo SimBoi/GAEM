@@ -11,13 +11,17 @@ public enum WeaponType
 
 public class Gun : Item
 {
+    [Header("Gun General Properties")]
     public WeaponType type;
-
     public ushort magazineSize;
     public ushort magazine;
     public float reloadTime;
     public short damage;
     public ushort fireRate;
+    public ushort effectiveRange;
+    public ushort maxRange;
+
+    [Header("Accuracy Properties")]
     public float adsZoom;
     public float adsTime;
     public float adsAccuracy;
@@ -25,13 +29,14 @@ public class Gun : Item
     public float moveAccuracy;
     public float accuracyJumpFactor;
     public float accuracyJumpBias;
+
+    [Header("Recoil Properties")]
     public float recoil;
     public float recoilPower;
     public float maxRecoilDegree;
-    public ushort effectiveRange;
-    public ushort maxRange;
     //public float swapTime;
 
+    [Header("Settings")]
     public Item ammoType;
     public GameObject testBulletHole;
     public Transform raySpawnPoint;

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Consumable : Item
 {
+    [Header("Consumable Properties")]
     public float nutritionalValue;
 
     public void CopyFrom(Consumable source)

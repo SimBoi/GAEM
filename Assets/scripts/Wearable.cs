@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Wearable : Item
 {
+    [Header("Wearable Properties")]
     public float armorStrength;
     public ArmorPiece armorPiece;
 

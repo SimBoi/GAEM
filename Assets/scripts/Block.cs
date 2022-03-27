@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Block : Item
 {
+    [Header("Block Properties")]
     public int blockID;
     public float stiffness;
     public bool hasCustomMesh;

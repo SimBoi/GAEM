@@ -5,6 +5,7 @@ using  UnityEngine;
 
 public class Item : MonoBehaviour
 {
+    [Header("Item Properties")]
     public ItemPrefabs itemPrefabs;
     public string name;
     public int id;
@@ -21,6 +22,7 @@ public class Item : MonoBehaviour
     public bool isDestroyed = false;
     public Sprite icon;
     public GameObject ui = null;
+    public AnimatorOverrideController fpsArmsAnimatorOverrideController;
 
     public void CopyFrom(Item source)
     {
