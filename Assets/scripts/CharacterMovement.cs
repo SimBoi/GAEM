@@ -1,391 +1,280 @@
-﻿using System.Collections;
-using System.Collections.Specialized;
-using System.Security.Cryptography;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-
-public enum GroundedState
-{
-    Ground,
-    Air,
-    Slope
-}
 
 public enum Stance
 {
-    Standing,
-    Walking,
-    Sprinting,
-    Crouching,
-    Sliding
+    Idle,
+    Walk,
+    Sprint,
+    CrouchIdle,
+    CrouchWalk,
+    Slide,
+    LedgeGrab,
+    AirborneStand,
+    AirborneCrouch
 }
 
 public class CharacterMovement : MonoBehaviour
 {
-    // GROUND SPEEDS
-    public float speed = 4f;
-    public float acceleration = 30f;
-
-    // AIR SPEEDS
-    public float airSpeedFactor = 1f;
-    public float airAccelFactor = 0.4f;
-    public float airDrag = 0.01f;
-    public float airAccelDelay = 1.5f;
-    private float airAccelDelayFactor;
-    
-    // JUMP
-    public float jumpForce = 5f;
-    public float jumpDelay = 0.1f;
-    private bool jump = false;
-
-    // CROUCH
-    public float crouchSpeedFactor = 0.5f;
-    public float crouchHeightFactor = 0.5f;
-    public float crouchingDuration = 0.1f;
-
-    // SPRINT
-    public float sprintSpeedFactor = 1.5f;
-    public float sprintAngleLimitation = 1.5f;
-
-    // Slide
-    public float minSlideSpeedPercentage = 0.8f;
-    public float slideExitSpeedPercentage = 0.25f;
-    public float slideForceBoost = 5f;
-    public float slideBoostDelay = 3f;
-    public float slideDrag = 10f;
-
-    // PLAYER POSITION
-    public float positionSmoothness = 0f;
-    public Transform smoothedObject;
+    [Header("General")]
+    public Rigidbody rb;
+    public CapsuleCollider capsuleCollider;
+    public float height;
     public Transform eyeTransform;
-    private Vector3 lastPosition;
-    private Vector3 velocity = Vector3.zero;
-    public Vector3 relativeVelocity;
-
-    // OTHER
-    public bool hasVoxelCollider;
-    public float height = 2f;
     public float eyeHeight = 0.8f;
     public float skinWidth = 0.1f;
     public float groundMaxDistance = 0.02f;
-    public float slopeLimit = 36f;
-    private Rigidbody rb;
-    public GroundedState groundedState = GroundedState.Ground;
-    public Stance stance = Stance.Standing;
-    private CapsuleCollider collider;
+    public float slopeLimit = 36;
 
-    void Start()
+    [Header("Standing Parameters")]
+    public float groundedAcceleration;
+    public float groundedDeceleration;
+    public float walkSpeed;
+    public float sprintSpeedFactor;
+    public float sprintAngleLimitation = 1.5f;
+    public float jumpSpeed;
+
+    [Header("Crouch & Slide Parameters")]
+    public float crouchSpeedFactor;
+    public float crouchHeightPercentage;
+    public float crouchingDuration = 0.35f;
+    public float minSlideSpeedPercentage = 0.8f;
+    public float slideExitSpeedPercentage = 0.25f;
+    public float slideForceBoost = 5;
+    public float slideBoostDelay = 3;
+    public float slideDeceleration;
+
+    [Header("In Air Parameters")]
+    public float airAcceleration;
+    public float airDeceleration;
+    public float airSpeed;
+
+    [HideInInspector]
+    public bool grounded;
+    [HideInInspector]
+    public Stance stance;
+
+    // Update is called once per frame
+    private void Update()
     {
-        rb = gameObject.GetComponent<Rigidbody>();
-        collider = gameObject.GetComponent<CapsuleCollider>();
-        lastPosition = transform.position;
+        UpdateCrouchHeight();
+
+        if (Input.GetButtonDown("Jump"))
+            Jump();
     }
 
-    private float crouchVelocity = 0;
-    void Update()
+    private void FixedUpdate()
     {
-        // get the current stance
-        stance = GetStance();
-
-        // get jump key down
-        if (GetJumpKeyDown()) jump = true;
-
-        // smoothly change height when crouching/standing
-        float targetHeight = ((stance == Stance.Crouching && groundedState != GroundedState.Air ) || stance == Stance.Sliding) ? crouchHeightFactor * height : height;
-        float smoothedHeight = Mathf.SmoothDamp(collider.height, targetHeight, ref crouchVelocity, crouchingDuration);
-        float newYPosition = transform.position.y + (smoothedHeight - collider.height) / 2;
-        transform.position = new Vector3(transform.position.x, newYPosition, transform.position.z);
-        collider.height = smoothedHeight;
-        eyeTransform.localPosition = new Vector3(0, eyeHeight*(smoothedHeight/height), 0);
+        UpdateGrounded();
+        UpdateStance();
+        UpdateMovement();
     }
 
-    private bool wasSliding = false;
-    void FixedUpdate()
-    {
-        if (jump)
-        {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            jump = false;
-        }
-
-        groundedState = GetGroundedState();
-
-        Vector3 input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
-        relativeVelocity = transform.InverseTransformDirection(rb.velocity);
-
-        if (groundedState == GroundedState.Air || groundedState == GroundedState.Slope || stance == Stance.Sliding)
-        {
-            airAccelDelayFactor += (1 / airAccelDelay) * Time.fixedDeltaTime;
-            if (airAccelDelayFactor > 1) airAccelDelayFactor = 1;
-            float airMaxSpeed = speed * airSpeedFactor;
-            float airAcceleration = acceleration * airAccelFactor * airAccelDelayFactor;
-
-            Vector3 force = new Vector3(0,0,0);
-            if (stance == Stance.Sliding && groundedState != GroundedState.Air)
-                input = new Vector3(0, 0, 0);
-
-            //calculate force
-            force.z = CalcAirForce(relativeVelocity.z, input.normalized.z, airMaxSpeed, airDrag, airAcceleration);
-            force.x = CalcAirForce(relativeVelocity.x, input.normalized.x, airMaxSpeed, airDrag, airAcceleration);
-            force.y = 0;
-
-            if (stance == Stance.Sliding && groundedState != GroundedState.Air)
-            {
-                if (wasSliding == false)
-                {   
-                    wasSliding = true;
-                    if (CanSlideBoost())
-                        rb.AddRelativeForce(relativeVelocity.normalized * slideForceBoost, ForceMode.Impulse);
-                }
-            }
-            else
-            {
-                wasSliding = false;
-            }
-
-            if (groundedState == GroundedState.Air)
-            {
-                //substract air drag from force
-                force.z -= CalcAirDrag(relativeVelocity.z, airDrag);
-                force.x -= CalcAirDrag(relativeVelocity.x, airDrag);
-            }
-            else
-            {
-                //substract slide drag from force
-                force -= CalcSlideDrag(relativeVelocity, slideDrag, speed * sprintSpeedFactor);
-            }
-            
-            //apply force
-            rb.AddRelativeForce(force, ForceMode.Acceleration);
-        }
-        else
-        {
-            wasSliding = false;
-            airAccelDelayFactor = 0;
-            //crouch/sprint
-            float stanceFactor = 1;
-            if (stance == Stance.Sprinting)
-            {
-                stanceFactor = sprintSpeedFactor;
-                input.z *= sprintAngleLimitation;
-            }
-            else if (stance == Stance.Crouching)
-            {
-                stanceFactor = crouchSpeedFactor;
-            }
-            
-            //calculate force
-            Vector3 force;
-            force.z = CalcGroundedForce(relativeVelocity.z, input.normalized.z, speed * stanceFactor, acceleration);
-            force.x = CalcGroundedForce(relativeVelocity.x, input.normalized.x, speed * stanceFactor, acceleration);
-            force.y = 0;
-
-            //substract drag from force
-            force.z -= CalcGroundedDrag(relativeVelocity.z, input.normalized.z, speed * stanceFactor, acceleration);
-            force.x -= CalcGroundedDrag(relativeVelocity.x, input.normalized.x, speed * stanceFactor, acceleration);
-            force.y -= CalcGroundedDrag(relativeVelocity.y, 0, speed, acceleration);
-
-            //apply force
-            rb.AddRelativeForce(force, ForceMode.Acceleration);
-        }
-    }
-
-    void LateUpdate()
-    {
-        SmoothPosition();
-    }
-
-    GroundedState GetGroundedState()
+    // updates grounded variable
+    private void UpdateGrounded()
     {
         RaycastHit hit;
-        float radius = collider.radius - skinWidth;
-        float distance = hasVoxelCollider ? (collider.height / 2) + groundMaxDistance : (collider.height/2) + groundMaxDistance - radius;
+        float radius = capsuleCollider.radius - skinWidth;
+        float distance = (capsuleCollider.height / 2) + groundMaxDistance - radius;
 
-        if (hasVoxelCollider)
+        if (Physics.SphereCast(transform.position, radius, Vector3.down, out hit, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
         {
-            if (Physics.SphereCast(transform.position, radius, Vector3.down, out hit, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            float slopeAngle = Vector3.Angle(Vector3.up, hit.normal);
+            if (slopeAngle < slopeLimit)
             {
-                Vector3 collisionVector = hit.point - transform.position;
-                float distanceFromGround = collisionVector.magnitude * Mathf.Cos(Vector3.Angle(collisionVector, Vector3.down) * Mathf.Deg2Rad) - (height/2); // collisionDistance*cos(angle(rayDirection, collisionDirection)) - height/2
-                if (distanceFromGround <= groundMaxDistance)
+                if (stance != Stance.Slide)
                 {
-                    return GroundedState.Ground;
-                }
-                else
-                {
-                    return GroundedState.Air;
-                }
-            }
-            else
-            {
-                return GroundedState.Air;
-            }
-        }
-        else
-        {
-            if (Physics.SphereCast(transform.position, radius, Vector3.down, out hit, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
-            {
-                float slopeAngle = Vector3.Angle(Vector3.up, hit.normal);
-                if (slopeAngle < slopeLimit)
-                {
-                    Vector3 counterForce = Vector3.RotateTowards(hit.normal, Vector3.down, -Mathf.PI / 2, 0.0f) * Mathf.Sin(slopeAngle * Mathf.Deg2Rad) * Physics.gravity.magnitude * rb.mass; // -m*g*sin(slopeAngle)
+                    // counterForce = -m*g*sin(slopeAngle)
+                    Vector3 counterForce = Vector3.RotateTowards(hit.normal, Vector3.down, -Mathf.PI / 2, 0.0f) * Mathf.Sin(slopeAngle * Mathf.Deg2Rad) * Physics.gravity.magnitude * rb.mass;
                     rb.AddForce(counterForce, ForceMode.Force);
-                    return GroundedState.Ground;
                 }
-                else
-                {
-                    return GroundedState.Slope;
-                }
+                grounded = true;
             }
             else
             {
-                return GroundedState.Air;
+                grounded = false;
             }
-        }
-    }
-
-    Stance GetStance()
-    {
-        Vector3 relativeVelocity = transform.InverseTransformDirection(new Vector3(rb.velocity.x, 0, rb.velocity.z));
-        float rationalVelocity = relativeVelocity.magnitude / (speed*sprintSpeedFactor);
-
-        if (stance != Stance.Sliding)
-        {
-            if (Input.GetAxisRaw("Vertical") == 1 && Input.GetAxisRaw("Sprint") == 1 && Input.GetAxisRaw("Crouch") == 1 && rationalVelocity >= minSlideSpeedPercentage)
-                return Stance.Sliding;
-            if (Input.GetAxisRaw("Crouch") == 1 || !CanStandUp())
-                return Stance.Crouching;
-            if (Input.GetAxisRaw("Horizontal") == 0 && Input.GetAxisRaw("Vertical") == 0)
-                return Stance.Standing;
-            if (Input.GetAxisRaw("Vertical") == 1 && Input.GetAxisRaw("Sprint") == 1)
-                return Stance.Sprinting;
-            return Stance.Walking;
-        }
-        else if (Input.GetAxisRaw("Crouch") == 0 || rationalVelocity <= slideExitSpeedPercentage)
-        {
-            stance = Stance.Walking;
-            return GetStance();
         }
         else
         {
-            return Stance.Sliding;
+            grounded = false;
+        }
+    }    
+
+    // updated stance variable, and initiates slide if needed
+    private void UpdateStance()
+    {
+        if (grounded)
+        {
+            Vector3 relativeVelocity = transform.InverseTransformDirection(new Vector3(rb.velocity.x, 0, rb.velocity.z));
+            float rationalVelocity = relativeVelocity.magnitude / (walkSpeed * sprintSpeedFactor);
+
+            if (!(stance == Stance.Slide && Input.GetAxisRaw("Crouch") == 1 && rationalVelocity > slideExitSpeedPercentage))
+            {
+                if (Input.GetAxisRaw("Crouch") == 1 || !CanStandUp())
+                {
+                    if (((Input.GetAxisRaw("Vertical") == 1 && Input.GetAxisRaw("Sprint") == 1) || (stance == Stance.AirborneCrouch || stance == Stance.AirborneStand)) && rationalVelocity >= minSlideSpeedPercentage)
+                        InitiateSlide();
+                    else if (Input.GetAxisRaw("Horizontal") == 0 && Input.GetAxisRaw("Vertical") == 0)
+                        stance = Stance.CrouchIdle;
+                    else
+                        stance = Stance.CrouchWalk;
+                }
+                else
+                {
+                    if (Input.GetAxisRaw("Horizontal") == 0 && Input.GetAxisRaw("Vertical") == 0)
+                        stance = Stance.Idle;
+                    else if (Input.GetAxisRaw("Vertical") == 1 && Input.GetAxisRaw("Sprint") == 1)
+                        stance = Stance.Sprint;
+                    else
+                        stance = Stance.Walk;
+                }
+            }
+        }
+        else
+        {
+            if (Input.GetAxisRaw("Crouch") == 1 || !CanStandUp())
+                stance = Stance.AirborneCrouch;
+            else
+                stance = Stance.AirborneStand;
         }
     }
 
-    bool CanStandUp()
+    // smoothly change height when crouching/standing for capsule and update eye position
+    private float smoothedHeightVelocity = 0;
+    private void UpdateCrouchHeight()
     {
-        if (stance != Stance.Crouching) return true;
+        float targetHeight = (stance == Stance.CrouchIdle || stance == Stance.CrouchWalk || stance == Stance.AirborneCrouch || stance == Stance.Slide) ? crouchHeightPercentage * height : height;
+        float smoothedHeight = Mathf.SmoothDamp(capsuleCollider.height, targetHeight, ref smoothedHeightVelocity, crouchingDuration);
+        if (grounded)
+        {
+            // stick to the ground when changing height
+            float newYPosition = transform.position.y + (smoothedHeight - capsuleCollider.height) / 2;
+            transform.position = new Vector3(transform.position.x, newYPosition, transform.position.z);
+        }
+        capsuleCollider.height = smoothedHeight;
+        eyeTransform.localPosition = new Vector3(0, eyeHeight * (smoothedHeight / height), 0);
+    }    
+
+    private bool CanStandUp()
+    {
+        if (!(stance == Stance.CrouchIdle || stance == Stance.CrouchWalk)) return true;
 
         RaycastHit hit;
-        float radius = collider.radius - skinWidth;
-        float distance = height - (collider.height / 2) - radius - 0.01f;
+        float radius = capsuleCollider.radius - skinWidth;
+        float distance = height - (capsuleCollider.height / 2) - radius - 0.01f;
 
         return !(Physics.SphereCast(transform.position, radius, Vector3.up, out hit, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore));
     }
 
-    private bool jumpWasPressed = false;
-    bool GetJumpKeyDown()
+    private void UpdateMovement()
     {
-        bool jumpKeyDown = false;
-        if (Input.GetAxisRaw("Jump") == 1)
+        Vector3 input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+        Vector3 relativeVelocity = transform.InverseTransformDirection(rb.velocity);
+
+        // calculate maxSpeed/acceleration/deceleration based on current stance and grounded state
+        float acceleration;
+        float deceleration;
+        float maxSpeed;
+        if (grounded)
         {
-            if (!jumpWasPressed) jumpKeyDown = true;
-            jumpWasPressed = true;
+            if (stance == Stance.Slide)
+            {
+                acceleration = 0;
+                deceleration = slideDeceleration;
+                maxSpeed = 0;
+            }
+            else
+            {
+                acceleration = groundedAcceleration;
+                deceleration = groundedDeceleration;
+                maxSpeed = walkSpeed;
+                if (stance == Stance.Sprint)
+                {
+                    maxSpeed *= sprintSpeedFactor;
+                    input.z *= sprintAngleLimitation;
+                }
+                else if (stance == Stance.CrouchWalk || stance == Stance.CrouchIdle)
+                {
+                    maxSpeed *= crouchSpeedFactor;
+                }
+            }
         }
         else
         {
-            jumpWasPressed = false;
+            acceleration = airAcceleration;
+            deceleration = airDeceleration;
+            maxSpeed = airSpeed;
         }
 
-        if (jumpKeyDown && CanJump())
-            return true;
-        else
-            return false;
-    }
-
-    private bool jumpInDelay = false;
-    bool CanJump()
-    {
-        if (!jumpInDelay && groundedState == GroundedState.Ground && stance != Stance.Crouching)
+        // calculate velocity change
+        float zVelocityChange;
+        float xVelocityChange;
+        float zTargetSpeed = maxSpeed * input.normalized.z;
+        float xTargetSpeed = maxSpeed * input.normalized.x;
+        if (Mathf.Abs(relativeVelocity.z) > Mathf.Abs(zTargetSpeed))
         {
-            StartCoroutine(JumpDelay());
-            return true;
+            if (relativeVelocity.z > zTargetSpeed)
+                zVelocityChange = Mathf.Clamp(-deceleration * Time.fixedDeltaTime, zTargetSpeed - relativeVelocity.z, 0);
+            else
+                zVelocityChange = Mathf.Clamp(deceleration * Time.fixedDeltaTime, 0, zTargetSpeed - relativeVelocity.z);
         }
-        return false;
+        else
+        {
+            if (relativeVelocity.z < zTargetSpeed)
+                zVelocityChange = Mathf.Clamp(acceleration * Time.fixedDeltaTime, 0, zTargetSpeed - relativeVelocity.z);
+            else
+                zVelocityChange = Mathf.Clamp(-acceleration * Time.fixedDeltaTime, zTargetSpeed - relativeVelocity.z, 0);
+        }
+        if (Mathf.Abs(relativeVelocity.x) > Mathf.Abs(xTargetSpeed))
+        {
+            if (relativeVelocity.x > xTargetSpeed)
+                xVelocityChange = Mathf.Clamp(-deceleration * Time.fixedDeltaTime, xTargetSpeed - relativeVelocity.x, 0);
+            else
+                xVelocityChange = Mathf.Clamp(deceleration * Time.fixedDeltaTime, 0, xTargetSpeed - relativeVelocity.x);
+        }
+        else
+        {
+            if (relativeVelocity.x < xTargetSpeed)
+                xVelocityChange = Mathf.Clamp(acceleration * Time.fixedDeltaTime, 0, xTargetSpeed - relativeVelocity.x);
+            else
+                xVelocityChange = Mathf.Clamp(-acceleration * Time.fixedDeltaTime, xTargetSpeed - relativeVelocity.x, 0);
+        }
+
+        // apply velocity change
+        relativeVelocity.z += zVelocityChange;
+        relativeVelocity.x += xVelocityChange;
+        rb.velocity = transform.TransformDirection(relativeVelocity);
     }
-    
-    IEnumerator JumpDelay()
+
+    private void Jump()
     {
-        jumpInDelay = true;
-        yield return new WaitForSeconds(jumpDelay);
-        jumpInDelay = false;
+        if (!grounded) return;
+
+        Vector3 v = rb.velocity;
+        if (v.y < jumpSpeed)
+        {
+            v.y = jumpSpeed;
+            rb.velocity = v;
+        }
     }
 
     private bool slideBoostInDelay = false;
-    bool CanSlideBoost()
+    private void InitiateSlide()
     {
-        if (!slideBoostInDelay )
+        stance = Stance.Slide;
+        if (!slideBoostInDelay)
         {
             StartCoroutine(SlideBoostDelay());
-            return true;
+            rb.AddForce(rb.velocity.normalized * slideForceBoost, ForceMode.Impulse);
         }
-        return false;
     }
-    
+
     IEnumerator SlideBoostDelay()
     {
         slideBoostInDelay = true;
         yield return new WaitForSeconds(slideBoostDelay);
         slideBoostInDelay = false;
-    }
-
-    float CalcGroundedForce(float velocity, float input, float maxSpeed, float acceleration)
-    {
-        if (input == 0) return 0;
-        return Mathf.Abs(velocity / (maxSpeed * input)) > 0.95f ? input * maxSpeed : input * acceleration;
-    }
-
-    float CalcAirForce(float velocity, float input, float maxSpeed, float airDrag, float acceleration)
-    {
-        if (input == 0) return 0;
-        return Mathf.Abs(velocity / (maxSpeed * input)) > 0.95f ? input * CalcAirDrag(maxSpeed, airDrag) : input * acceleration;
-    }
-
-    float CalcGroundedDrag(float velocity, float input, float maxSpeed, float acceleration)
-    {
-        float drag;
-        float rationalVelocity = input != 0 ? Mathf.Abs(velocity / (maxSpeed * input)) : Mathf.Abs(velocity / maxSpeed);
-        
-        if (rationalVelocity > 1.1f) drag = 10 * velocity;
-        else if (rationalVelocity > 0.95f) drag = velocity;
-        else if (input == 0 || (input < 0 && velocity > 0) || (input > 0 && velocity < 0))
-        {
-            if (rationalVelocity > 0.25f) drag = acceleration;
-            else drag = 0.3f * acceleration * Mathf.Sqrt(Mathf.Abs(velocity));
-        }
-        else drag = 0;
-
-        return Mathf.Abs(drag) * Mathf.Sign(velocity);
-    }
-
-    float CalcAirDrag(float velocity, float airDrag)
-    {
-        return Mathf.Abs(airDrag * Mathf.Pow(Mathf.Abs(velocity), 2)) * Mathf.Sign(velocity);
-    }
-    
-    Vector3 CalcSlideDrag(Vector3 velocity, float slideDrag, float maxSpeed)
-    {
-        Vector3 drag;
-        float rationalVelocity = Mathf.Abs(velocity.magnitude / maxSpeed);
-
-        if (rationalVelocity > 0.8f)
-            return velocity.normalized * slideDrag / 1.8f;
-        else
-            return velocity.normalized * slideDrag * rationalVelocity;
-    }
-
-    void SmoothPosition()
-    {
-        smoothedObject.position = Vector3.SmoothDamp(lastPosition, transform.position, ref velocity, positionSmoothness);
-        lastPosition = smoothedObject.position;
     }
 }

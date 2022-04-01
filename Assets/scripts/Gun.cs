@@ -11,13 +11,17 @@ public enum WeaponType
 
 public class Gun : Item
 {
+    [Header("Gun General Properties")]
     public WeaponType type;
-
     public ushort magazineSize;
     public ushort magazine;
     public float reloadTime;
     public short damage;
     public ushort fireRate;
+    public ushort effectiveRange;
+    public ushort maxRange;
+
+    [Header("Accuracy Properties")]
     public float adsZoom;
     public float adsTime;
     public float adsAccuracy;
@@ -25,13 +29,14 @@ public class Gun : Item
     public float moveAccuracy;
     public float accuracyJumpFactor;
     public float accuracyJumpBias;
+
+    [Header("Recoil Properties")]
     public float recoil;
     public float recoilPower;
     public float maxRecoilDegree;
-    public ushort effectiveRange;
-    public ushort maxRange;
     //public float swapTime;
 
+    [Header("Settings")]
     public Item ammoType;
     public GameObject testBulletHole;
     public Transform raySpawnPoint;
@@ -214,13 +219,13 @@ public class Gun : Item
         raySpawnPoint.rotation = transform.rotation;
 
         float angle = Random.Range(0.0000f, 6.2832f);
-        float magnitude = (Mathf.Clamp(Mathf.Sqrt(Mathf.Pow(playerMovement.relativeVelocity.x, 2) + Mathf.Pow(playerMovement.relativeVelocity.z, 2)), 0, playerMovement.speed) * (moveAccuracy - hipAccuracy) / playerMovement.speed) + hipAccuracy;
+        float magnitude = (Mathf.Clamp(Mathf.Sqrt(Mathf.Pow(playerMovement.rb.velocity.x, 2) + Mathf.Pow(playerMovement.rb.velocity.z, 2)), 0, playerMovement.walkSpeed) * (moveAccuracy - hipAccuracy) / playerMovement.walkSpeed) + hipAccuracy;
         float factor = (playerLook.defaultFov - playerLook.GetFov()) / (playerLook.defaultFov - playerLook.defaultFov/adsZoom);
         magnitude = (adsAccuracy * factor) + (magnitude * (1 - factor));
         magnitude *= Mathf.Sqrt(Random.Range(0.0f, 1.0f));
-        if (playerMovement.groundedState == GroundedState.Air)
+        if (!playerMovement.grounded)
         {
-            magnitude *= (accuracyJumpFactor * playerMovement.relativeVelocity.y) + accuracyJumpBias;
+            magnitude *= (accuracyJumpFactor * playerMovement.rb.velocity.y) + accuracyJumpBias;
         }
         Vector3 bloom = new Vector3(0, 0, 0);
         bloom.x = magnitude * Mathf.Cos(angle);
