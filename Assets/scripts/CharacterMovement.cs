@@ -10,9 +10,9 @@ public enum Stance
     CrouchIdle,
     CrouchWalk,
     Slide,
-    LedgeGrab,
     AirborneStand,
-    AirborneCrouch
+    AirborneCrouch,
+    LedgeGrab
 }
 
 public class CharacterMovement : MonoBehaviour
