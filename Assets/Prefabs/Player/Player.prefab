@@ -268,6 +268,7 @@ GameObject:
   - component: {fileID: 2051427869558859579}
   - component: {fileID: 2051427869558859580}
   - component: {fileID: 2051427869558859581}
+  - component: {fileID: 3735179357806212790}
   - component: {fileID: 2051427869558859582}
   - component: {fileID: 1828069676}
   - component: {fileID: 1828069675}
@@ -334,7 +335,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2051427869558859583}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1c17d3b0a838a5c4fa6f78e804d59baf, type: 3}
   m_Name: 
@@ -368,6 +369,45 @@ MonoBehaviour:
   groundMaxDistance: 0.02
   slopeLimit: 36
   groundedState: 0
+  stance: 0
+--- !u!114 &3735179357806212790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051427869558859583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00bb16c44c71cdd4399f79c828b493f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rb: {fileID: 2051427869558859580}
+  capsuleCollider: {fileID: 2051427869558859579}
+  height: 2
+  eyeTransform: {fileID: 1949629238}
+  eyeHeight: 0.8
+  skinWidth: 0.1
+  groundMaxDistance: 0.02
+  slopeLimit: 36
+  groundedAcceleration: 20
+  groundedDeceleration: 25
+  walkSpeed: 4
+  sprintSpeedFactor: 1.5
+  sprintAngleLimitation: 1.5
+  jumpSpeed: 5
+  crouchSpeedFactor: 0.5
+  crouchHeightPercentage: 0.5
+  crouchingDuration: 0.2
+  minSlideSpeedPercentage: 0.8
+  slideExitSpeedPercentage: 0.25
+  slideForceBoost: 3
+  slideBoostDelay: 3
+  slideDeceleration: 4
+  airAcceleration: 6
+  airDeceleration: 1
+  airSpeed: 4
+  grounded: 0
   stance: 0
 --- !u!114 &2051427869558859582
 MonoBehaviour:
@@ -456,7 +496,7 @@ MonoBehaviour:
   health: {fileID: 1828069676}
   hunger: {fileID: 1828069675}
   interactDistance: 5
-  characterMovement: {fileID: 2051427869558859581}
+  characterMovement: {fileID: 3735179357806212790}
   characterCamera: {fileID: 2051427869518740362}
   mouseLook: {fileID: 2051427869558859582}
   inventory: {fileID: 1828069674}
