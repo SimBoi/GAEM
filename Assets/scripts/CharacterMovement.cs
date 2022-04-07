@@ -26,6 +26,7 @@ public class CharacterMovement : MonoBehaviour
     public float skinWidth = 0.1f;
     public float groundMaxDistance = 0.02f;
     public float slopeLimit = 36;
+    public bool animate;
 
     [Header("Standing Parameters")]
     public float groundedAcceleration;
@@ -62,6 +63,12 @@ public class CharacterMovement : MonoBehaviour
 
         if (Input.GetButtonDown("Jump"))
             Jump();
+
+        if (animate)
+        {
+            SendMessageUpwards("AnimStance", stance);
+            SendMessageUpwards("AnimIsGrounded", grounded);
+        }
     }
 
     private void FixedUpdate()
@@ -257,6 +264,11 @@ public class CharacterMovement : MonoBehaviour
         {
             v.y = jumpSpeed;
             rb.velocity = v;
+        }
+
+        if (animate)
+        {
+            SendMessageUpwards("AnimJump");
         }
     }
 

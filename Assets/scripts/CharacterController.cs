@@ -39,7 +39,7 @@ public class CharacterController : MonoBehaviour
     public float inventoryUIScale;
     private List<List<InventorySlotUI>> inventoriesUI = new List<List<InventorySlotUI>>();
     private GameObject machineUI = null;
-    public GameObject fpsArms;
+    public Animator fpsArms;
     public RuntimeAnimatorController defaultFpsArmsAnimatorController;
 
     public void Start()
@@ -438,14 +438,14 @@ public class CharacterController : MonoBehaviour
     {
         if (inventory.heldItemIndex == -1)
         {
-            fpsArms.GetComponent<Animator>().runtimeAnimatorController = defaultFpsArmsAnimatorController;
+            fpsArms.runtimeAnimatorController = defaultFpsArmsAnimatorController;
         }
         else
         {
             if (inventory.GetHeldItemRef().fpsArmsAnimatorOverrideController != null)
-                fpsArms.GetComponent<Animator>().runtimeAnimatorController = inventory.GetHeldItemRef().fpsArmsAnimatorOverrideController;
+                fpsArms.runtimeAnimatorController = inventory.GetHeldItemRef().fpsArmsAnimatorOverrideController;
             else
-                fpsArms.GetComponent<Animator>().runtimeAnimatorController = defaultFpsArmsAnimatorController;
+                fpsArms.runtimeAnimatorController = defaultFpsArmsAnimatorController;
         }
     }
 
@@ -454,5 +454,20 @@ public class CharacterController : MonoBehaviour
         Destroy(gameObject);
         GameObject gameManager = GameObject.Find("GameManager");
         if (caller != gameManager) gameManager.GetComponent<GameManager>().KillPlayer();
+    }
+
+    public void AnimStance(Stance stance)
+    {
+        fpsArms.SetInteger("stance", (int)stance);
+    }
+
+    public void AnimIsGrounded(bool isGrounded)
+    {
+        fpsArms.SetBool("isGrounded", isGrounded);
+    }
+
+    public void AnimJump()
+    {
+        fpsArms.SetTrigger("jump");
     }
 }

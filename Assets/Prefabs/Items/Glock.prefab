@@ -539,13 +539,15 @@ MonoBehaviour:
   isDestroyed: 0
   icon: {fileID: 21300000, guid: b8794006953522b44ad1e11131d7527e, type: 3}
   ui: {fileID: 1865841644}
-  fpsArmsAnimatorOverrideController: {fileID: 22100000, guid: fa03f58df969bcd42a9bcde82206c28d, type: 2}
+  fpsArmsAnimatorOverrideController: {fileID: 22100000, guid: bd8bbf4b9c1b6e84fa245a22a844d1f0, type: 2}
   type: 0
   magazineSize: 16
   magazine: 16
   reloadTime: 1.5
   damage: 10
   fireRate: 600
+  effectiveRange: 100
+  maxRange: 150
   adsZoom: 1.3
   adsTime: 0.2
   adsAccuracy: 1
@@ -556,8 +558,6 @@ MonoBehaviour:
   recoil: 5
   recoilPower: 2
   maxRecoilDegree: 15
-  effectiveRange: 100
-  maxRange: 150
   ammoType: {fileID: 2483047963270853810, guid: 3ef3be445a1b0e34bb9a73c70cf4782b, type: 3}
   testBulletHole: {fileID: 8437811162711746264, guid: 52d873d502b3d5c45924901cbc0b7465, type: 3}
   raySpawnPoint: {fileID: 0}
