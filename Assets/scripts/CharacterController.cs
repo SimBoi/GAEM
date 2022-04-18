@@ -470,4 +470,19 @@ public class CharacterController : MonoBehaviour
     {
         fpsArms.SetTrigger("jump");
     }
+
+    public void AnimFire()
+    {
+        fpsArms.SetTrigger("fire");
+    }
+
+    public void AnimReload()
+    {
+        fpsArms.SetTrigger("reload");
+    }
+
+    public void AnimIsADSing(bool isADSing)
+    {
+        fpsArms.SetBool("isADSing", isADSing);
+    }
 }

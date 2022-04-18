@@ -564,6 +564,7 @@ MonoBehaviour:
   crosshairUI: {fileID: 1822626978}
   reloadUI: {fileID: 1505082519}
   ammoUI: {fileID: 6822219791172277563}
+  animate: 1
   isReloading: 0
   isAiming: 0
 --- !u!1 &6409290635311265886
