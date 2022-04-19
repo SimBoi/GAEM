@@ -39,6 +39,8 @@ public class CharacterController : MonoBehaviour
     public float inventoryUIScale;
     private List<List<InventorySlotUI>> inventoriesUI = new List<List<InventorySlotUI>>();
     private GameObject machineUI = null;
+    public Animator fpsArms;
+    public RuntimeAnimatorController defaultFpsArmsAnimatorController;
 
     public void Start()
     {
@@ -64,6 +66,7 @@ public class CharacterController : MonoBehaviour
         UpdateHealthUI();
         UpdateHeldItemUI();
         UpdateClickedItemUI();
+        UpdateHeldItemAnimationController();
     }
 
     private bool getThrowItem = false;
@@ -429,6 +432,59 @@ public class CharacterController : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
+    }
+
+    public void UpdateHeldItemAnimationController()
+    {
+        RuntimeAnimatorController nextController;
+
+        if (inventory.heldItemIndex == -1)
+        {
+            nextController = defaultFpsArmsAnimatorController;
+        }
+        else
+        {
+            if (inventory.GetHeldItemRef().fpsArmsAnimatorOverrideController != null)
+                nextController = inventory.GetHeldItemRef().fpsArmsAnimatorOverrideController;
+            else
+                nextController = defaultFpsArmsAnimatorController;
+        }
+
+        if (nextController != fpsArms.runtimeAnimatorController)
+        {
+            fpsArms.runtimeAnimatorController = nextController;
+            fpsArms.SetTrigger("equip");
+        }
+    }
+
+    public void AnimStance(Stance stance)
+    {
+        fpsArms.SetInteger("stance", (int)stance);
+    }
+
+    public void AnimIsGrounded(bool isGrounded)
+    {
+        fpsArms.SetBool("isGrounded", isGrounded);
+    }
+
+    public void AnimJump()
+    {
+        fpsArms.SetTrigger("jump");
+    }
+
+    public void AnimFire()
+    {
+        fpsArms.SetTrigger("fire");
+    }
+
+    public void AnimReload()
+    {
+        fpsArms.SetTrigger("reload");
+    }
+
+    public void AnimIsADSing(bool isADSing)
+    {
+        fpsArms.SetBool("isADSing", isADSing);
     }
 
     public void Die(GameObject caller)

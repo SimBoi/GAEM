@@ -43,6 +43,7 @@ public class Gun : Item
     public GameObject crosshairUI;
     public GameObject reloadUI;
     public GameObject ammoUI;
+    public bool animate;
 
     //gets set when calling an event
     private GameObject eventCaller = null;
@@ -156,6 +157,11 @@ public class Gun : Item
 
     public void LateUpdate()
     {
+        if (isHeld && animate)
+        {
+            SendMessageUpwards("AnimIsADSing", isAiming);
+        }
+
         isAiming = false;
     }
 
@@ -179,13 +185,20 @@ public class Gun : Item
         {
             reloadTimer = 0;
             isReloading = true;
+            if (animate)
+            {
+                SendMessageUpwards("AnimReload");
+            }
         }
     }
 
     public void GetADSKey()
     {
-        isAiming = true;
-        playerLook.ChangeZoomLevel(adsZoom, adsTime);
+        if (!isReloading)
+        {
+            isAiming = true;
+            playerLook.ChangeZoomLevel(adsZoom, adsTime);
+        }
     }
 
     IEnumerator FireDelay()
@@ -212,6 +225,11 @@ public class Gun : Item
             DealDamage(rayHit.collider, effectiveDmg);
         }
         Recoil();
+
+        if (animate)
+        {
+            SendMessageUpwards("AnimFire");
+        }
     }
 
     private Vector3 Bloom()
