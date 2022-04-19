@@ -1,0 +1,61 @@
+{% metadata_file .yamato/project.metafile %}
+---
+run_all_tests:
+  name: Run All Package and Project Tests
+  dependencies:
+    # Pull in package and validate jobs through the badges job
+    - .yamato/_triggers.yml#badges_test_trigger
+    - .yamato/mobile-build-and-test.yml#2021.2_Run_iOS_Player_With_Tests
+    - .yamato/mobile-build-and-test.yml#2021.2_Run_Android_Player_With_Tests
+{% for platform in test_platforms -%}
+{% for project in projects -%}
+{% for editor in project.test_editors -%}
+{% for package in project.packages -%}
+    - .yamato/package-tests.yml#test_{{ project.name}}_{{ package.name }}_{{ editor }}_{{ platform.name }}
+{% endfor -%}
+    - .yamato/project-tests.yml#test_{{ project.name }}_{{ editor }}_{{ platform.name }}
+{% endfor -%}
+{% endfor -%}
+{% endfor -%}
+
+all_project_tests:
+  name: Run All Project Tests
+  dependencies:
+    # Pull in package and validate jobs through the badges job
+    - .yamato/_triggers.yml#badges_test_trigger
+{% for platform in test_platforms -%}
+{% for project in projects -%}
+{% for editor in project.test_editors -%}
+    - .yamato/project-tests.yml#test_{{ projects.first.name }}_{{ editor }}_{{ platform.name }}
+{% endfor -%}
+{% endfor -%}
+{% endfor -%}
+
+all_package_tests:
+  name: Run All Package Tests
+  dependencies:
+    # Pull in package and validate jobs through the badges job
+    - .yamato/_triggers.yml#badges_test_trigger
+{% for platform in test_platforms -%}
+{% for project in projects -%}
+{% for editor in project.test_editors -%}
+{% for package in project.packages -%}
+    - .yamato/package-tests.yml#test_{{ project.name}}_{{ package.name }}_{{ editor }}_{{ platform.name }}
+{% endfor -%}
+{% endfor -%}
+{% endfor -%}
+{% endfor -%}
+
+all_singlenode_multiprocess_tests:
+  name: Run All Multiprocess Tests - Single Node
+  dependencies:
+    # Pull in package and validate jobs through the badges job
+{% for platform in test_platforms -%}
+{% for project in projects -%}
+{% for editor in project.test_editors -%}
+{% if editor != "trunk" %}
+    - .yamato/multiprocess-project-tests.yml#singlenode_multiprocess_test_testproject_{{ editor }}_{{ platform.name }}
+{% endif %}
+{% endfor -%}
+{% endfor -%}
+{% endfor -%}
