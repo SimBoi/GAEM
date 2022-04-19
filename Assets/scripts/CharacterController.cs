@@ -436,24 +436,25 @@ public class CharacterController : MonoBehaviour
 
     public void UpdateHeldItemAnimationController()
     {
+        RuntimeAnimatorController nextController;
+
         if (inventory.heldItemIndex == -1)
         {
-            fpsArms.runtimeAnimatorController = defaultFpsArmsAnimatorController;
+            nextController = defaultFpsArmsAnimatorController;
         }
         else
         {
             if (inventory.GetHeldItemRef().fpsArmsAnimatorOverrideController != null)
-                fpsArms.runtimeAnimatorController = inventory.GetHeldItemRef().fpsArmsAnimatorOverrideController;
+                nextController = inventory.GetHeldItemRef().fpsArmsAnimatorOverrideController;
             else
-                fpsArms.runtimeAnimatorController = defaultFpsArmsAnimatorController;
+                nextController = defaultFpsArmsAnimatorController;
         }
-    }
 
-    public void Die(GameObject caller)
-    {
-        Destroy(gameObject);
-        GameObject gameManager = GameObject.Find("GameManager");
-        if (caller != gameManager) gameManager.GetComponent<GameManager>().KillPlayer();
+        if (nextController != fpsArms.runtimeAnimatorController)
+        {
+            fpsArms.runtimeAnimatorController = nextController;
+            fpsArms.SetTrigger("equip");
+        }
     }
 
     public void AnimStance(Stance stance)
@@ -484,5 +485,12 @@ public class CharacterController : MonoBehaviour
     public void AnimIsADSing(bool isADSing)
     {
         fpsArms.SetBool("isADSing", isADSing);
+    }
+
+    public void Die(GameObject caller)
+    {
+        Destroy(gameObject);
+        GameObject gameManager = GameObject.Find("GameManager");
+        if (caller != gameManager) gameManager.GetComponent<GameManager>().KillPlayer();
     }
 }
