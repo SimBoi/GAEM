@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkBehaviour
 {
     private const string mainMenuScene = "MainMenu";
 
@@ -12,7 +13,7 @@ public class GameManager : MonoBehaviour
     public GameObject playerPrefab;
     public Transform[] spawnPoints;
 
-    private GameObject activePlayer = null;
+    public GameObject activePlayer = null;
 
     private void Start()
     {
@@ -24,10 +25,31 @@ public class GameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        int i = Random.Range(0, spawnPoints.Length);
-        activePlayer = Instantiate(playerPrefab, spawnPoints[i].position, spawnPoints[i].rotation);
+        SpawnServerRpc(NetworkManager.Singleton.LocalClientId);
         spawnUI.SetActive(false);
         respawnUI.SetActive(false);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SpawnServerRpc(ulong clientId)
+    {
+        int i = Random.Range(0, spawnPoints.Length);
+        NetworkObject player = Instantiate(playerPrefab, spawnPoints[i].position, spawnPoints[i].rotation).GetComponent<NetworkObject>();
+        player.SpawnWithOwnership(clientId);
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+        SpawnClientRPC(player.NetworkObjectId, clientRpcParams);
+    }
+
+    [ClientRpc]
+    private void SpawnClientRPC(ulong objectId, ClientRpcParams clientRpcParams)
+    {
+        activePlayer = NetworkManager.Singleton.SpawnManager.SpawnedObjects[objectId].gameObject;
     }
 
     public void KillPlayer()
@@ -50,5 +72,39 @@ public class GameManager : MonoBehaviour
 
         KillPlayer();
         SceneManager.LoadScene(mainMenuScene);
+    }
+
+    ////////////////////    networking test    ////////////////////
+
+    void OnGUI()
+    {
+        GUILayout.BeginArea(new Rect(10, 10, 300, 300));
+        if (!NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsServer)
+        {
+            StartButtons();
+        }
+        else
+        {
+            StatusLabels();
+        }
+
+        GUILayout.EndArea();
+    }
+
+    static void StartButtons()
+    {
+        if (GUILayout.Button("Host")) NetworkManager.Singleton.StartHost();
+        if (GUILayout.Button("Client")) NetworkManager.Singleton.StartClient();
+        if (GUILayout.Button("Server")) NetworkManager.Singleton.StartServer();
+    }
+
+    static void StatusLabels()
+    {
+        var mode = NetworkManager.Singleton.IsHost ?
+            "Host" : NetworkManager.Singleton.IsServer ? "Server" : "Client";
+
+        GUILayout.Label("Transport: " +
+            NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetType().Name);
+        GUILayout.Label("Mode: " + mode);
     }
 }

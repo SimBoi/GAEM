@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Unity.Netcode;
 
-public class CharacterController : MonoBehaviour
+public class CharacterController : NetworkBehaviour
 {
     public float pickupRadius;
     public Health health;
@@ -17,6 +18,8 @@ public class CharacterController : MonoBehaviour
     public GameObject eyePosition;
     public Transform gunRaySpawnPoint;
 
+    public GameObject localPlayer;
+    public GameObject externalPlayer;
     public Canvas canvas;
     public GameObject pauseUI;
     public Slider healthSliderUI;
@@ -492,5 +495,37 @@ public class CharacterController : MonoBehaviour
         Destroy(gameObject);
         GameObject gameManager = GameObject.Find("GameManager");
         if (caller != gameManager) gameManager.GetComponent<GameManager>().KillPlayer();
+    }
+
+    //////////    Networking    //////////
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsOwner)
+        {
+            GameObject.Find("GameManager").GetComponent<GameManager>().activePlayer = gameObject;
+
+            mouseLook.enabled = true;
+            characterMovement.enabled = true;
+            health.enabled = true;
+            hunger.enabled = true;
+            inventory.enabled = true;
+            enabled = true;
+
+            localPlayer.SetActive(true);
+            externalPlayer.SetActive(false);
+        }
+        else
+        {
+            mouseLook.enabled = false;
+            characterMovement.enabled = false;
+            health.enabled = false;
+            hunger.enabled = false;
+            inventory.enabled = false;
+            enabled = false;
+
+            localPlayer.SetActive(false);
+            externalPlayer.SetActive(true);
+        }
     }
 }
