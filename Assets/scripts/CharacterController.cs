@@ -18,8 +18,6 @@ public class CharacterController : NetworkBehaviour
     public GameObject eyePosition;
     public Transform gunRaySpawnPoint;
 
-    public GameObject localPlayer;
-    public GameObject externalPlayer;
     public Canvas canvas;
     public GameObject pauseUI;
     public Slider healthSliderUI;
@@ -45,31 +43,78 @@ public class CharacterController : NetworkBehaviour
     public Animator fpsArms;
     public RuntimeAnimatorController defaultFpsArmsAnimatorController;
 
-    public void Start()
+    // networking
+    public GameObject localPlayer;
+    public GameObject externalPlayer;
+    public NetworkObject networkObject;
+    public NetworkedTransform networkTransform;
+    public NetworkHealth networkHealth;
+
+    private void Start()
     {
         foreach (PlayerInventoryType inventoryType in Enum.GetValues(typeof(PlayerInventoryType)))
             inventoriesUI.Add(new List<InventorySlotUI>());
         clickedItemUI.transform.localScale = new Vector3(inventoryUIScale, inventoryUIScale, inventoryUIScale);
     }
 
-    public void Update()
+    public override void OnNetworkSpawn()
     {
-        if (transform.position.y < -5)
+        if (IsServer)
         {
-            health.DealDamage(100 * Time.deltaTime);
+            health.enabled = true;
+            hunger.enabled = true;
+        }
+        else
+        {
+            health.enabled = false;
+            hunger.enabled = false;
         }
 
-        if (health.GetHp() <= 0)
+        if (IsOwner)
         {
-            Die(gameObject);
+            mouseLook.enabled = true;
+            characterMovement.enabled = true;
+            inventory.enabled = true;
+
+            localPlayer.SetActive(true);
+            externalPlayer.SetActive(false);
+        }
+        else
+        {
+            mouseLook.enabled = false;
+            characterMovement.enabled = false;
+            inventory.enabled = false;
+
+            localPlayer.SetActive(false);
+            externalPlayer.SetActive(true);
+        }
+    }
+
+    private void Update()
+    {
+        if (IsServer)
+        {
+            if (transform.position.y < -5)
+            {
+                health.DealDamage(100 * Time.deltaTime);
+            }
+
+            if (networkHealth.hp.Value <= 0)
+            {
+                Die();
+            }
+
+            PickupItemsNearby();
         }
 
-        GetPlayerInput();
-        PickupItemsNearby();
-        UpdateHealthUI();
-        UpdateHeldItemUI();
-        UpdateClickedItemUI();
-        UpdateHeldItemAnimationController();
+        if (IsOwner)
+        {
+            GetPlayerInput();
+            UpdateHealthUI();
+            UpdateHeldItemUI();
+            UpdateClickedItemUI();
+            UpdateHeldItemAnimationController();
+        }
     }
 
     private bool getThrowItem = false;
@@ -209,10 +254,9 @@ public class CharacterController : NetworkBehaviour
 
     public void UpdateHealthUI()
     {
-        healthSliderUI.maxValue = health.GetMaxHp();
-        healthSliderUI.value = health.GetHp();
+        healthSliderUI.maxValue = health.maxHp;
+        healthSliderUI.value = networkHealth.hp.Value;
         healthFill.color = healthGradient.Evaluate(healthSliderUI.normalizedValue);
-        
     }
 
     public void UpdateHeldItemUI()
@@ -490,42 +534,31 @@ public class CharacterController : NetworkBehaviour
         fpsArms.SetBool("isADSing", isADSing);
     }
 
-    public void Die(GameObject caller)
+    public void Die(bool callGameManager = true)
     {
-        Destroy(gameObject);
-        GameObject gameManager = GameObject.Find("GameManager");
-        if (caller != gameManager) gameManager.GetComponent<GameManager>().KillPlayer();
+        DieServerRpc(callGameManager, networkObject.NetworkObjectId, networkObject.OwnerClientId);
     }
 
-    //////////    Networking    //////////
-
-    public override void OnNetworkSpawn()
+    [ServerRpc(RequireOwnership = false)]
+    private void DieServerRpc(bool callGameManager, ulong objectId, ulong clientId)
     {
-        if (IsOwner)
+        Destroy(NetworkManager.Singleton.SpawnManager.SpawnedObjects[objectId].gameObject);
+        ClientRpcParams clientRpcParams = new ClientRpcParams
         {
-            GameObject.Find("GameManager").GetComponent<GameManager>().activePlayer = gameObject;
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+        DieClientRpc(callGameManager, clientRpcParams);
+    }
 
-            mouseLook.enabled = true;
-            characterMovement.enabled = true;
-            health.enabled = true;
-            hunger.enabled = true;
-            inventory.enabled = true;
-            enabled = true;
-
-            localPlayer.SetActive(true);
-            externalPlayer.SetActive(false);
-        }
-        else
+    [ClientRpc]
+    private void DieClientRpc(bool callGameManager, ClientRpcParams clientRpcParams)
+    {
+        if (callGameManager)
         {
-            mouseLook.enabled = false;
-            characterMovement.enabled = false;
-            health.enabled = false;
-            hunger.enabled = false;
-            inventory.enabled = false;
-            enabled = false;
-
-            localPlayer.SetActive(false);
-            externalPlayer.SetActive(true);
+            GameObject.Find("GameManager").GetComponent<GameManager>().KillPlayer();
         }
     }
 }

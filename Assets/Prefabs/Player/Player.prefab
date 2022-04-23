@@ -276,6 +276,7 @@ GameObject:
   - component: {fileID: 1828069677}
   - component: {fileID: 4507752567041032622}
   - component: {fileID: 203232871174289378}
+  - component: {fileID: 1355308355588449220}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -462,8 +463,6 @@ MonoBehaviour:
   inventory: {fileID: 1828069674}
   eyePosition: {fileID: 1949629237}
   gunRaySpawnPoint: {fileID: 4576706661783122559}
-  localPlayer: {fileID: 3743344509638769257}
-  externalPlayer: {fileID: 1246019865823731028}
   canvas: {fileID: 1048454355977733587}
   pauseUI: {fileID: 2844603175448876061}
   healthSliderUI: {fileID: 4814080811179710830}
@@ -513,6 +512,11 @@ MonoBehaviour:
   inventoryUIScale: 0.2
   fpsArms: {fileID: 8480419303887186593}
   defaultFpsArmsAnimatorController: {fileID: 9100000, guid: c5a4ca4c788b26c4da1becf32f995c75, type: 2}
+  localPlayer: {fileID: 3743344509638769257}
+  externalPlayer: {fileID: 1246019865823731028}
+  networkObject: {fileID: 4507752567041032622}
+  networkTransform: {fileID: 203232871174289378}
+  networkHealth: {fileID: 1355308355588449220}
 --- !u!114 &4507752567041032622
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -542,6 +546,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncVelocity: 1
+--- !u!114 &1355308355588449220
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051427869558859583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2746fcdd121328b489e26ef73b5de2ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hp:
+    m_InternalValue: 0
 --- !u!1 &2051427869652139020
 GameObject:
   m_ObjectHideFlags: 0

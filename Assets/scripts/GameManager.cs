@@ -59,7 +59,7 @@ public class GameManager : NetworkBehaviour
 
         if (activePlayer != null)
         {
-            activePlayer.GetComponent<CharacterController>().Die(gameObject);
+            activePlayer.GetComponent<CharacterController>().Die(false);
         }
         activePlayer = null;
         respawnUI.SetActive(true);
