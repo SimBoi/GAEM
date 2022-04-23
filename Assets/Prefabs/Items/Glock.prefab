@@ -488,6 +488,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4626922982977740661}
   - component: {fileID: 8752844573586030655}
+  - component: {fileID: 825130536076149558}
   m_Layer: 0
   m_Name: Glock
   m_TagString: Untagged
@@ -533,6 +534,7 @@ MonoBehaviour:
   health: {fileID: 0}
   preventDespawn: 0
   despawnTime: 300
+  preventPickup: 0
   pickupDelay: 2
   timeSinceSpawn: 0
   isHeld: 0
@@ -567,6 +569,22 @@ MonoBehaviour:
   animate: 1
   isReloading: 0
   isAiming: 0
+--- !u!114 &825130536076149558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4626922982977740658}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &6409290635311265886
 GameObject:
   m_ObjectHideFlags: 0

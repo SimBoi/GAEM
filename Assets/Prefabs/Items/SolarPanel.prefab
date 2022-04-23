@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6769794262379600009}
   - component: {fileID: 7805172845991660090}
   - component: {fileID: 5993343291147930790}
+  - component: {fileID: -1880926481128596731}
   m_Layer: 0
   m_Name: SolarPanel
   m_TagString: Untagged
@@ -57,17 +58,21 @@ MonoBehaviour:
   health: {fileID: 0}
   preventDespawn: 0
   despawnTime: 300
+  preventPickup: 0
   pickupDelay: 2
   timeSinceSpawn: 0
   isHeld: 0
   isDestroyed: 0
+  icon: {fileID: 0}
   ui: {fileID: 0}
+  fpsArmsAnimatorOverrideController: {fileID: 0}
   blockID: 5
   stiffness: 1
   hasCustomMesh: 1
   itemObject: {fileID: 7745575149429932022}
   blockObject: {fileID: 6800486258220794364}
   inventorySizes: 
+  machineUI: {fileID: 0}
   inventories: []
   PrimaryMachineEventType: 1
   SecondaryMachineEventType: 0
@@ -106,6 +111,22 @@ MonoBehaviour:
   block: {fileID: 6769794262379600009}
   maxDistance: 3
   prevCoords: {x: 0, y: 0, z: 0}
+--- !u!114 &-1880926481128596731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6769794262379600011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &6800486258220794364
 GameObject:
   m_ObjectHideFlags: 0

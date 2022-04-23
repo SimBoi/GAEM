@@ -585,6 +585,7 @@ GameObject:
   - component: {fileID: 8774141630154489949}
   - component: {fileID: 5191238020087436525}
   - component: {fileID: 8608579938416333425}
+  - component: {fileID: -6952724425857867136}
   m_Layer: 0
   m_Name: ItemMagnet
   m_TagString: Untagged
@@ -630,17 +631,21 @@ MonoBehaviour:
   health: {fileID: 0}
   preventDespawn: 0
   despawnTime: 300
+  preventPickup: 0
   pickupDelay: 2
   timeSinceSpawn: 0
   isHeld: 0
   isDestroyed: 0
+  icon: {fileID: 0}
   ui: {fileID: 0}
+  fpsArmsAnimatorOverrideController: {fileID: 0}
   blockID: 7
   stiffness: 1
   hasCustomMesh: 1
   itemObject: {fileID: 6723420837956339870}
   blockObject: {fileID: 8807736956464586539}
   inventorySizes: 0f000000
+  machineUI: {fileID: 0}
   inventories: []
   PrimaryMachineEventType: 1
   SecondaryMachineEventType: 1
@@ -679,6 +684,22 @@ MonoBehaviour:
   block: {fileID: 8774141630154489949}
   maxDistance: 3
   prevCoords: {x: 0, y: 0, z: 0}
+--- !u!114 &-6952724425857867136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8766349186654717532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &8807736956464586539
 GameObject:
   m_ObjectHideFlags: 0

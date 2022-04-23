@@ -16,6 +16,7 @@ public class Item : MonoBehaviour
     public Health health;
     public bool preventDespawn;
     public float despawnTime = 300;
+    public bool preventPickup;
     public float pickupDelay;
     public float timeSinceSpawn = 0;
     public bool isHeld;
@@ -26,7 +27,6 @@ public class Item : MonoBehaviour
 
     public void CopyFrom(Item source)
     {
-        this.itemPrefabs = source.itemPrefabs;
         this.name = source.name;
         this.id = source.id;
         this.maxStackSize = source.maxStackSize;
@@ -39,11 +39,11 @@ public class Item : MonoBehaviour
             this.health = new Health(source.health.GetHp(), 0, source.maxDurability, 0, 0);
         this.preventDespawn = source.preventDespawn;
         this.despawnTime = source.despawnTime;
+        this.preventPickup = source.preventPickup;
         this.pickupDelay = source.pickupDelay;
         this.timeSinceSpawn = source.timeSinceSpawn;
         this.isHeld = source.isHeld;
         this.isDestroyed = source.isDestroyed;
-        this.icon = source.icon;
     }
 
     public virtual Item Clone()
@@ -149,7 +149,7 @@ public class Item : MonoBehaviour
 
     public virtual bool CanBePickedUp()
     {
-        if (timeSinceSpawn >= pickupDelay && !isHeld && !isDestroyed) return true;
+        if (!preventDespawn && timeSinceSpawn >= pickupDelay && !isHeld && !isDestroyed) return true;
         return false;
     }
 

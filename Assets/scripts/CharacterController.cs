@@ -7,7 +7,6 @@ using Unity.Netcode;
 
 public class CharacterController : NetworkBehaviour
 {
-    public float pickupRadius;
     public Health health;
     public Hunger hunger;
     public float interactDistance;
@@ -49,6 +48,7 @@ public class CharacterController : NetworkBehaviour
     public NetworkObject networkObject;
     public NetworkedTransform networkTransform;
     public NetworkHealth networkHealth;
+    public NetworkPickupItem networkPickupItem;
 
     private void Start()
     {
@@ -103,8 +103,6 @@ public class CharacterController : NetworkBehaviour
             {
                 Die();
             }
-
-            PickupItemsNearby();
         }
 
         if (IsOwner)
@@ -233,23 +231,6 @@ public class CharacterController : NetworkBehaviour
         getThrowItemDown = false;
         getInventoryDown = false;
         getPauseDown = false;
-    }
-
-    public void PickupItemsNearby()
-    {
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, pickupRadius);
-        foreach (var hitCollider in hitColliders)
-        {
-            object[] message = new object[1]{
-                null
-            };
-            hitCollider.SendMessageUpwards("GetItemRefMsg", message, SendMessageOptions.DontRequireReceiver);
-            Item item = (Item)message[0];
-            if (item != null && item.CanBePickedUp())
-            {
-                inventory.PickupItem(item, out _, out _);
-            }
-        }
     }
 
     public void UpdateHealthUI()

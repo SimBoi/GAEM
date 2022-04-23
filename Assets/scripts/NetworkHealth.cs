@@ -10,7 +10,11 @@ public class NetworkHealth : NetworkBehaviour
 
     private void Start()
     {
-        health = GetComponent<Health>();
+        if (IsServer)
+        {
+            hp.Value = 100;
+            health = GetComponent<Health>();
+        }
     }
 
     private void Update()
@@ -24,7 +28,6 @@ public class NetworkHealth : NetworkBehaviour
     public void DealDamage(float dmg) // clients should call this, server should call Health.DealDamage directly (when using SendMessage on server both methods will be called)
     {
         if (IsServer) return;
-
         DealDamageServerRpc(dmg);
     }
 

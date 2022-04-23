@@ -979,6 +979,7 @@ GameObject:
   - component: {fileID: 1467250639895100891}
   - component: {fileID: 8915456248635239450}
   - component: {fileID: 4955994344897964678}
+  - component: {fileID: 8793188199133700658}
   m_Layer: 0
   m_Name: Portal
   m_TagString: Untagged
@@ -1024,17 +1025,21 @@ MonoBehaviour:
   health: {fileID: 0}
   preventDespawn: 0
   despawnTime: 300
+  preventPickup: 0
   pickupDelay: 2
   timeSinceSpawn: 0
   isHeld: 0
   isDestroyed: 0
+  icon: {fileID: 0}
   ui: {fileID: 0}
+  fpsArmsAnimatorOverrideController: {fileID: 0}
   blockID: 6
   stiffness: 1
   hasCustomMesh: 1
   itemObject: {fileID: 5587268079771103166}
   blockObject: {fileID: 5299528784423561180}
   inventorySizes: 
+  machineUI: {fileID: 0}
   inventories: []
   PrimaryMachineEventType: 1
   SecondaryMachineEventType: 0
@@ -1074,6 +1079,22 @@ MonoBehaviour:
   block: {fileID: 1467250639895100891}
   maxDistance: 3
   prevCoords: {x: 0, y: 0, z: 0}
+--- !u!114 &8793188199133700658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5339227789536411307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &5587268079771103166
 GameObject:
   m_ObjectHideFlags: 0

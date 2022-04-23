@@ -108,6 +108,7 @@ GameObject:
   - component: {fileID: 6860486424626803581}
   - component: {fileID: -4544310723011560390}
   - component: {fileID: -30830473682224474}
+  - component: {fileID: 5076260472240020650}
   m_Layer: 0
   m_Name: Dogecoin Minter
   m_TagString: Untagged
@@ -153,17 +154,21 @@ MonoBehaviour:
   health: {fileID: 0}
   preventDespawn: 0
   despawnTime: 300
+  preventPickup: 0
   pickupDelay: 2
   timeSinceSpawn: 0
   isHeld: 0
   isDestroyed: 0
+  icon: {fileID: 0}
   ui: {fileID: 0}
+  fpsArmsAnimatorOverrideController: {fileID: 0}
   blockID: 1
   stiffness: 1
   hasCustomMesh: 1
   itemObject: {fileID: 1362694357772957986}
   blockObject: {fileID: 9192997310427570172}
   inventorySizes: 
+  machineUI: {fileID: 0}
   inventories: []
   PrimaryMachineEventType: 1
   SecondaryMachineEventType: 0
@@ -203,6 +208,22 @@ MonoBehaviour:
   block: {fileID: 6860486424626803581}
   maxDistance: 3
   prevCoords: {x: 0, y: 0, z: 0}
+--- !u!114 &5076260472240020650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8164447933402656395}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &9192997310427570172
 GameObject:
   m_ObjectHideFlags: 0

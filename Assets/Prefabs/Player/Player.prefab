@@ -273,10 +273,11 @@ GameObject:
   - component: {fileID: 1828069676}
   - component: {fileID: 1828069675}
   - component: {fileID: 1828069674}
-  - component: {fileID: 1828069677}
   - component: {fileID: 4507752567041032622}
   - component: {fileID: 203232871174289378}
   - component: {fileID: 1355308355588449220}
+  - component: {fileID: 6326046970249114573}
+  - component: {fileID: 1828069677}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -441,6 +442,62 @@ MonoBehaviour:
   health: {fileID: 1828069676}
   heldItemPos: {fileID: 2229074504544305825}
   heldItemIndex: -1
+--- !u!114 &4507752567041032622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051427869558859583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+--- !u!114 &203232871174289378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051427869558859583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5306e2a79f079de459125574735390ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncVelocity: 1
+--- !u!114 &1355308355588449220
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051427869558859583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2746fcdd121328b489e26ef73b5de2ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hp:
+    m_InternalValue: 0
+--- !u!114 &6326046970249114573
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051427869558859583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db93cdbee9330194e84b6c7be1f484c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pickupRadius: 3
 --- !u!114 &1828069677
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -453,7 +510,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94d987a9edcf55b4ab284e7a02c48d76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pickupRadius: 1.5
   health: {fileID: 1828069676}
   hunger: {fileID: 1828069675}
   interactDistance: 5
@@ -517,49 +573,7 @@ MonoBehaviour:
   networkObject: {fileID: 4507752567041032622}
   networkTransform: {fileID: 203232871174289378}
   networkHealth: {fileID: 1355308355588449220}
---- !u!114 &4507752567041032622
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2051427869558859583}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 951099334
-  AlwaysReplicateAsRoot: 0
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
---- !u!114 &203232871174289378
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2051427869558859583}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5306e2a79f079de459125574735390ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncVelocity: 1
---- !u!114 &1355308355588449220
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2051427869558859583}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2746fcdd121328b489e26ef73b5de2ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hp:
-    m_InternalValue: 0
+  networkPickupItem: {fileID: 6326046970249114573}
 --- !u!1 &2051427869652139020
 GameObject:
   m_ObjectHideFlags: 0

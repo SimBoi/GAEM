@@ -204,6 +204,7 @@ GameObject:
   - component: {fileID: 798687978397726786}
   - component: {fileID: 798687978397726789}
   - component: {fileID: 798687978397726788}
+  - component: {fileID: -3918764726640339715}
   m_Layer: 0
   m_Name: ItemCable
   m_TagString: Untagged
@@ -249,11 +250,14 @@ MonoBehaviour:
   health: {fileID: 0}
   preventDespawn: 0
   despawnTime: 300
+  preventPickup: 0
   pickupDelay: 2
   timeSinceSpawn: 0
   isHeld: 0
   isDestroyed: 0
+  icon: {fileID: 0}
   ui: {fileID: 0}
+  fpsArmsAnimatorOverrideController: {fileID: 0}
   blockID: 8
   stiffness: 1
   hasCustomMesh: 1
@@ -292,6 +296,22 @@ MonoBehaviour:
   block: {fileID: 798687978397726786}
   maxDistance: 15.09
   prevCoords: {x: 0, y: 0, z: 0}
+--- !u!114 &-3918764726640339715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 798687978397726791}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &798687979277854724
 GameObject:
   m_ObjectHideFlags: 0
