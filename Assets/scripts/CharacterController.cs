@@ -396,10 +396,16 @@ public class CharacterController : NetworkBehaviour
 
             if (clickedItem != null)
             {
-                clickedItem.Spawn(false, transform.position);
+                ThrowClickedItemServerRpc(SerializedItem.Serialize(clickedItem));
                 clickedItem = null;
             }
         }
+    }
+
+    [ServerRpc]
+    private void ThrowClickedItemServerRpc(SerializedItem serializedItem)
+    {
+        SerializedItem.Deserialize(serializedItem).Spawn(false, transform.position);
     }
 
     // returns the new item icon to display in the slot
@@ -484,6 +490,7 @@ public class CharacterController : NetworkBehaviour
             fpsArms.SetTrigger("equip");
         }
     }
+
 
     public void AnimStance(Stance stance)
     {

@@ -489,6 +489,7 @@ GameObject:
   - component: {fileID: 4626922982977740661}
   - component: {fileID: 8752844573586030655}
   - component: {fileID: 825130536076149558}
+  - component: {fileID: 7828398751671067645}
   m_Layer: 0
   m_Name: Glock
   m_TagString: Untagged
@@ -524,7 +525,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2775e7d3aa8c380458a8ceafc614fc03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
   name: Glock
   id: 5
   maxStackSize: 1
@@ -585,6 +585,20 @@ MonoBehaviour:
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+--- !u!114 &7828398751671067645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4626922982977740658}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ccae3f31d65b56458f524fb5515982b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  networkedStackSize:
+    m_InternalValue: 1
 --- !u!1 &6409290635311265886
 GameObject:
   m_ObjectHideFlags: 0

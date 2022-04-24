@@ -8,85 +8,131 @@ using System;
 /// item should only be spawned on the server
 /// </summary>
 
+public struct SerializedItem : INetworkSerializable
+{
+    public string name;
+    public int id;
+    public int maxStackSize;
+    public float maxDurability;
+    public float spawnDurability;
+    public int stackSize;
+    public float hp;
+    public bool preventDespawn;
+    public float despawnTime;
+    public bool preventPickup;
+    public float pickupDelay;
+    public float timeSinceSpawn;
+    public bool isHeld;
+    public bool isDestroyed;
+
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref name);
+        serializer.SerializeValue(ref id);
+        serializer.SerializeValue(ref maxStackSize);
+        serializer.SerializeValue(ref maxDurability);
+        serializer.SerializeValue(ref spawnDurability);
+        serializer.SerializeValue(ref stackSize);
+        serializer.SerializeValue(ref hp);
+        serializer.SerializeValue(ref preventDespawn);
+        serializer.SerializeValue(ref despawnTime);
+        serializer.SerializeValue(ref preventPickup);
+        serializer.SerializeValue(ref pickupDelay);
+        serializer.SerializeValue(ref timeSinceSpawn);
+        serializer.SerializeValue(ref isHeld);
+        serializer.SerializeValue(ref isDestroyed);
+    }
+
+    static public SerializedItem Serialize(Item source)
+    {
+        SerializedItem result = new SerializedItem
+        {
+            name = source.name,
+            id = source.id,
+            maxStackSize = source.maxStackSize,
+            maxDurability = source.maxDurability,
+            spawnDurability = source.spawnDurability,
+            stackSize = source.stackSize,
+            preventDespawn = source.preventDespawn,
+            despawnTime = source.despawnTime,
+            preventPickup = source.preventPickup,
+            pickupDelay = source.pickupDelay,
+            timeSinceSpawn = source.timeSinceSpawn,
+            isHeld = source.isHeld,
+            isDestroyed = source.isDestroyed
+        };
+        if (source.health == null)
+            result.hp = source.spawnDurability;
+        else
+            result.hp = source.health.GetHp();
+        return result;
+    }
+
+    static public Item Deserialize(SerializedItem source)
+    {
+        Item result = new Item
+        {
+            name = source.name,
+            id = source.id,
+            maxStackSize = source.maxStackSize,
+            maxDurability = source.maxDurability,
+            spawnDurability = source.spawnDurability,
+            stackSize = source.stackSize,
+            preventDespawn = source.preventDespawn,
+            despawnTime = source.despawnTime,
+            preventPickup = source.preventPickup,
+            pickupDelay = source.pickupDelay,
+            timeSinceSpawn = source.timeSinceSpawn,
+            isHeld = source.isHeld,
+            isDestroyed = source.isDestroyed
+        };
+        result.health = new Health(source.hp, 0, source.maxDurability);
+        return result;
+    }
+}
+
 public class NetworkItem : NetworkBehaviour
 {
     private Item item;
+    public NetworkVariable<int> networkedStackSize = new NetworkVariable<int>();
 
     public void Start()
     {
-        if (GetComponent<NetworkObject>().IsSpawned)
-            throw new Exception();
-        GetComponent<NetworkObject>().Spawn();
+        item = GetComponent<Item>();
+
+        if (!NetworkManager.Singleton.IsServer) return;
+
+        networkedStackSize.Value = item.stackSize;
+        if (!GetComponent<NetworkObject>().IsSpawned)
+        {
+            GetComponent<NetworkObject>().Spawn();
+        }
     }
 
     public override void OnNetworkSpawn()
     {
-        item = GetComponent<Item>();
         if (IsServer)
         {
-            if (item.health == null)
-                SyncItemClientRpc(
-                    item.name,
-                    item.id,
-                    item.maxStackSize,
-                    item.maxDurability,
-                    item.spawnDurability,
-                    item.stackSize,
-                    item.spawnDurability,
-                    item.despawnTime,
-                    item.preventPickup,
-                    item.pickupDelay,
-                    item.timeSinceSpawn,
-                    item.isHeld,
-                    item.isDestroyed);
-            else
-                SyncItemClientRpc(
-                    item.name,
-                    item.id,
-                    item.maxStackSize,
-                    item.maxDurability,
-                    item.spawnDurability,
-                    item.stackSize,
-                    item.health.GetHp(),
-                    item.despawnTime,
-                    item.preventPickup,
-                    item.pickupDelay,
-                    item.timeSinceSpawn,
-                    item.isHeld,
-                    item.isDestroyed);
+            SyncItemClientRpc(SerializedItem.Serialize(item));
         }
     }
 
     // syncs item on all clients on spawn
     [ClientRpc]
-    public void SyncItemClientRpc(
-        string name,
-        int id,
-        int maxStackSize,
-        float maxDurability,
-        float spawnDurability,
-        int stackSize,
-        float hp,
-        float despawnTime,
-        bool preventPickup,
-        float pickupDelay,
-        float timeSinceSpawn,
-        bool isHeld,
-        bool isDestroyed)
+    public void SyncItemClientRpc(SerializedItem serializedItem)
     {
-        item.name = name;
-        item.id = id;
-        item.maxStackSize = maxStackSize;
-        item.maxDurability = maxDurability;
-        item.spawnDurability = spawnDurability;
-        item.stackSize = stackSize;
-        item.health = new Health(hp, 0, maxDurability, 0, 0);
-        item.preventDespawn = true;
-        item.despawnTime = despawnTime;
-        item.preventPickup = preventPickup;
-        item.pickupDelay = pickupDelay;
-        item.timeSinceSpawn = timeSinceSpawn;
-        item.isHeld = isHeld;
-        item.isDestroyed = isDestroyed;
+        item.CopyFrom(SerializedItem.Deserialize(serializedItem));
+    }
+
+    public virtual void Update()
+    {
+        if (IsServer)
+        {
+            networkedStackSize.Value = item.GetStackSize();
+        }
+        else
+        {
+            item.SetStackSize(networkedStackSize.Value);
+        }
     }
 }

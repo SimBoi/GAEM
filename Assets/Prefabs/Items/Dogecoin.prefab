@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8181782636717577039}
   - component: {fileID: 684213270639588771}
   - component: {fileID: -5659733794074583720}
+  - component: {fileID: 7212886811993675550}
   m_Layer: 0
   m_Name: Dogecoin
   m_TagString: Untagged
@@ -97,7 +98,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca1ba845dee590d49baada43557ef176, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
   name: DogeCoin
   id: 2
   maxStackSize: 1000
@@ -144,3 +144,17 @@ MonoBehaviour:
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+--- !u!114 &7212886811993675550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8181782636717577036}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ccae3f31d65b56458f524fb5515982b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  networkedStackSize:
+    m_InternalValue: 1

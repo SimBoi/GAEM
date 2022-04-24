@@ -6,13 +6,12 @@ using  UnityEngine;
 public class Item : MonoBehaviour
 {
     [Header("Item Properties")]
-    public ItemPrefabs itemPrefabs;
     public string name;
     public int id;
     public int maxStackSize;
     public float maxDurability;
     public float spawnDurability;
-    public  int stackSize;
+    public int stackSize;
     public Health health;
     public bool preventDespawn;
     public float despawnTime = 300;
@@ -109,6 +108,7 @@ public class Item : MonoBehaviour
     public virtual Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
     {
         GameObject newItem;
+        ItemPrefabs itemPrefabs = ((GameObject)Resources.Load("ItemPrefabReferences", typeof(GameObject))).GetComponent<ItemPrefabs>();
         if (parent == null)
             newItem = Instantiate(itemPrefabs.prefabs[id], pos, rotation);
         else
