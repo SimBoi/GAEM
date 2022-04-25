@@ -99,27 +99,25 @@ public class NetworkItem : NetworkBehaviour
     public void Start()
     {
         item = GetComponent<Item>();
-
-        if (!NetworkManager.Singleton.IsServer) return;
-
-        networkedStackSize.Value = item.stackSize;
-        if (!GetComponent<NetworkObject>().IsSpawned)
+        if (NetworkManager.Singleton.IsServer)
         {
+            networkedStackSize.Value = item.stackSize;
             GetComponent<NetworkObject>().Spawn();
         }
     }
 
     public override void OnNetworkSpawn()
     {
+        item = GetComponent<Item>();
         if (IsServer)
         {
-            SyncItemClientRpc(SerializedItem.Serialize(item));
+            SyncItemClientRpc(item.spawnDurability, SerializedItem.Serialize(item));
         }
     }
 
     // syncs item on all clients on spawn
     [ClientRpc]
-    public void SyncItemClientRpc(SerializedItem serializedItem)
+    public void SyncItemClientRpc(float spawnDurability, SerializedItem serializedItem)
     {
         item.CopyFrom(SerializedItem.Deserialize(serializedItem));
     }

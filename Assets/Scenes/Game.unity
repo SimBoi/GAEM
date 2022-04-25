@@ -999,10 +999,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Dogecoin
       objectReference: {fileID: 0}
-    - target: {fileID: 8181782636717577036, guid: a2858dbd47a742e4ba14469be27baed1, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 8181782636717577038, guid: a2858dbd47a742e4ba14469be27baed1, type: 3}
       propertyPath: m_RootOrder
       value: 19
@@ -1046,6 +1042,10 @@ PrefabInstance:
     - target: {fileID: 8181782636717577038, guid: a2858dbd47a742e4ba14469be27baed1, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8181782636717577039, guid: a2858dbd47a742e4ba14469be27baed1, type: 3}
+      propertyPath: spawnDurability
+      value: 2.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a2858dbd47a742e4ba14469be27baed1, type: 3}

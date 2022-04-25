@@ -29,7 +29,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8181782636717577036}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 76.197365, y: 26.056723, z: 51.835846}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -101,12 +101,12 @@ MonoBehaviour:
   name: DogeCoin
   id: 2
   maxStackSize: 1000
-  maxDurability: 1
+  maxDurability: 8.92
   spawnDurability: 1
   stackSize: 1
   health: {fileID: 0}
   preventDespawn: 0
-  despawnTime: 30
+  despawnTime: 300
   preventPickup: 0
   pickupDelay: 2
   timeSinceSpawn: 0

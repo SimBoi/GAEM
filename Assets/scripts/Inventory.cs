@@ -48,20 +48,20 @@ public class Inventory : MonoBehaviour
     }
 
     // if index is -1 item gets inserted in the first empty inventory space, returns true on success, returns false if inventory is full
-    public InsertResult PickupItem(Item item, out List<int> changedIndexes, int index = -1)
+    public InsertResult PickupItem(Item item, out List<int> changedIndexes, bool despawnItem = true, int index = -1)
     {
         InsertResult result;
         Item insertedItem;
 
         if (index == -1)
         {
-            result = InsertItemCopy(item, out insertedItem, out changedIndexes);
+            result = InsertItemCopy(item, out insertedItem, out changedIndexes, despawnItem);
             if (result != InsertResult.Success)
                 return result;
         }
         else
         {
-            result = SetItemCopy(item, index, out insertedItem);
+            result = SetItemCopy(item, index, out insertedItem, despawnItem);
             changedIndexes = new List<int> { index };
             if (result != InsertResult.Success)
                 return result;
@@ -81,7 +81,7 @@ public class Inventory : MonoBehaviour
     }
     
     //returns true on success, false on failure (e.g. inventry is full)
-    public InsertResult InsertItemCopy(Item item, out Item insertedItem, out List<int> changedIndexes)
+    public InsertResult InsertItemCopy(Item item, out Item insertedItem, out List<int> changedIndexes, bool despawnItem = true)
     {
         insertedItem = null;
         changedIndexes = new List<int>();
@@ -92,7 +92,7 @@ public class Inventory : MonoBehaviour
         {
             if (GetItemRef(i) == item)
             {
-                InsertResult currResult = SetItemCopy(item, i, out insertedItem);
+                InsertResult currResult = SetItemCopy(item, i, out insertedItem, despawnItem);
                 if (currResult != InsertResult.Failure)
                     changedIndexes.Add(i);
                 if (currResult == InsertResult.Partial)
@@ -142,7 +142,7 @@ public class Inventory : MonoBehaviour
         }
     }
     
-    public InsertResult SetItemCopy(Item item, int index, out Item insertedItem)
+    public InsertResult SetItemCopy(Item item, int index, out Item insertedItem, bool despawnItem = true)
     {
         if (item == null)
         {

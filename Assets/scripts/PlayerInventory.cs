@@ -101,13 +101,13 @@ public class PlayerInventory : MonoBehaviour
     }
 
     // inserts a copy of the item into the hotbar/backpack and despawns it
-    public InsertResult PickupItem(Item item, out List<int> hotbarIndexes, out List<int> backpackIndexes)
+    public InsertResult PickupItem(Item item, out List<int> hotbarIndexes, out List<int> backpackIndexes, bool despawnItem = true)
     {
         backpackIndexes = new List<int>();
-        InsertResult hotbarResult = hotbar.PickupItem(item, out hotbarIndexes);
+        InsertResult hotbarResult = hotbar.PickupItem(item, out hotbarIndexes, despawnItem);
         InsertResult backpackResult = InsertResult.Failure;
         if (hotbarResult != InsertResult.Success)
-            backpackResult = backpack.PickupItem(item, out backpackIndexes);
+            backpackResult = backpack.PickupItem(item, out backpackIndexes, despawnItem);
 
         if (hotbarResult == InsertResult.Success || backpackResult == InsertResult.Success)
             return InsertResult.Success;

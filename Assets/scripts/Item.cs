@@ -73,11 +73,11 @@ public class Item : MonoBehaviour
     }
 
     //returns new stacksize on success, returns -1 on error
-    public int ChangeStackSize(int stackChange)
+    public int ChangeStackSize(int stackChange, bool despawnItem = true)
     {
         if (stackSize + stackChange < 0 || stackSize + stackChange > maxStackSize) return -1;
             stackSize += stackChange;
-        if (stackSize <= 0)
+        if (despawnItem && stackSize <= 0)
             Despawn();
         return stackSize;
     }
