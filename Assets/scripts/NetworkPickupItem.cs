@@ -34,7 +34,19 @@ public class NetworkPickupItem : NetworkBehaviour
             if (item != null && item.GetComponent<NetworkObject>().IsSpawned && item.CanBePickedUp())
             {
                 item.preventPickup = true;
-                RequestItemPickupServerRpc(item.GetComponent<NetworkObject>().NetworkObjectId, controller.networkObject.OwnerClientId);
+                if (!IsHost)
+                    RequestItemPickupServerRpc(item.GetComponent<NetworkObject>().NetworkObjectId, controller.networkObject.OwnerClientId);
+                else
+                {
+                    ClientRpcParams clientRpcParams = new ClientRpcParams
+                    {
+                        Send = new ClientRpcSendParams
+                        {
+                            TargetClientIds = new ulong[] { controller.networkObject.OwnerClientId }
+                        }
+                    };
+                    PickupItemClientRpc(item.GetComponent<NetworkObject>().NetworkObjectId, clientRpcParams);
+                }
             }
         }
     }
