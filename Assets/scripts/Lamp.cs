@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class Lamp : Machine
@@ -26,6 +27,24 @@ public class Lamp : Machine
         Lamp clone = new Lamp();
         clone.CopyFrom(this);
         return clone;
+    }
+
+    public override void Serialize(MemoryStream m, BinaryWriter writer)
+    {
+        base.Serialize(m, writer);
+
+        writer.Write(peakEnergyDemand);
+        writer.Write(maxIntensity);
+        writer.Write(isActive);
+    }
+
+    public override void Deserialize(MemoryStream m, BinaryReader reader)
+    {
+        base.Deserialize(m, reader);
+
+        peakEnergyDemand = reader.ReadSingle();
+        maxIntensity = reader.ReadSingle();
+        isActive = reader.ReadBoolean();
     }
 
     public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)

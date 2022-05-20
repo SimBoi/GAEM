@@ -1,6 +1,7 @@
 using System;
 using  System.Collections;
 using  System.Collections.Generic;
+using System.IO;
 using  UnityEngine;
 
 public class Item : MonoBehaviour
@@ -50,6 +51,60 @@ public class Item : MonoBehaviour
         Item clone = new Item();
         clone.CopyFrom(this);
         return clone;
+    }
+
+    public byte[] Serialize()
+    {
+        MemoryStream m = new MemoryStream();
+        BinaryWriter writer = new BinaryWriter(m);
+        Serialize(m, writer);
+        return m.ToArray();
+    }
+
+    public void Deserialize(byte[] data)
+    {
+        MemoryStream m = new MemoryStream(data);
+        BinaryReader reader = new BinaryReader(m);
+        Deserialize(m, reader);
+    }
+
+    public virtual void Serialize(MemoryStream m, BinaryWriter writer)
+    {
+        writer.Write(name);
+        writer.Write(id);
+        writer.Write(maxStackSize);
+        writer.Write(maxDurability);
+        writer.Write(spawnDurability);
+        writer.Write(stackSize);
+        if (health == null)
+            writer.Write(spawnDurability);
+        else
+            writer.Write(health.GetHp());
+        writer.Write(preventDespawn);
+        writer.Write(despawnTime);
+        writer.Write(preventPickup);
+        writer.Write(pickupDelay);
+        writer.Write(timeSinceSpawn);
+        writer.Write(isHeld);
+        writer.Write(isDestroyed);
+    }
+
+    public virtual void Deserialize(MemoryStream m, BinaryReader reader)
+    {
+        name = reader.ReadString();
+        id = reader.ReadInt32();
+        maxStackSize = reader.ReadInt32();
+        maxDurability = reader.ReadSingle();
+        spawnDurability = reader.ReadSingle();
+        stackSize = reader.ReadInt32();
+        health = new Health(reader.ReadSingle(), 0, maxDurability);
+        preventDespawn = reader.ReadBoolean();
+        despawnTime = reader.ReadSingle();
+        preventPickup = reader.ReadBoolean();
+        pickupDelay = reader.ReadSingle();
+        timeSinceSpawn = reader.ReadSingle();
+        isHeld = reader.ReadBoolean();
+        isDestroyed = reader.ReadBoolean();
     }
 
     public static bool operator ==(Item a, Item b)
@@ -105,6 +160,14 @@ public class Item : MonoBehaviour
         return health.GetHp();
     }
 
+    public static Item SpawnSerializedItem(int id, byte[] serializedItem, bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
+    {
+        ItemPrefabs itemPrefabs = ((GameObject)Resources.Load("ItemPrefabReferences", typeof(GameObject))).GetComponent<ItemPrefabs>();
+        Item itemToSpawn = itemPrefabs.prefabs[id].GetComponent<Item>().Clone();
+        itemToSpawn.Deserialize(serializedItem);
+        return itemToSpawn.Spawn(isHeld, pos, rotation, parent);
+    }
+
     public virtual Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
     {
         GameObject newItem;
@@ -149,7 +212,8 @@ public class Item : MonoBehaviour
 
     public virtual bool CanBePickedUp()
     {
-        if (!preventDespawn && timeSinceSpawn >= pickupDelay && !isHeld && !isDestroyed) return true;
+        if (!preventPickup && timeSinceSpawn >= pickupDelay && !isHeld && !isDestroyed)
+            return true;
         return false;
     }
 

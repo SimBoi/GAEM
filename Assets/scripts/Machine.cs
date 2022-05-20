@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public enum MachineEventType
@@ -51,6 +52,26 @@ public class Machine : Block
         Machine clone = new Machine();
         clone.CopyFrom(this);
         return clone;
+    }
+
+    public override void Serialize(MemoryStream m, BinaryWriter writer)
+    {
+        base.Serialize(m, writer);
+
+        writer.Write(inventorySizes.Length);
+        foreach (int x in inventorySizes)
+            writer.Write(x);
+        //writer.Write(ports);
+    }
+
+    public override void Deserialize(MemoryStream m, BinaryReader reader)
+    {
+        base.Deserialize(m, reader);
+
+        inventorySizes = new int[reader.ReadInt32()];
+        for (int i = 0; i < inventorySizes.Length; i++)
+            inventorySizes[i] = reader.ReadInt32();
+        //writer.Write(ports);
     }
 
     public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)

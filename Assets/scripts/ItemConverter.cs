@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class ItemConverter : Machine
@@ -26,6 +27,20 @@ public class ItemConverter : Machine
         ItemConverter clone = new ItemConverter();
         clone.CopyFrom(this);
         return clone;
+    }
+
+    public override void Serialize(MemoryStream m, BinaryWriter writer)
+    {
+        base.Serialize(m, writer);
+
+        writer.Write(cost);
+    }
+
+    public override void Deserialize(MemoryStream m, BinaryReader reader)
+    {
+        base.Deserialize(m, reader);
+
+        cost = reader.ReadInt32();
     }
 
     public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)

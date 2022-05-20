@@ -396,16 +396,16 @@ public class CharacterController : NetworkBehaviour
 
             if (clickedItem != null)
             {
-                ThrowClickedItemServerRpc(SerializedItem.Serialize(clickedItem));
+                ThrowClickedItemServerRpc(clickedItem.id, clickedItem.Serialize());
                 clickedItem = null;
             }
         }
     }
 
     [ServerRpc]
-    private void ThrowClickedItemServerRpc(SerializedItem serializedItem)
+    private void ThrowClickedItemServerRpc(int itemID, byte[] serializedItem)
     {
-        SerializedItem.Deserialize(serializedItem).Spawn(false, transform.position);
+        Item.SpawnSerializedItem(itemID, serializedItem, false, transform.position);
     }
 
     // returns the new item icon to display in the slot

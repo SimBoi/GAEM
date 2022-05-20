@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class SolarPanel : Machine
@@ -23,6 +24,22 @@ public class SolarPanel : Machine
         SolarPanel clone = new SolarPanel();
         clone.CopyFrom(this);
         return clone;
+    }
+
+    public override void Serialize(MemoryStream m, BinaryWriter writer)
+    {
+        base.Serialize(m, writer);
+
+        writer.Write(rate);
+        writer.Write(isActive);
+    }
+
+    public override void Deserialize(MemoryStream m, BinaryReader reader)
+    {
+        base.Deserialize(m, reader);
+
+        rate = reader.ReadSingle();
+        isActive = reader.ReadBoolean();
     }
 
     public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)

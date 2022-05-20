@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class Wearable : Item
@@ -25,6 +26,22 @@ public class Wearable : Item
         Wearable clone = new Wearable();
         clone.CopyFrom(this);
         return clone;
+    }
+
+    public override void Serialize(MemoryStream m, BinaryWriter writer)
+    {
+        base.Serialize(m, writer);
+
+        writer.Write(armorStrength);
+        writer.Write((int)armorPiece);
+    }
+
+    public override void Deserialize(MemoryStream m, BinaryReader reader)
+    {
+        base.Deserialize(m, reader);
+
+        armorStrength = reader.ReadSingle();
+        armorPiece = (ArmorPiece)reader.ReadInt32();
     }
 
     public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)

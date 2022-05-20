@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class Block : Item
@@ -29,6 +30,24 @@ public class Block : Item
         Block clone = new Block();
         clone.CopyFrom(this);
         return clone;
+    }
+
+    public override void Serialize(MemoryStream m, BinaryWriter writer)
+    {
+        base.Serialize(m, writer);
+
+        writer.Write(blockID);
+        writer.Write(stiffness);
+        writer.Write(hasCustomMesh);
+    }
+
+    public override void Deserialize(MemoryStream m, BinaryReader reader)
+    {
+        base.Deserialize(m, reader);
+
+        blockID = reader.ReadInt32();
+        stiffness = reader.ReadSingle();
+        hasCustomMesh = reader.ReadBoolean();
     }
 
     public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)

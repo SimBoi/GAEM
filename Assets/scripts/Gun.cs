@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -86,7 +87,6 @@ public class Gun : Item
         this.maxRange = source.maxRange;
         //this.swapTime = source.swapTime;
 
-        this.magazine = source.magazine;
         this.isReloading = source.isReloading;
         this.isAiming = source.isAiming;
         this.reloadTimer = source.reloadTimer;
@@ -99,6 +99,70 @@ public class Gun : Item
         Gun clone = new Gun();
         clone.CopyFrom(this);
         return clone;
+    }
+
+    public override void Serialize(MemoryStream m, BinaryWriter writer)
+    {
+        base.Serialize(m, writer);
+
+        writer.Write((int)type);
+
+        writer.Write(magazineSize);
+        writer.Write(magazine);
+        writer.Write(reloadTime);
+        writer.Write(damage);
+        writer.Write(fireRate);
+        writer.Write(adsZoom);
+        writer.Write(adsTime);
+        writer.Write(adsAccuracy);
+        writer.Write(hipAccuracy);
+        writer.Write(moveAccuracy);
+        writer.Write(accuracyJumpFactor);
+        writer.Write(accuracyJumpBias);
+        writer.Write(recoil);
+        writer.Write(recoilPower);
+        writer.Write(maxRecoilDegree);
+        writer.Write(effectiveRange);
+        writer.Write(maxRange);
+        //writer.Write(swapTime);
+
+        writer.Write(isReloading);
+        writer.Write(isAiming);
+        writer.Write(reloadTimer);
+        writer.Write(fireTimer);
+        //writer.Write(swapTimer);
+    }
+
+    public override void Deserialize(MemoryStream m, BinaryReader reader)
+    {
+        base.Deserialize(m, reader);
+
+        type = (WeaponType)reader.ReadInt32();
+
+        magazineSize = reader.ReadUInt16();
+        magazine = reader.ReadUInt16();
+        reloadTime = reader.ReadSingle();
+        damage = reader.ReadInt16();
+        fireRate = reader.ReadUInt16();
+        adsZoom = reader.ReadSingle();
+        adsTime = reader.ReadSingle();
+        adsAccuracy = reader.ReadSingle();
+        hipAccuracy = reader.ReadSingle();
+        moveAccuracy = reader.ReadSingle();
+        accuracyJumpFactor = reader.ReadSingle();
+        accuracyJumpBias = reader.ReadSingle();
+        recoil = reader.ReadSingle();
+        recoilPower = reader.ReadSingle();
+        maxRecoilDegree = reader.ReadSingle();
+        effectiveRange = reader.ReadUInt16();
+        maxRange = reader.ReadUInt16();
+        //swapTime = reader.ReadSingle();
+
+        isReloading = reader.ReadBoolean();
+        isAiming = reader.ReadBoolean();
+        reloadTimer = reader.ReadSingle();
+        fireTimer = reader.ReadUInt16();
+        //swapTimer = reader.ReadSingle();
     }
 
     public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
