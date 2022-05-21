@@ -33,6 +33,8 @@ public class ItemConverter : Machine
     {
         base.Serialize(m, writer);
 
+        writer.Write(inputItem.id);
+        writer.Write(outputItem.id);
         writer.Write(cost);
     }
 
@@ -40,6 +42,9 @@ public class ItemConverter : Machine
     {
         base.Deserialize(m, reader);
 
+        ItemPrefabs itemPrefabs = ((GameObject)Resources.Load("ItemPrefabReferences", typeof(GameObject))).GetComponent<ItemPrefabs>();
+        inputItem = itemPrefabs.prefabs[reader.ReadInt32()].GetComponent<Item>();
+        outputItem = itemPrefabs.prefabs[reader.ReadInt32()].GetComponent<Item>();
         cost = reader.ReadInt32();
     }
 

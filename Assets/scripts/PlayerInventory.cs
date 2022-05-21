@@ -19,22 +19,17 @@ public enum ArmorPiece
 
 public class PlayerInventory : MonoBehaviour
 {
-    public int backpackSize;
-    public int hotbarSize;
     public Health health;
     public Transform heldItemPos;
     public int heldItemIndex = -1; // held item index = -1 when no item is held
-    private Inventory backpack;
-    private Inventory hotbar;
-    private Inventory armor;
+    public Inventory backpack;
+    public Inventory hotbar;
+    public Inventory armor;
     private float totalArmorProtection;
 
     private void Start()
     {
         heldItemIndex = -1;
-        backpack = new Inventory(backpackSize);
-        hotbar = new Inventory(hotbarSize);
-        armor = new Inventory(System.Enum.GetNames(typeof(ArmorPiece)).Length);
     }
 
     private void Update()
@@ -221,16 +216,16 @@ public class PlayerInventory : MonoBehaviour
         return consumedStack;
     }
 
-    public Item ThrowHeldItem(int itemCount)
+    public void ThrowHeldItem(int itemCount)
     {
-        return ThrowItem(PlayerInventoryType.Hotbar, heldItemIndex, itemCount);
+        ThrowItem(PlayerInventoryType.Hotbar, heldItemIndex, itemCount);
     }
 
-    public Item ThrowItem(PlayerInventoryType inventoryType, int index, int itemCount)
+    public void ThrowItem(PlayerInventoryType inventoryType, int index, int itemCount)
     {
         if (inventoryType == PlayerInventoryType.Backpack)
         {
-            return backpack.ThrowItem(index, itemCount, transform.position);
+            backpack.ThrowItem(index, itemCount, transform.position);
         }
         else if (inventoryType == PlayerInventoryType.Hotbar)
         {
@@ -238,19 +233,18 @@ public class PlayerInventory : MonoBehaviour
             {
                 if (GetHeldItemRef().GetStackSize() == 1)
                     LetGoOfHeldItem();
-                Item thrownItem = hotbar.ThrowItem(index, itemCount, transform.position);
-                thrownItem.isHeld = false;
-                return thrownItem;
+                hotbar.ThrowItem(index, itemCount, transform.position);
             }
-            return hotbar.ThrowItem(index, itemCount, transform.position);
+            else
+                hotbar.ThrowItem(index, itemCount, transform.position);
         }
         else
         {
-            return armor.ThrowItem(index, itemCount, transform.position);
+            armor.ThrowItem(index, itemCount, transform.position);
         }
     }
 
-    /*//returns true on success, false on failure (e.g. inventry is full)
+    /*//returns true on success, false on failure (e.g. inventory is full)
     public bool InsertItemRef(Item item)
     {
         if (hotbar.InsertItemRef(item)) return true;

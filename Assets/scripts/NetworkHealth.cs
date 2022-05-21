@@ -31,7 +31,7 @@ public class NetworkHealth : NetworkBehaviour
         DealDamageServerRpc(dmg);
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     public void DealDamageServerRpc(float dmg)
     {
         health.DealDamage(dmg);

@@ -583,6 +583,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8766349186654717529}
   - component: {fileID: 8774141630154489949}
+  - component: {fileID: 7779009410753719219}
   - component: {fileID: 5191238020087436525}
   - component: {fileID: 8608579938416333425}
   - component: {fileID: -6952724425857867136}
@@ -621,7 +622,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e894f94fc9367242941251897ef6c21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
   name: ItemMagnet
   id: 11
   maxStackSize: 64
@@ -644,13 +644,28 @@ MonoBehaviour:
   hasCustomMesh: 1
   itemObject: {fileID: 6723420837956339870}
   blockObject: {fileID: 8807736956464586539}
-  inventorySizes: 0f000000
   machineUI: {fileID: 0}
-  inventories: []
+  inventories:
+  - {fileID: 7779009410753719219}
   PrimaryMachineEventType: 1
   SecondaryMachineEventType: 1
   radius: 5
   isActive: 0
+--- !u!114 &7779009410753719219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8766349186654717532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c58684576b1ddc04db57bb2038d523f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  size: 10
+  SlotFilledFlag: 0
+  SlotEmptiedFlag: 0
 --- !u!114 &5191238020087436525
 MonoBehaviour:
   m_ObjectHideFlags: 0

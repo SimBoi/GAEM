@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 public enum InsertResult
@@ -9,18 +10,12 @@ public enum InsertResult
     Partial  // inserted part of the stack of the item
 }
 
-public class Inventory : MonoBehaviour
+public class Inventory : NetworkBehaviour
 {
     public int size;
     private Item[] items;
     public bool SlotFilledFlag = false;
     public bool SlotEmptiedFlag = false;
-
-    public Inventory(int size)
-    {
-        this.size = size;
-        items = new Item[size];
-    }
 
     static public bool operator ==(Inventory inv1, Inventory inv2)
     {
@@ -32,7 +27,7 @@ public class Inventory : MonoBehaviour
         return !(inv1 == inv2);
     }
 
-    public Inventory DeepClone()
+    /*public Inventory DeepClone()
     {
         Inventory result = new Inventory(this.size);
         for (int i = 0; i < this.size; i++)
@@ -40,7 +35,7 @@ public class Inventory : MonoBehaviour
             result.SetItemCopy(this.items[i], i, out _);
         }
         return result;
-    }    
+    }*/
 
     private void Start()
     {
@@ -237,21 +232,24 @@ public class Inventory : MonoBehaviour
         return consumedStack;
     }
 
-    //returns the thrown item on success, null on failure (e.g. there is no item with the index to delete, itemCount is bigger than the number of available items)
-    public Item ThrowItem(int index, int itemCount, Vector3 position, Quaternion rotation = default, Transform parent = null)
+    //spawns item with (sets stack=itemCount isHeld=false) and deletes item from inventory if the new stack is 0, does nothing if there is no item with the index to throw or itemCount is bigger than the number of available items
+    public void ThrowItem(int index, int itemCount, Vector3 position, Quaternion rotation = default)
     {
         if (items[index] == null || items[index].GetStackSize() < itemCount)
-            return null;
+            return;
 
         Item itemToBeThrown = items[index].Clone();
         itemToBeThrown.SetStackSize(itemCount);
-        Item thrownItem = itemToBeThrown.Spawn(false, position, rotation, parent);
+        itemToBeThrown.isHeld = false;
+        ThrowItemServerRpc(itemToBeThrown.id, itemToBeThrown.Serialize(), position, rotation);
         if (items[index].ChangeStackSize(-1 * itemCount) == 0)
-        {
             DeleteItem(index);
-        }
+    }
 
-        return thrownItem;
+    [ServerRpc]
+    public void ThrowItemServerRpc(int itemID, byte[] serializedItem, Vector3 position, Quaternion rotation = default)
+    {
+        Item.SpawnSerializedItem(itemID, serializedItem, false, position, rotation);
     }
     
     //returns true on success, false on failure (e.g. there is no item with the index to delete)

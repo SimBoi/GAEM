@@ -273,6 +273,9 @@ GameObject:
   - component: {fileID: 1828069676}
   - component: {fileID: 1828069675}
   - component: {fileID: 1828069674}
+  - component: {fileID: 7398459472117307586}
+  - component: {fileID: 7115738343574047991}
+  - component: {fileID: 4906844874927020724}
   - component: {fileID: 4507752567041032622}
   - component: {fileID: 203232871174289378}
   - component: {fileID: 1355308355588449220}
@@ -437,11 +440,57 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d533366fc694d98489abff1d2c1bb645, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backpackSize: 12
-  hotbarSize: 4
   health: {fileID: 1828069676}
   heldItemPos: {fileID: 2229074504544305825}
   heldItemIndex: -1
+  backpack: {fileID: 7398459472117307586}
+  hotbar: {fileID: 7115738343574047991}
+  armor: {fileID: 4906844874927020724}
+--- !u!114 &7398459472117307586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051427869558859583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c58684576b1ddc04db57bb2038d523f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  size: 12
+  SlotFilledFlag: 0
+  SlotEmptiedFlag: 0
+--- !u!114 &7115738343574047991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051427869558859583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c58684576b1ddc04db57bb2038d523f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  size: 4
+  SlotFilledFlag: 0
+  SlotEmptiedFlag: 0
+--- !u!114 &4906844874927020724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051427869558859583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c58684576b1ddc04db57bb2038d523f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  size: 4
+  SlotFilledFlag: 0
+  SlotEmptiedFlag: 0
 --- !u!114 &4507752567041032622
 MonoBehaviour:
   m_ObjectHideFlags: 0

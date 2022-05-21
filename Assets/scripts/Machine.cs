@@ -14,10 +14,9 @@ public enum MachineEventType
 public class Machine : Block
 {
     [Header("Machine Properties")]
-    public int[] inventorySizes;
     public RectTransform machineUI;
     public Port[] ports;
-    [HideInInspector] public Inventory[] inventories;
+    public Inventory[] inventories;
 
     public void Start()
     {
@@ -31,68 +30,10 @@ public class Machine : Block
         return null;
     }
 
-    public void CopyFrom(Machine source)
-    {
-        base.CopyFrom(source);
-        CopyFromDerived(source);
-    }
-
-    public void CopyFromDerived(Machine source)
-    {
-        this.inventorySizes = (int[])source.inventorySizes.Clone();
-        this.inventories = new Inventory[source.inventories.Length];
-        for (int i = 0; i < source.inventories.Length; i++)
-        {
-            this.inventories[i] = source.inventories[i].DeepClone();
-        }
-    }
-
-    public override Item Clone()
-    {
-        Machine clone = new Machine();
-        clone.CopyFrom(this);
-        return clone;
-    }
-
-    public override void Serialize(MemoryStream m, BinaryWriter writer)
-    {
-        base.Serialize(m, writer);
-
-        writer.Write(inventorySizes.Length);
-        foreach (int x in inventorySizes)
-            writer.Write(x);
-        //writer.Write(ports);
-    }
-
-    public override void Deserialize(MemoryStream m, BinaryReader reader)
-    {
-        base.Deserialize(m, reader);
-
-        inventorySizes = new int[reader.ReadInt32()];
-        for (int i = 0; i < inventorySizes.Length; i++)
-            inventorySizes[i] = reader.ReadInt32();
-        //writer.Write(ports);
-    }
-
-    public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
-    {
-        Machine spawnedItem = (Machine)base.Spawn(isHeld, pos, rotation, parent);
-        spawnedItem.CopyFromDerived(this);
-        return spawnedItem;
-    }
-
     public override bool BlockInitialize()
     {
         if (!base.BlockInitialize()) return false;
 
-        if (inventories == null || inventories.Length == 0)
-        {
-            inventories = new Inventory[inventorySizes.Length];
-            for (int i = 0; i < inventories.Length; i++)
-            {
-                inventories[i] = new Inventory(inventorySizes[i]);
-            }
-        }
         if (ports == null || ports.Length == 0)
         {
             ports = new Port[6];

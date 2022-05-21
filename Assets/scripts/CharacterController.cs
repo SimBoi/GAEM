@@ -115,25 +115,9 @@ public class CharacterController : NetworkBehaviour
         }
     }
 
-    private bool getThrowItem = false;
-    private bool getThrowItemDown = false;
-    private bool getInventory = false;
-    private bool getInventoryDown = false;
-    private bool getPause = false;
-    private bool getPauseDown = false;
     public void GetPlayerInput()
     {
-        if (Input.GetAxisRaw("Cancel") == 1)
-        {
-            if (!getPause)
-                getPauseDown = true;
-            getPause = true;
-        }
-        else
-        {
-            getPause = false;
-        }
-        if (getPauseDown)
+        if (Input.GetButtonDown("Cancel"))
         {
             if (inventoriesUIParent.activeSelf)
             {
@@ -147,42 +131,18 @@ public class CharacterController : NetworkBehaviour
 
         if (!pauseUI.activeSelf)
         {
-            // gen button down handlers
-            if (Input.GetAxisRaw("Throw Item") == 1)
-            {
-                if (!getThrowItem)
-                    getThrowItemDown = true;
-                getThrowItem = true;
-            }
-            else
-            {
-                getThrowItem = false;
-            }
-            if (Input.GetAxisRaw("Inventory") == 1)
-            {
-                if (!getInventory)
-                    getInventoryDown = true;
-                getInventory = true;
-            }
-            else
-            {
-                getInventory = false;
-            }
-            if (getInventoryDown)
-            {
-                ToggleInventoriesUI();
-            }
-
             // mouse look inputs
             if (!inventoriesUIParent.activeSelf)
                 mouseLook.changeDirection(Input.GetAxis("Mouse Y"), Input.GetAxis("Mouse X"));
 
             // inventory and item inputs
+            if (Input.GetButtonDown("Inventory"))
+                ToggleInventoriesUI();
             if (Input.GetAxisRaw("Hotbar Slot 0") == 1)
                 inventory.SwitchToItem(0);
             else if (Input.GetAxisRaw("Hotbar Slot 1") == 1)
                 inventory.SwitchToItem(1);
-            else if (getThrowItemDown && inventory.heldItemIndex != -1)
+            else if (Input.GetButtonDown("Throw Item") && inventory.heldItemIndex != -1)
                 inventory.ThrowHeldItem(1);
             else if (inventory.heldItemIndex != -1 && !inventoriesUIParent.activeSelf)
             {
@@ -226,11 +186,6 @@ public class CharacterController : NetworkBehaviour
                 }
             }
         }
-
-        // get button down handlers reset
-        getThrowItemDown = false;
-        getInventoryDown = false;
-        getPauseDown = false;
     }
 
     public void UpdateHealthUI()
@@ -490,7 +445,6 @@ public class CharacterController : NetworkBehaviour
             fpsArms.SetTrigger("equip");
         }
     }
-
 
     public void AnimStance(Stance stance)
     {

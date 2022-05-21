@@ -1170,6 +1170,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7300327053921501084}
   - component: {fileID: 3774855845562117629}
+  - component: {fileID: -3922005335432339402}
   - component: {fileID: 6119643799773556008}
   - component: {fileID: 7750832660848634804}
   - component: {fileID: 4461438238497726805}
@@ -1209,7 +1210,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4d5577bd1b50e841ba7781b24d75afe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
   name: Chest
   id: 13
   maxStackSize: 1
@@ -1232,11 +1232,26 @@ MonoBehaviour:
   hasCustomMesh: 1
   itemObject: {fileID: 498573177659942960}
   blockObject: {fileID: 7752415408075902702}
-  inventorySizes: 06000000
   machineUI: {fileID: 672314262119255522}
-  inventories: []
+  inventories:
+  - {fileID: -3922005335432339402}
   PrimaryMachineEventType: 1
   SecondaryMachineEventType: 0
+--- !u!114 &-3922005335432339402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7300327053921501081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c58684576b1ddc04db57bb2038d523f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  size: 6
+  SlotFilledFlag: 0
+  SlotEmptiedFlag: 0
 --- !u!114 &6119643799773556008
 MonoBehaviour:
   m_ObjectHideFlags: 0
