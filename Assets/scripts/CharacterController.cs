@@ -360,7 +360,7 @@ public class CharacterController : NetworkBehaviour
     [ServerRpc]
     private void ThrowClickedItemServerRpc(int itemID, byte[] serializedItem)
     {
-        Item.SpawnSerializedItem(itemID, serializedItem, false, transform.position);
+        Item.Deserialize(itemID, serializedItem).Spawn(false, transform.position);
     }
 
     // returns the new item icon to display in the slot

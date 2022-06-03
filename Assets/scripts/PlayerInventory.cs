@@ -181,7 +181,7 @@ public class PlayerInventory : MonoBehaviour
         return hotbar.GetTotalStackSize(item) + backpack.GetTotalStackSize(item);
     }
 
-    // returns number of items consumed
+    // consumes from the stack of the item specified by the index, returns number of items consumed
     public int ConsumeFromStack(int stackToConsume, int index, PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar)
     {
         if (inventoryType == PlayerInventoryType.Hotbar)

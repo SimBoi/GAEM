@@ -61,11 +61,19 @@ public class Item : MonoBehaviour
         return m.ToArray();
     }
 
-    public void Deserialize(byte[] data)
+    public void Deserialize(byte[] serializedItem)
     {
-        MemoryStream m = new MemoryStream(data);
+        MemoryStream m = new MemoryStream(serializedItem);
         BinaryReader reader = new BinaryReader(m);
         Deserialize(m, reader);
+    }
+
+    public static Item Deserialize(int id, byte[] serializedItem)
+    {
+        ItemPrefabs itemPrefabs = ((GameObject)Resources.Load("ItemPrefabReferences", typeof(GameObject))).GetComponent<ItemPrefabs>();
+        Item item = itemPrefabs.prefabs[id].GetComponent<Item>().Clone();
+        item.Deserialize(serializedItem);
+        return item;
     }
 
     public virtual void Serialize(MemoryStream m, BinaryWriter writer)
@@ -158,14 +166,6 @@ public class Item : MonoBehaviour
     public float GetDurability()
     {
         return health.GetHp();
-    }
-
-    public static Item SpawnSerializedItem(int id, byte[] serializedItem, bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
-    {
-        ItemPrefabs itemPrefabs = ((GameObject)Resources.Load("ItemPrefabReferences", typeof(GameObject))).GetComponent<ItemPrefabs>();
-        Item itemToSpawn = itemPrefabs.prefabs[id].GetComponent<Item>().Clone();
-        itemToSpawn.Deserialize(serializedItem);
-        return itemToSpawn.Spawn(isHeld, pos, rotation, parent);
     }
 
     public virtual Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)

@@ -249,7 +249,7 @@ public class Inventory : NetworkBehaviour
     [ServerRpc]
     public void ThrowItemServerRpc(int itemID, byte[] serializedItem, Vector3 position, Quaternion rotation = default)
     {
-        Item.SpawnSerializedItem(itemID, serializedItem, false, position, rotation);
+        Item.Deserialize(itemID, serializedItem).Spawn(false, position, rotation);
     }
     
     //returns true on success, false on failure (e.g. there is no item with the index to delete)

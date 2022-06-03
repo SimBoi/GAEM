@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 public enum ItemEventType
@@ -10,7 +9,7 @@ public enum ItemEventType
     ContinuousSeconadryEvent
 }
 
-public class ItemEvent : MonoBehaviour
+public class ItemEvent : NetworkBehaviour
 {
     public ItemEventType eventType;
     private bool isEventActive = false;
@@ -60,13 +59,7 @@ public class ItemEvent : MonoBehaviour
         }
     }
 
-    public virtual void CustomItemEvent(GameObject eventCaller)
-    {
+    public virtual void CustomItemEvent(GameObject eventCaller) { }
 
-    }
-
-    public virtual void CustomItemEventExit(GameObject eventCaller)
-    {
-
-    }
+    public virtual void CustomItemEventExit(GameObject eventCaller) { }
 }
