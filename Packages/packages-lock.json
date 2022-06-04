@@ -75,7 +75,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.netcode.gameobjects": {
-      "version": "file:D:\\documents\\Unity Projects\\GitHub\\GAEM\\mlapi package repo\\com.unity.netcode.gameobjects",
+      "version": "file:../mlapi package repo/com.unity.netcode.gameobjects",
       "depth": 0,
       "source": "local",
       "dependencies": {

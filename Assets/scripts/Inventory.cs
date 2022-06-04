@@ -27,24 +27,18 @@ public class Inventory : NetworkBehaviour
         return !(inv1 == inv2);
     }
 
-    /*public Inventory DeepClone()
-    {
-        Inventory result = new Inventory(this.size);
-        for (int i = 0; i < this.size; i++)
-        {
-            result.SetItemCopy(this.items[i], i, out _);
-        }
-        return result;
-    }*/
-
     private void Start()
     {
         items = new Item[size];
     }
 
-    // if index is -1 item gets inserted in the first empty inventory space, returns true on success, returns false if inventory is full
+    // if index is -1 item gets inserted in the first empty inventory space, should only be called on the server
     public InsertResult PickupItem(Item item, out List<int> changedIndexes, bool despawnItem = true, int index = -1)
     {
+        changedIndexes = new List<int>();
+
+        if (!(IsServer || IsHost)) return InsertResult.Failure;
+
         InsertResult result;
         Item insertedItem;
 
@@ -67,19 +61,24 @@ public class Inventory : NetworkBehaviour
         return result;
     }
 
-    //returns true on success, false on failure (e.g. inventry is full)
+    // should only be called on the server
     public InsertResult InsertItemRef(Item item)
     {
+        if (!(IsServer || IsHost)) return InsertResult.Failure;
+
         for (int i = 0; i < size; i++)
             if (SetItemRef(item, i) == InsertResult.Success) return InsertResult.Success;
         return InsertResult.Failure;
     }
     
-    //returns true on success, false on failure (e.g. inventry is full)
+    // should only be called on the server
     public InsertResult InsertItemCopy(Item item, out Item insertedItem, out List<int> changedIndexes, bool despawnItem = true)
     {
         insertedItem = null;
         changedIndexes = new List<int>();
+
+        if (!(IsServer || IsHost)) return InsertResult.Failure;
+
         InsertResult result = InsertResult.Failure;
 
         // check if there is a stack of the same item type and add item on top
@@ -119,38 +118,41 @@ public class Inventory : NetworkBehaviour
         return items[index].Clone();
     }
 
+    // should only be called on the server
     public InsertResult SetItemRef(Item item, int index)
     {
-        if (item == null)
+        if (!(IsServer || IsHost) || item == null || items[index] != null) return InsertResult.Failure;
+
+        items[index] = item;
+        SlotFilledFlag = true;
+
+        ClientRpcParams clientRpcParams = new ClientRpcParams
         {
-            return InsertResult.Failure;
-        }
-        else if (items[index] == null)
-        {
-            items[index] = item;
-            SlotFilledFlag = true;
-            return InsertResult.Success;
-        }
-        else
-        {
-            return InsertResult.Failure;
-        }
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { OwnerClientId }
+            }
+        };
+        SyncSlotClientRpc(index, items[index].id, items[index].Serialize(), clientRpcParams);
+
+        return InsertResult.Success;
     }
     
+    // should only be called on the server
     public InsertResult SetItemCopy(Item item, int index, out Item insertedItem, bool despawnItem = true)
     {
-        if (item == null)
-        {
-            insertedItem = null;
-            return InsertResult.Failure;
-        }
-        else if (items[index] == null)
+        insertedItem = null;
+
+        if (!(IsServer || IsHost) || item == null) return InsertResult.Failure;
+
+        InsertResult result = InsertResult.Failure;
+        if (items[index] == null)
         {
             items[index] = item.Clone();
             item.ChangeStackSize(-item.GetStackSize());
             insertedItem = items[index];
             SlotFilledFlag = true;
-            return InsertResult.Success;
+            result = InsertResult.Success;
         }
         else if (item == items[index])
         {
@@ -160,24 +162,32 @@ public class Inventory : NetworkBehaviour
                 items[index].ChangeStackSize(stackToAdd);
                 item.ChangeStackSize(-stackToAdd);
                 insertedItem = items[index];
-                return InsertResult.Partial;
+                result = InsertResult.Partial;
             }
             else
             {
                 items[index].ChangeStackSize(item.GetStackSize());
                 item.ChangeStackSize(-item.GetStackSize());
                 insertedItem = items[index];
-                return InsertResult.Success;
+                result = InsertResult.Success;
             }
         }
-        else
+
+        if (result != InsertResult.Failure)
         {
-            insertedItem = null;
-            return InsertResult.Failure;
+            ClientRpcParams clientRpcParams = new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams
+                {
+                    TargetClientIds = new ulong[] { OwnerClientId }
+                }
+            };
+            SyncSlotClientRpc(index, items[index].id, items[index].Serialize(), clientRpcParams);
         }
+
+        return result;
     }
 
-    // returns true if items[index] contains an item, false if its empty
     public bool IsSlotFilled(int index)
     {
         if (items[index] == null)
@@ -201,21 +211,45 @@ public class Inventory : NetworkBehaviour
         return totalStack;
     }
 
-    // returns number of items consumed
+    // consumes from the stack of a specific slot, returns number of items consumed, should only be called on the server
     public int ConsumeFromStack(int index, int stackToConsume)
     {
+        if (!(IsServer || IsHost) || stackToConsume < 0) return 0;
+
         int oldStackSize = GetItemRef(index).GetStackSize();
         int newStackSize = GetItemRef(index).ChangeStackSize(Mathf.Clamp(-stackToConsume, -oldStackSize, 0));
         if (newStackSize == 0)
-            DeleteItem(index);
+        {
+            DeleteItemServerRpc(index);
+        }
+        else
+        {
+            ClientRpcParams clientRpcParams = new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams
+                {
+                    TargetClientIds = new ulong[] { OwnerClientId }
+                }
+            };
+            SyncSlotClientRpc(index, items[index].id, items[index].Serialize(), clientRpcParams);
+        }
 
         return oldStackSize - newStackSize;
     }
 
-    // returns number of items consumed
+    [ServerRpc]
+    public void ConsumeFromStackServerRpc(int index, int stackToConsume)
+    {
+        ConsumeFromStack(index, stackToConsume);
+    }
+
+    // consumes from the collective stack of all slots of the same item parameter type, returns number of items consumed, should only be called on the server
     public int ConsumeFromTotalStack(Item item, int stackToConsume, out List<int> changedIndexes)
     {
         changedIndexes = new List<int>();
+        
+        if (!(IsServer || IsHost) || stackToConsume < 0) return 0;
+
         int consumedStack = 0;
         for (int i = 0; i < size; i++)
         {
@@ -232,32 +266,66 @@ public class Inventory : NetworkBehaviour
         return consumedStack;
     }
 
-    //spawns item with (sets stack=itemCount isHeld=false) and deletes item from inventory if the new stack is 0, does nothing if there is no item with the index to throw or itemCount is bigger than the number of available items
-    public void ThrowItem(int index, int itemCount, Vector3 position, Quaternion rotation = default)
+    [ServerRpc]
+    public void ConsumeFromTotalStackServerRpc(int itemID, byte[] serializedItem, int stackToConsume)
     {
-        if (items[index] == null || items[index].GetStackSize() < itemCount)
-            return;
+        ConsumeFromTotalStack(Item.Deserialize(itemID, serializedItem), stackToConsume, out _);
+    }
+
+    //spawns item with (sets stack=itemCount isHeld=false) and deletes item from inventory if the new stack is 0, does nothing if there is no item with the index to throw or itemCount is bigger than the number of available items
+    [ServerRpc]
+    public void ThrowItemServerRpc(int index, int itemCount, Vector3 position, Quaternion rotation = default)
+    {
+        if (items[index] == null || items[index].GetStackSize() < itemCount) return;
 
         Item itemToBeThrown = items[index].Clone();
         itemToBeThrown.SetStackSize(itemCount);
         itemToBeThrown.isHeld = false;
-        ThrowItemServerRpc(itemToBeThrown.id, itemToBeThrown.Serialize(), position, rotation);
+        itemToBeThrown.Spawn(false, position, rotation);
         if (items[index].ChangeStackSize(-1 * itemCount) == 0)
-            DeleteItem(index);
+        {
+            DeleteItemServerRpc(index);
+        }
+        else
+        {
+            ClientRpcParams clientRpcParams = new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams
+                {
+                    TargetClientIds = new ulong[] { OwnerClientId }
+                }
+            };
+            SyncSlotClientRpc(index, items[index].id, items[index].Serialize(), clientRpcParams);
+        }
     }
 
     [ServerRpc]
-    public void ThrowItemServerRpc(int itemID, byte[] serializedItem, Vector3 position, Quaternion rotation = default)
+    public void DeleteItemServerRpc(int index)
     {
-        Item.Deserialize(itemID, serializedItem).Spawn(false, position, rotation);
-    }
-    
-    //returns true on success, false on failure (e.g. there is no item with the index to delete)
-    public bool DeleteItem(int index)
-    {
-        if (items[index] == null) return false;
+        if (items[index] == null) return;
+
         items[index] = null;
         SlotEmptiedFlag = true;
-        return true;
+
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { OwnerClientId }
+            }
+        };
+        SyncSlotClientRpc(index, 0, null, clientRpcParams);
+    }
+
+    [ClientRpc]
+    public void SyncSlotClientRpc(int index, int itemID, byte[] serializedItem, ClientRpcParams clientRpcParams)
+    {
+        items[index] = itemID == 0 ? null : Item.Deserialize(itemID, serializedItem);
+    }
+
+    [ClientRpc]
+    public void SyncInventoryClientRpc(int[] itemIDs, byte[][] serializedItems, ClientRpcParams clientRpcParams)
+    {
+        for (int i = 0; i < size; i++) items[i] = itemIDs[i] == 0 ? null : Item.Deserialize(itemIDs[i], serializedItems[i]);
     }
 }

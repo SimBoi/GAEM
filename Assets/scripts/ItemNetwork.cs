@@ -39,7 +39,7 @@ public class ItemNetwork : Network
                                 inputPort.linkedInventory.InsertItemCopy(item, out _, out _);
                                 if (item.GetStackSize() == 0)
                                 {
-                                    outputPort.linkedInventory.DeleteItem(i);
+                                    outputPort.linkedInventory.DeleteItemServerRpc(i);
                                     break;
                                 }
                             }

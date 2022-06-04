@@ -114,7 +114,7 @@ public class Machine : Block
             if (inventory == null)
                 continue;
             for (int i = 0; i < inventory.size; i++)
-                inventory.ThrowItem(i, inventory.GetStackSize(i), pos);
+                inventory.ThrowItemServerRpc(i, inventory.GetStackSize(i), pos);
         }
         return true;
     }

@@ -139,7 +139,7 @@ public class Item : MonoBehaviour
     public int ChangeStackSize(int stackChange, bool despawnItem = true)
     {
         if (stackSize + stackChange < 0 || stackSize + stackChange > maxStackSize) return -1;
-            stackSize += stackChange;
+        stackSize += stackChange;
         if (despawnItem && stackSize <= 0)
             Despawn();
         return stackSize;

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 public enum PlayerInventoryType
@@ -17,7 +18,7 @@ public enum ArmorPiece
     Boots
 }
 
-public class PlayerInventory : MonoBehaviour
+public class PlayerInventory : NetworkBehaviour
 {
     public Health health;
     public Transform heldItemPos;
@@ -36,7 +37,7 @@ public class PlayerInventory : MonoBehaviour
     {
         if (heldItemIndex != -1 && GetHeldItemRef().isDestroyed == true)
         {
-            hotbar.DeleteItem(heldItemIndex);
+            hotbar.DeleteItemServerRpc(heldItemIndex);
             heldItemIndex = -1;
         }
     }
@@ -54,12 +55,13 @@ public class PlayerInventory : MonoBehaviour
         return armor;
     }
 
-    public void SwitchToItem(int index)
+    [ServerRpc]
+    public void SwitchToItemServerRpc(int index)
     {
         if (index == heldItemIndex) return;
 
         // let go of currently held item
-        LetGoOfHeldItem();
+        LetGoOfHeldItemServerRpc();
 
         // check if there is an item to hold
         if (hotbar.IsSlotFilled(index))
@@ -68,10 +70,25 @@ public class PlayerInventory : MonoBehaviour
             Item spawnedItem = hotbar.GetItemRef(index).Spawn(true, heldItemPos.position, heldItemPos.rotation, heldItemPos);
             spawnedItem.preventDespawn = true;
             spawnedItem.HoldEvent(gameObject);
-            hotbar.DeleteItem(index);
+            hotbar.DeleteItemServerRpc(index);
             hotbar.SetItemRef(spawnedItem, index);
             heldItemIndex = index;
         }
+
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { OwnerClientId }
+            }
+        };
+        SwitchToItemClientRpc(index, clientRpcParams);
+    }
+
+    [ClientRpc]
+    public void SwitchToItemClientRpc(int index, ClientRpcParams clientRpcParams)
+    {
+
     }
 
     public ref Item GetHeldItemRef()
@@ -79,7 +96,8 @@ public class PlayerInventory : MonoBehaviour
         return ref hotbar.GetItemRef(heldItemIndex);
     }
 
-    public void LetGoOfHeldItem()
+    [ServerRpc]
+    public void LetGoOfHeldItemServerRpc()
     {
         if (heldItemIndex == -1) return;
 
@@ -87,7 +105,7 @@ public class PlayerInventory : MonoBehaviour
         Item heldItem = GetHeldItemRef();
         heldItem.isHeld = false;
         heldItem.preventDespawn = false;
-        hotbar.DeleteItem(heldItemIndex);
+        hotbar.DeleteItemServerRpc(heldItemIndex);
         hotbar.SetItemCopy(heldItem, heldItemIndex, out _);
         heldItem.Despawn();
 
@@ -95,10 +113,20 @@ public class PlayerInventory : MonoBehaviour
         heldItemIndex = -1;
     }
 
-    // inserts a copy of the item into the hotbar/backpack and despawns it
+    [ClientRpc]
+    public void LetGoOfHeldItemClientRpc()
+    {
+
+    }
+
+    // inserts a copy of the item into the hotbar/backpack and despawns it, should only be called on the server
     public InsertResult PickupItem(Item item, out List<int> hotbarIndexes, out List<int> backpackIndexes, bool despawnItem = true)
     {
+        hotbarIndexes = new List<int>();
         backpackIndexes = new List<int>();
+
+        if (!(IsServer || IsHost)) return InsertResult.Failure;
+
         InsertResult hotbarResult = hotbar.PickupItem(item, out hotbarIndexes, despawnItem);
         InsertResult backpackResult = InsertResult.Failure;
         if (hotbarResult != InsertResult.Success)
@@ -113,6 +141,10 @@ public class PlayerInventory : MonoBehaviour
 
     public InsertResult SetItemCopy(PlayerInventoryType inventoryType, Item item, int index, out Item insertedItem)
     {
+        insertedItem = null;
+
+        if (!(IsServer || IsHost)) return InsertResult.Failure;
+
         if (inventoryType == PlayerInventoryType.Backpack)
         {
             return backpack.SetItemCopy(item, index, out insertedItem);
@@ -181,15 +213,14 @@ public class PlayerInventory : MonoBehaviour
         return hotbar.GetTotalStackSize(item) + backpack.GetTotalStackSize(item);
     }
 
-    // consumes from the stack of the item specified by the index, returns number of items consumed
+    // consumes from the stack of a specific slot, returns number of items consumed, should only be called on the server
     public int ConsumeFromStack(int stackToConsume, int index, PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar)
     {
+        if (!(IsServer || IsHost)) return 0;
+
         if (inventoryType == PlayerInventoryType.Hotbar)
         {
-            if (index == heldItemIndex && GetHeldItemRef().GetStackSize() <= stackToConsume)
-            {
-                LetGoOfHeldItem();
-            }
+            if (index == heldItemIndex && GetHeldItemRef().GetStackSize() <= stackToConsume) LetGoOfHeldItemServerRpc();
             return hotbar.ConsumeFromStack(index, stackToConsume);
         }
         else
@@ -198,9 +229,20 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-    // returns number of items consumed
+    [ServerRpc]
+    public void ConsumeFromStackServerRpc(int index, int stackToConsume)
+    {
+        ConsumeFromStack(index, stackToConsume);
+    }
+
+    // consumes from the collective stack of all slots of the same item parameter type, returns number of items consumed, should only be called on the server
     public int ConsumeFromTotalStack(Item item, int stackToConsume, out List<int> hotbarIndexes, out List<int> backpackIndexes)
     {
+        hotbarIndexes = new List<int>();
+        backpackIndexes = new List<int>();
+
+        if (!(IsServer || IsHost)) return 0;
+
         int consumedStack = 0;
         bool consumedFromHeldItem = false;
         if (GetHeldItemRef() == item)
@@ -216,6 +258,12 @@ public class PlayerInventory : MonoBehaviour
         return consumedStack;
     }
 
+    [ServerRpc]
+    public void ConsumeFromTotalStackServerRpc(int itemID, byte[] serializedItem, int stackToConsume)
+    {
+        ConsumeFromTotalStack(Item.Deserialize(itemID, serializedItem), stackToConsume, out _, out _);
+    }
+
     public void ThrowHeldItem(int itemCount)
     {
         ThrowItem(PlayerInventoryType.Hotbar, heldItemIndex, itemCount);
@@ -225,32 +273,24 @@ public class PlayerInventory : MonoBehaviour
     {
         if (inventoryType == PlayerInventoryType.Backpack)
         {
-            backpack.ThrowItem(index, itemCount, transform.position);
+            backpack.ThrowItemServerRpc(index, itemCount, transform.position);
         }
         else if (inventoryType == PlayerInventoryType.Hotbar)
         {
             if (index == heldItemIndex)
             {
                 if (GetHeldItemRef().GetStackSize() == 1)
-                    LetGoOfHeldItem();
-                hotbar.ThrowItem(index, itemCount, transform.position);
+                    LetGoOfHeldItemServerRpc();
+                hotbar.ThrowItemServerRpc(index, itemCount, transform.position);
             }
             else
-                hotbar.ThrowItem(index, itemCount, transform.position);
+                hotbar.ThrowItemServerRpc(index, itemCount, transform.position);
         }
         else
         {
-            armor.ThrowItem(index, itemCount, transform.position);
+            armor.ThrowItemServerRpc(index, itemCount, transform.position);
         }
     }
-
-    /*//returns true on success, false on failure (e.g. inventory is full)
-    public bool InsertItemRef(Item item)
-    {
-        if (hotbar.InsertItemRef(item)) return true;
-        if (backpack.InsertItemRef(item)) return true;
-        return false;
-    }*/
 
     public bool IsSlotFilled(PlayerInventoryType inventoryType, int index)
     {
@@ -288,21 +328,20 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-    public bool DeleteItem(PlayerInventoryType inventoryType, int index)
+    public void DeleteItem(PlayerInventoryType inventoryType, int index)
     {
         if (inventoryType == PlayerInventoryType.Backpack)
         {
-            return backpack.DeleteItem(index);
+            backpack.DeleteItemServerRpc(index);
         }
         else if (inventoryType == PlayerInventoryType.Hotbar)
         {
-            if (index == heldItemIndex)
-                LetGoOfHeldItem();
-            return hotbar.DeleteItem(index);
+            if (index == heldItemIndex) LetGoOfHeldItemServerRpc();
+            hotbar.DeleteItemServerRpc(index);
         }
         else
         {
-            return armor.DeleteItem(index);
+            armor.DeleteItemServerRpc(index);
         }
     }
 

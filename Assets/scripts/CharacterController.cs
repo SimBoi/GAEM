@@ -139,9 +139,9 @@ public class CharacterController : NetworkBehaviour
             if (Input.GetButtonDown("Inventory"))
                 ToggleInventoriesUI();
             if (Input.GetAxisRaw("Hotbar Slot 0") == 1)
-                inventory.SwitchToItem(0);
+                inventory.SwitchToItemServerRpc(0);
             else if (Input.GetAxisRaw("Hotbar Slot 1") == 1)
-                inventory.SwitchToItem(1);
+                inventory.SwitchToItemServerRpc(1);
             else if (Input.GetButtonDown("Throw Item") && inventory.heldItemIndex != -1)
                 inventory.ThrowHeldItem(1);
             else if (inventory.heldItemIndex != -1 && !inventoriesUIParent.activeSelf)
@@ -400,7 +400,7 @@ public class CharacterController : NetworkBehaviour
                 clickedItem = inventory.GetItemCopy(slotIndex);
             else
                 clickedItem = null;
-            inventory.DeleteItem(slotIndex);
+            inventory.DeleteItemServerRpc(slotIndex);
             if (previousClickedItem != null)
             {
                 inventory.SetItemCopy(previousClickedItem, slotIndex, out _);
