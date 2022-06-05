@@ -173,7 +173,7 @@ public class Gun : Item
         return spawnedItem;
     }
 
-    public override void HoldEvent(GameObject eventCaller)
+    public override void HoldItem(GameObject eventCaller)
     {
         this.eventCaller = eventCaller;
         CharacterController controller = eventCaller.GetComponent<CharacterController>();

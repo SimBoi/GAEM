@@ -360,7 +360,8 @@ public class CharacterController : NetworkBehaviour
     [ServerRpc]
     private void ThrowClickedItemServerRpc(int itemID, byte[] serializedItem)
     {
-        Item.Deserialize(itemID, serializedItem).Spawn(false, transform.position);
+        Item spawnedItem = Item.Deserialize(itemID, serializedItem).Spawn(false, transform.position);
+        spawnedItem.NetworkSpawn();
     }
 
     // returns the new item icon to display in the slot
@@ -396,15 +397,9 @@ public class CharacterController : NetworkBehaviour
         }
         else
         {
-            if (inventory.IsSlotFilled(slotIndex))
-                clickedItem = inventory.GetItemCopy(slotIndex);
-            else
-                clickedItem = null;
+            clickedItem = inventory.IsSlotFilled(slotIndex) ? inventory.GetItemCopy(slotIndex) : null;
             inventory.DeleteItemServerRpc(slotIndex);
-            if (previousClickedItem != null)
-            {
-                inventory.SetItemCopy(previousClickedItem, slotIndex, out _);
-            }
+            if (previousClickedItem != null) inventory.SetItemCopy(previousClickedItem, slotIndex, out _);
         }
     }
 

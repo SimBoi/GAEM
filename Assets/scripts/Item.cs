@@ -2,9 +2,10 @@ using System;
 using  System.Collections;
 using  System.Collections.Generic;
 using System.IO;
-using  UnityEngine;
+using Unity.Netcode;
+using UnityEngine;
 
-public class Item : MonoBehaviour
+public class Item : NetworkBehaviour
 {
     [Header("Item Properties")]
     public string name;
@@ -115,6 +116,12 @@ public class Item : MonoBehaviour
         isDestroyed = reader.ReadBoolean();
     }
 
+    [ClientRpc]
+    public void SyncItemClientRpc(byte[] serializedItem)
+    {
+        Deserialize(serializedItem);
+    }
+
     public static bool operator ==(Item a, Item b)
     {
         if (a is null || b is null)
@@ -188,12 +195,21 @@ public class Item : MonoBehaviour
         return spawnedItem;
     }
 
+    public void NetworkSpawn()
+    {
+        if (NetworkManager.Singleton.IsServer) GetComponent<NetworkObject>().Spawn();
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer) SyncItemClientRpc(Serialize());
+    }
+
     public virtual bool Despawn()
     {
         try
         {
-            if (gameObject != null)
-                Destroy(gameObject);
+            if (gameObject != null) Destroy(gameObject);
         }
         catch (NullReferenceException) { }
         isDestroyed = true;
@@ -219,7 +235,28 @@ public class Item : MonoBehaviour
 
     public virtual void PickupEvent() { }
     
-    public virtual void HoldEvent(GameObject eventCaller) { }
+    // calls HoldItem on the client that owns eventCaller, eventCaller has to have a NetworkObject component
+    public void HoldEvent(GameObject eventCaller)
+    {
+        NetworkObject callerNetworkObject = eventCaller.GetComponent<NetworkObject>();
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { callerNetworkObject.OwnerClientId }
+            }
+        };
+        HoldEventClientRpc(callerNetworkObject.NetworkObjectId, clientRpcParams);
+    }
+
+    [ClientRpc]
+    public void HoldEventClientRpc(ulong eventCallerID, ClientRpcParams clientRpcParams)
+    {
+        GameObject eventCaller = NetworkManager.Singleton.SpawnManager.SpawnedObjects[eventCallerID].gameObject;
+        HoldItem(eventCaller);
+    }
+
+    public virtual void HoldItem(GameObject eventCaller) { }
 
     public virtual void PrimaryItemEvent(GameObject eventCaller)
     {

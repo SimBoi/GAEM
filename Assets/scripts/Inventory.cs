@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -61,7 +60,7 @@ public class Inventory : NetworkBehaviour
         return result;
     }
 
-    // should only be called on the server
+    // should only be called on the server, item must be network spawned, syncs item reference with owner client
     public InsertResult InsertItemRef(Item item)
     {
         if (!(IsServer || IsHost)) return InsertResult.Failure;
@@ -71,7 +70,7 @@ public class Inventory : NetworkBehaviour
         return InsertResult.Failure;
     }
     
-    // should only be called on the server
+    // should only be called on the server, syncs item with owner client
     public InsertResult InsertItemCopy(Item item, out Item insertedItem, out List<int> changedIndexes, bool despawnItem = true)
     {
         insertedItem = null;
@@ -118,7 +117,7 @@ public class Inventory : NetworkBehaviour
         return items[index].Clone();
     }
 
-    // should only be called on the server
+    // fails if slot is filled or item is null, should only be called on the server, item must be network spawned, syncs item reference with owner client
     public InsertResult SetItemRef(Item item, int index)
     {
         if (!(IsServer || IsHost) || item == null || items[index] != null) return InsertResult.Failure;
@@ -133,12 +132,12 @@ public class Inventory : NetworkBehaviour
                 TargetClientIds = new ulong[] { OwnerClientId }
             }
         };
-        SyncSlotClientRpc(index, items[index].id, items[index].Serialize(), clientRpcParams);
+        SyncSlotRefClientRpc(index, item.GetComponent<NetworkObject>().NetworkObjectId, clientRpcParams);
 
         return InsertResult.Success;
     }
-    
-    // should only be called on the server
+
+    // if slot is filled with same type item the stack will be increased, fails if slot is filled with a different type of item or item is null, should only be called on the server, syncs item with owner client
     public InsertResult SetItemCopy(Item item, int index, out Item insertedItem, bool despawnItem = true)
     {
         insertedItem = null;
@@ -278,10 +277,9 @@ public class Inventory : NetworkBehaviour
     {
         if (items[index] == null || items[index].GetStackSize() < itemCount) return;
 
-        Item itemToBeThrown = items[index].Clone();
-        itemToBeThrown.SetStackSize(itemCount);
-        itemToBeThrown.isHeld = false;
-        itemToBeThrown.Spawn(false, position, rotation);
+        Item thrownItem = items[index].Spawn(false, position, rotation);
+        thrownItem.SetStackSize(itemCount);
+        thrownItem.NetworkSpawn();
         if (items[index].ChangeStackSize(-1 * itemCount) == 0)
         {
             DeleteItemServerRpc(index);
@@ -321,6 +319,12 @@ public class Inventory : NetworkBehaviour
     public void SyncSlotClientRpc(int index, int itemID, byte[] serializedItem, ClientRpcParams clientRpcParams)
     {
         items[index] = itemID == 0 ? null : Item.Deserialize(itemID, serializedItem);
+    }
+
+    [ClientRpc]
+    public void SyncSlotRefClientRpc(int index, ulong itemNetworkID, ClientRpcParams clientRpcParams)
+    {
+        items[index] = NetworkManager.Singleton.SpawnManager.SpawnedObjects[itemNetworkID].GetComponent<Item>();
     }
 
     [ClientRpc]

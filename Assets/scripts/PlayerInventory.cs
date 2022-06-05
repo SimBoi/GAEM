@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -44,15 +43,9 @@ public class PlayerInventory : NetworkBehaviour
 
     public Inventory GetInventory(PlayerInventoryType type)
     {
-        if (type == PlayerInventoryType.Hotbar)
-        {
-            return hotbar;
-        }
-        if (type == PlayerInventoryType.Backpack)
-        {
-            return backpack;
-        }
-        return armor;
+        if (type == PlayerInventoryType.Hotbar) return hotbar;
+        if (type == PlayerInventoryType.Backpack) return backpack;
+        else return armor;
     }
 
     [ServerRpc]
@@ -69,26 +62,27 @@ public class PlayerInventory : NetworkBehaviour
             // spawn item to be held and update inventory to the new spawned item and update held item index
             Item spawnedItem = hotbar.GetItemRef(index).Spawn(true, heldItemPos.position, heldItemPos.rotation, heldItemPos);
             spawnedItem.preventDespawn = true;
-            spawnedItem.HoldEvent(gameObject);
-            hotbar.DeleteItemServerRpc(index);
-            hotbar.SetItemRef(spawnedItem, index);
-            heldItemIndex = index;
-        }
+            spawnedItem.NetworkSpawn(); // spawns held item across the network
+            spawnedItem.HoldEvent(gameObject); // calls hold event on the owner client
+            hotbar.DeleteItemServerRpc(index); // deletes previous item on the server and the owner client
+            hotbar.SetItemRef(spawnedItem, index); // sets new held item ref on the server and the owner client
 
-        ClientRpcParams clientRpcParams = new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams
+            heldItemIndex = index; // updates held item index on the server
+            ClientRpcParams clientRpcParams = new ClientRpcParams
             {
-                TargetClientIds = new ulong[] { OwnerClientId }
-            }
-        };
-        SwitchToItemClientRpc(index, clientRpcParams);
+                Send = new ClientRpcSendParams
+                {
+                    TargetClientIds = new ulong[] { OwnerClientId }
+                }
+            };
+            SwitchToItemClientRpc(index, clientRpcParams); // updates heldItemIndex on the owner client
+        }
     }
 
     [ClientRpc]
     public void SwitchToItemClientRpc(int index, ClientRpcParams clientRpcParams)
     {
-
+        heldItemIndex = index;
     }
 
     public ref Item GetHeldItemRef()
@@ -105,18 +99,26 @@ public class PlayerInventory : NetworkBehaviour
         Item heldItem = GetHeldItemRef();
         heldItem.isHeld = false;
         heldItem.preventDespawn = false;
-        hotbar.DeleteItemServerRpc(heldItemIndex);
-        hotbar.SetItemCopy(heldItem, heldItemIndex, out _);
-        heldItem.Despawn();
+        hotbar.DeleteItemServerRpc(heldItemIndex); // deletes held item from the inventory of the server and the owner client
+        hotbar.SetItemCopy(heldItem, heldItemIndex, out _); // sets a copy of the held item in the inventory  of the server and the owner client
+        heldItem.Despawn(); // despanws held item across the network
 
         // set held item index to holding nothing
-        heldItemIndex = -1;
+        heldItemIndex = -1; // updates held item index on the server
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { OwnerClientId }
+            }
+        };
+        LetGoOfHeldItemClientRpc(clientRpcParams); // updates held item index on the client
     }
 
     [ClientRpc]
-    public void LetGoOfHeldItemClientRpc()
+    public void LetGoOfHeldItemClientRpc(ClientRpcParams clientRpcParams)
     {
-
+        heldItemIndex = -1;
     }
 
     // inserts a copy of the item into the hotbar/backpack and despawns it, should only be called on the server
@@ -129,42 +131,28 @@ public class PlayerInventory : NetworkBehaviour
 
         InsertResult hotbarResult = hotbar.PickupItem(item, out hotbarIndexes, despawnItem);
         InsertResult backpackResult = InsertResult.Failure;
-        if (hotbarResult != InsertResult.Success)
-            backpackResult = backpack.PickupItem(item, out backpackIndexes, despawnItem);
+        if (hotbarResult != InsertResult.Success) backpackResult = backpack.PickupItem(item, out backpackIndexes, despawnItem);
 
-        if (hotbarResult == InsertResult.Success || backpackResult == InsertResult.Success)
-            return InsertResult.Success;
-        if (hotbarResult == InsertResult.Partial || backpackResult == InsertResult.Partial)
-            return InsertResult.Partial;
+        if (hotbarResult == InsertResult.Success || backpackResult == InsertResult.Success) return InsertResult.Success;
+        if (hotbarResult == InsertResult.Partial || backpackResult == InsertResult.Partial) return InsertResult.Partial;
         return InsertResult.Failure;
     }
 
+    // should only be called on the server
     public InsertResult SetItemCopy(PlayerInventoryType inventoryType, Item item, int index, out Item insertedItem)
     {
         insertedItem = null;
 
         if (!(IsServer || IsHost)) return InsertResult.Failure;
 
-        if (inventoryType == PlayerInventoryType.Backpack)
-        {
-            return backpack.SetItemCopy(item, index, out insertedItem);
-        }
-        else if (inventoryType == PlayerInventoryType.Hotbar)
-        {
-            return hotbar.SetItemCopy(item, index, out insertedItem);
-        }
-        else
-        {
-            return EquipArmor(item, (ArmorPiece)index, out insertedItem) ? InsertResult.Success : InsertResult.Failure;
-        }
+        if (inventoryType == PlayerInventoryType.Backpack) return backpack.SetItemCopy(item, index, out insertedItem);
+        if (inventoryType == PlayerInventoryType.Hotbar) return hotbar.SetItemCopy(item, index, out insertedItem);
+        return EquipArmor(item, (ArmorPiece)index, out insertedItem) ? InsertResult.Success : InsertResult.Failure;
     }
 
     public bool IsItemCompatible(PlayerInventoryType inventoryType, Item item, int index)
     {
-        if (item == null)
-        {
-            return true;
-        }
+        if (item == null) return true;
 
         if (inventoryType == PlayerInventoryType.Backpack)
         {
@@ -176,21 +164,18 @@ public class PlayerInventory : NetworkBehaviour
         }
         else
         {
-            if (item.GetType() != typeof(Wearable) || ((Wearable)item).armorPiece != (ArmorPiece)index)
-                return false;
+            if (item.GetType() != typeof(Wearable) || ((Wearable)item).armorPiece != (ArmorPiece)index) return false;
             return true;
         }
     }
 
-    //returns true on success, false on failure
+    // should only be called on the server
     public bool EquipArmor(Item item, ArmorPiece armorPiece, out Item insertedItem)
     {
         insertedItem = null;
 
-        if (item.GetType() != typeof(Wearable) || ((Wearable)item).armorPiece != armorPiece)
-            return false;
-        if (armor.SetItemCopy(item, (int)armorPiece, out insertedItem) == InsertResult.Failure)
-            return false;
+        if (item.GetType() != typeof(Wearable) || ((Wearable)item).armorPiece != armorPiece) return false;
+        if (armor.SetItemCopy(item, (int)armorPiece, out insertedItem) == InsertResult.Failure) return false;
 
         totalArmorProtection += ((Wearable)item).armorStrength;
         return true;
@@ -198,14 +183,8 @@ public class PlayerInventory : NetworkBehaviour
 
     public int GetStackSize(int index, PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar)
     {
-        if (inventoryType == PlayerInventoryType.Hotbar)
-        {
-            return hotbar.GetStackSize(index);
-        }
-        else
-        {
-            return backpack.GetStackSize(index);
-        }
+        if (inventoryType == PlayerInventoryType.Hotbar) return hotbar.GetStackSize(index);
+        else return backpack.GetStackSize(index);
     }
 
     public int GetTotalStackSize(Item item)
@@ -248,12 +227,10 @@ public class PlayerInventory : NetworkBehaviour
         if (GetHeldItemRef() == item)
         {
             consumedStack += ConsumeFromStack(stackToConsume - consumedStack, heldItemIndex);
-            if (consumedStack != 0)
-                consumedFromHeldItem = true;
+            if (consumedStack != 0) consumedFromHeldItem = true;
         }
         consumedStack += hotbar.ConsumeFromTotalStack(item, stackToConsume - consumedStack, out hotbarIndexes);
-        if (consumedFromHeldItem)
-            hotbarIndexes.Add(heldItemIndex);
+        if (consumedFromHeldItem) hotbarIndexes.Add(heldItemIndex);
         consumedStack += backpack.ConsumeFromTotalStack(item, stackToConsume - consumedStack, out backpackIndexes);
         return consumedStack;
     }
@@ -277,14 +254,8 @@ public class PlayerInventory : NetworkBehaviour
         }
         else if (inventoryType == PlayerInventoryType.Hotbar)
         {
-            if (index == heldItemIndex)
-            {
-                if (GetHeldItemRef().GetStackSize() == 1)
-                    LetGoOfHeldItemServerRpc();
-                hotbar.ThrowItemServerRpc(index, itemCount, transform.position);
-            }
-            else
-                hotbar.ThrowItemServerRpc(index, itemCount, transform.position);
+            if (index == heldItemIndex && GetHeldItemRef().GetStackSize() == itemCount) LetGoOfHeldItemServerRpc();
+            hotbar.ThrowItemServerRpc(index, itemCount, transform.position);
         }
         else
         {
@@ -294,38 +265,23 @@ public class PlayerInventory : NetworkBehaviour
 
     public bool IsSlotFilled(PlayerInventoryType inventoryType, int index)
     {
-        if (inventoryType == PlayerInventoryType.Backpack)
-            return backpack.IsSlotFilled(index);
-        else if (inventoryType == PlayerInventoryType.Hotbar)
-            return hotbar.IsSlotFilled(index);
-        else
-            return armor.IsSlotFilled(index);
+        if (inventoryType == PlayerInventoryType.Backpack) return backpack.IsSlotFilled(index);
+        else if (inventoryType == PlayerInventoryType.Hotbar) return hotbar.IsSlotFilled(index);
+        else return armor.IsSlotFilled(index);
     }
 
     public ref Item GetItemRef(PlayerInventoryType inventoryType, int index)
     {
-        if (inventoryType == PlayerInventoryType.Backpack)
-            return ref backpack.GetItemRef(index);
-        else if (inventoryType == PlayerInventoryType.Hotbar)
-            return ref hotbar.GetItemRef(index);
-        else
-            return ref armor.GetItemRef(index);
+        if (inventoryType == PlayerInventoryType.Backpack) return ref backpack.GetItemRef(index);
+        else if (inventoryType == PlayerInventoryType.Hotbar) return ref hotbar.GetItemRef(index);
+        else return ref armor.GetItemRef(index);
     }
 
     public Item GetItemCopy(PlayerInventoryType inventoryType, int index)
     {
-        if (inventoryType == PlayerInventoryType.Backpack)
-        {
-            return backpack.GetItemCopy(index);
-        }
-        else if (inventoryType == PlayerInventoryType.Hotbar)
-        {
-            return hotbar.GetItemCopy(index);
-        }
-        else
-        {
-            return armor.GetItemCopy(index);
-        }
+        if (inventoryType == PlayerInventoryType.Backpack) return backpack.GetItemCopy(index);
+        else if (inventoryType == PlayerInventoryType.Hotbar) return hotbar.GetItemCopy(index);
+        else return armor.GetItemCopy(index);
     }
 
     public void DeleteItem(PlayerInventoryType inventoryType, int index)
@@ -349,14 +305,10 @@ public class PlayerInventory : NetworkBehaviour
     {
         inventoryType = PlayerInventoryType.Hotbar;
 
-        if (inventory == hotbar)
-            inventoryType = PlayerInventoryType.Hotbar;
-        else if (inventory == backpack)
-            inventoryType = PlayerInventoryType.Backpack;
-        else if (inventory == armor)
-            inventoryType = PlayerInventoryType.Armor;
-        else
-            return false;
+        if (inventory == hotbar) inventoryType = PlayerInventoryType.Hotbar;
+        else if (inventory == backpack) inventoryType = PlayerInventoryType.Backpack;
+        else if (inventory == armor) inventoryType = PlayerInventoryType.Armor;
+        else return false;
 
         return true;
     }
