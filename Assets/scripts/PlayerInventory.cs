@@ -48,13 +48,13 @@ public class PlayerInventory : NetworkBehaviour
         else return armor;
     }
 
-    [ServerRpc]
-    public void SwitchToItemServerRpc(int index)
+    // should only be called on the server
+    public void SwitchToItem(int index)
     {
-        if (index == heldItemIndex) return;
+        if (!(IsServer || IsHost) || index == heldItemIndex) return;
 
         // let go of currently held item
-        LetGoOfHeldItemServerRpc();
+        LetGoOfHeldItem();
 
         // check if there is an item to hold
         if (hotbar.IsSlotFilled(index))
@@ -64,7 +64,7 @@ public class PlayerInventory : NetworkBehaviour
             spawnedItem.preventDespawn = true;
             spawnedItem.NetworkSpawn(); // spawns held item across the network
             spawnedItem.HoldEvent(gameObject); // calls hold event on the owner client
-            hotbar.DeleteItemServerRpc(index); // deletes previous item on the server and the owner client
+            hotbar.DeleteItem(index); // deletes previous item on the server and the owner client
             hotbar.SetItemRef(spawnedItem, index); // sets new held item ref on the server and the owner client
 
             heldItemIndex = index; // updates held item index on the server
@@ -79,6 +79,12 @@ public class PlayerInventory : NetworkBehaviour
         }
     }
 
+    [ServerRpc]
+    public void SwitchToItemServerRpc(int index)
+    {
+        SwitchToItem(index);
+    }
+
     [ClientRpc]
     public void SwitchToItemClientRpc(int index, ClientRpcParams clientRpcParams)
     {
@@ -90,16 +96,16 @@ public class PlayerInventory : NetworkBehaviour
         return ref hotbar.GetItemRef(heldItemIndex);
     }
 
-    [ServerRpc]
-    public void LetGoOfHeldItemServerRpc()
+    // should only be called on the server
+    public void LetGoOfHeldItem()
     {
-        if (heldItemIndex == -1) return;
+        if (!(IsServer || IsHost) || heldItemIndex == -1) return;
 
         // return previously selected item to the inventory by saving a copy of the item in the inventory and despawning the held item
         Item heldItem = GetHeldItemRef();
         heldItem.isHeld = false;
         heldItem.preventDespawn = false;
-        hotbar.DeleteItemServerRpc(heldItemIndex); // deletes held item from the inventory of the server and the owner client
+        hotbar.DeleteItem(heldItemIndex); // deletes held item from the inventory of the server and the owner client
         hotbar.SetItemCopy(heldItem, heldItemIndex, out _); // sets a copy of the held item in the inventory  of the server and the owner client
         heldItem.Despawn(); // despanws held item across the network
 
@@ -115,13 +121,20 @@ public class PlayerInventory : NetworkBehaviour
         LetGoOfHeldItemClientRpc(clientRpcParams); // updates held item index on the client
     }
 
+    [ServerRpc]
+    public void LetGoOfHeldItemServerRpc()
+    {
+        LetGoOfHeldItem();
+    }
+
     [ClientRpc]
     public void LetGoOfHeldItemClientRpc(ClientRpcParams clientRpcParams)
     {
         heldItemIndex = -1;
     }
 
-    // inserts a copy of the item into the hotbar/backpack and despawns it, should only be called on the server
+    // inserts a copy of the item into the hotbar/backpack and despawns it
+    // should only be called on the server
     public InsertResult PickupItem(Item item, out List<int> hotbarIndexes, out List<int> backpackIndexes, bool despawnItem = true)
     {
         hotbarIndexes = new List<int>();
@@ -192,14 +205,16 @@ public class PlayerInventory : NetworkBehaviour
         return hotbar.GetTotalStackSize(item) + backpack.GetTotalStackSize(item);
     }
 
-    // consumes from the stack of a specific slot, returns number of items consumed, should only be called on the server
+    // consumes from the stack of a specific slot
+    // returns number of items consumed
+    // should only be called on the server
     public int ConsumeFromStack(int stackToConsume, int index, PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar)
     {
         if (!(IsServer || IsHost)) return 0;
 
         if (inventoryType == PlayerInventoryType.Hotbar)
         {
-            if (index == heldItemIndex && GetHeldItemRef().GetStackSize() <= stackToConsume) LetGoOfHeldItemServerRpc();
+            if (index == heldItemIndex && GetHeldItemRef().GetStackSize() == stackToConsume) LetGoOfHeldItem();
             return hotbar.ConsumeFromStack(index, stackToConsume);
         }
         else
@@ -214,7 +229,9 @@ public class PlayerInventory : NetworkBehaviour
         ConsumeFromStack(index, stackToConsume);
     }
 
-    // consumes from the collective stack of all slots of the same item parameter type, returns number of items consumed, should only be called on the server
+    // consumes from the collective stack of all slots of the same item parameter type
+    // returns number of items consumed
+    // should only be called on the server
     public int ConsumeFromTotalStack(Item item, int stackToConsume, out List<int> hotbarIndexes, out List<int> backpackIndexes)
     {
         hotbarIndexes = new List<int>();

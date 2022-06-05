@@ -31,7 +31,8 @@ public class Inventory : NetworkBehaviour
         items = new Item[size];
     }
 
-    // if index is -1 item gets inserted in the first empty inventory space, should only be called on the server
+    // if index is -1 item gets inserted in the first empty inventory space
+    // should only be called on the server
     public InsertResult PickupItem(Item item, out List<int> changedIndexes, bool despawnItem = true, int index = -1)
     {
         changedIndexes = new List<int>();
@@ -60,7 +61,8 @@ public class Inventory : NetworkBehaviour
         return result;
     }
 
-    // should only be called on the server, item must be network spawned, syncs item reference with owner client
+    // should only be called on the server, syncs item reference with owner client
+    // note: item must be network spawned
     public InsertResult InsertItemRef(Item item)
     {
         if (!(IsServer || IsHost)) return InsertResult.Failure;
@@ -117,7 +119,9 @@ public class Inventory : NetworkBehaviour
         return items[index].Clone();
     }
 
-    // fails if slot is filled or item is null, should only be called on the server, item must be network spawned, syncs item reference with owner client
+    // fails if slot is filled or item is null
+    // should only be called on the server, syncs item reference with owner client
+    // note: item must be network spawned
     public InsertResult SetItemRef(Item item, int index)
     {
         if (!(IsServer || IsHost) || item == null || items[index] != null) return InsertResult.Failure;
@@ -137,7 +141,9 @@ public class Inventory : NetworkBehaviour
         return InsertResult.Success;
     }
 
-    // if slot is filled with same type item the stack will be increased, fails if slot is filled with a different type of item or item is null, should only be called on the server, syncs item with owner client
+    // if slot is filled with same type item the stack will be increased
+    // fails if slot is filled with a different type of item or item is null
+    // should only be called on the server, syncs item with owner client
     public InsertResult SetItemCopy(Item item, int index, out Item insertedItem, bool despawnItem = true)
     {
         insertedItem = null;
@@ -210,7 +216,9 @@ public class Inventory : NetworkBehaviour
         return totalStack;
     }
 
-    // consumes from the stack of a specific slot, returns number of items consumed, should only be called on the server
+    // consumes from the stack of a specific slot
+    // returns number of items consumed
+    // should only be called on the server
     public int ConsumeFromStack(int index, int stackToConsume)
     {
         if (!(IsServer || IsHost) || stackToConsume < 0) return 0;
@@ -242,7 +250,9 @@ public class Inventory : NetworkBehaviour
         ConsumeFromStack(index, stackToConsume);
     }
 
-    // consumes from the collective stack of all slots of the same item parameter type, returns number of items consumed, should only be called on the server
+    // consumes from the collective stack of all slots of the same item parameter type
+    // returns number of items consumed
+    // should only be called on the server
     public int ConsumeFromTotalStack(Item item, int stackToConsume, out List<int> changedIndexes)
     {
         changedIndexes = new List<int>();
@@ -271,18 +281,19 @@ public class Inventory : NetworkBehaviour
         ConsumeFromTotalStack(Item.Deserialize(itemID, serializedItem), stackToConsume, out _);
     }
 
-    //spawns item with (sets stack=itemCount isHeld=false) and deletes item from inventory if the new stack is 0, does nothing if there is no item with the index to throw or itemCount is bigger than the number of available items
-    [ServerRpc]
-    public void ThrowItemServerRpc(int index, int itemCount, Vector3 position, Quaternion rotation = default)
+    // spawns item with (sets stack=itemCount isHeld=false) and deletes item from inventory if the new stack is 0
+    // does nothing if there is no item with the index to throw or itemCount is bigger than the number of available items
+    // should only be called on the server, syncs item with owner client
+    public void ThrowItem(int index, int itemCount, Vector3 position, Quaternion rotation = default)
     {
-        if (items[index] == null || items[index].GetStackSize() < itemCount) return;
+        if (!(IsServer || IsHost) || items[index] == null || items[index].GetStackSize() < itemCount) return;
 
         Item thrownItem = items[index].Spawn(false, position, rotation);
         thrownItem.SetStackSize(itemCount);
         thrownItem.NetworkSpawn();
         if (items[index].ChangeStackSize(-1 * itemCount) == 0)
         {
-            DeleteItemServerRpc(index);
+            DeleteItem(index);
         }
         else
         {
@@ -298,9 +309,15 @@ public class Inventory : NetworkBehaviour
     }
 
     [ServerRpc]
-    public void DeleteItemServerRpc(int index)
+    public void ThrowItemServerRpc(int index, int itemCount, Vector3 position, Quaternion rotation = default)
     {
-        if (items[index] == null) return;
+        ThrowItem(index, itemCount, position, rotation);
+    }
+
+    // should only be called on the server, syncs item with owner client
+    public void DeleteItem(int index)
+    {
+        if (!(IsServer || IsHost) || items[index] == null) return;
 
         items[index] = null;
         SlotEmptiedFlag = true;
@@ -313,6 +330,12 @@ public class Inventory : NetworkBehaviour
             }
         };
         SyncSlotClientRpc(index, 0, null, clientRpcParams);
+    }
+
+    [ServerRpc]
+    public void DeleteItemServerRpc(int index)
+    {
+        DeleteItem(index);
     }
 
     [ClientRpc]
