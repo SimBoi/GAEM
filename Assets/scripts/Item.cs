@@ -268,7 +268,7 @@ public class Item : NetworkBehaviour
         SendMessage("CustomSecondaryItemEvent", eventCaller, SendMessageOptions.DontRequireReceiver);
     }
 
-    // message[0] = (Land)return
+    // message[0] = (Item)return
     public void GetItemRefMsg(object[] message)
     {
         message[0] = this;

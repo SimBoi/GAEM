@@ -34,6 +34,8 @@ public class PlayerInventory : NetworkBehaviour
 
     private void Update()
     {
+        if (!(IsServer || IsOwner)) return;
+
         if (heldItemIndex != -1 && GetHeldItemRef().isDestroyed == true)
         {
             hotbar.DeleteItemServerRpc(heldItemIndex);
@@ -51,7 +53,7 @@ public class PlayerInventory : NetworkBehaviour
     // should only be called on the server
     public void SwitchToItem(int index)
     {
-        if (!(IsServer || IsHost) || index == heldItemIndex) return;
+        if (!IsServer || index == heldItemIndex) return;
 
         // let go of currently held item
         LetGoOfHeldItem();
@@ -99,7 +101,7 @@ public class PlayerInventory : NetworkBehaviour
     // should only be called on the server
     public void LetGoOfHeldItem()
     {
-        if (!(IsServer || IsHost) || heldItemIndex == -1) return;
+        if (!IsServer || heldItemIndex == -1) return;
 
         // return previously selected item to the inventory by saving a copy of the item in the inventory and despawning the held item
         Item heldItem = GetHeldItemRef();
@@ -140,7 +142,7 @@ public class PlayerInventory : NetworkBehaviour
         hotbarIndexes = new List<int>();
         backpackIndexes = new List<int>();
 
-        if (!(IsServer || IsHost)) return InsertResult.Failure;
+        if (!IsServer) return InsertResult.Failure;
 
         InsertResult hotbarResult = hotbar.PickupItem(item, out hotbarIndexes, despawnItem);
         InsertResult backpackResult = InsertResult.Failure;
@@ -156,7 +158,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         insertedItem = null;
 
-        if (!(IsServer || IsHost)) return InsertResult.Failure;
+        if (!IsServer) return InsertResult.Failure;
 
         if (inventoryType == PlayerInventoryType.Backpack) return backpack.SetItemCopy(item, index, out insertedItem);
         if (inventoryType == PlayerInventoryType.Hotbar) return hotbar.SetItemCopy(item, index, out insertedItem);
@@ -210,7 +212,7 @@ public class PlayerInventory : NetworkBehaviour
     // should only be called on the server
     public int ConsumeFromStack(int stackToConsume, int index, PlayerInventoryType inventoryType = PlayerInventoryType.Hotbar)
     {
-        if (!(IsServer || IsHost)) return 0;
+        if (!IsServer) return 0;
 
         if (inventoryType == PlayerInventoryType.Hotbar)
         {
@@ -237,7 +239,7 @@ public class PlayerInventory : NetworkBehaviour
         hotbarIndexes = new List<int>();
         backpackIndexes = new List<int>();
 
-        if (!(IsServer || IsHost)) return 0;
+        if (!IsServer) return 0;
 
         int consumedStack = 0;
         bool consumedFromHeldItem = false;

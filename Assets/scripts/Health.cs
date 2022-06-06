@@ -44,10 +44,8 @@ public class Health : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (regenTimer <= 0)
-            AddHp(regenRate * Time.fixedDeltaTime);
-        else
-            regenTimer -= Time.fixedDeltaTime;
+        if (regenTimer <= 0) AddHp(regenRate * Time.fixedDeltaTime);
+        else regenTimer -= Time.fixedDeltaTime;
     }
 
     public void DealDamage(float dmg)

@@ -37,7 +37,7 @@ public class Inventory : NetworkBehaviour
     {
         changedIndexes = new List<int>();
 
-        if (!(IsServer || IsHost)) return InsertResult.Failure;
+        if (!IsServer) return InsertResult.Failure;
 
         InsertResult result;
         Item insertedItem;
@@ -65,7 +65,7 @@ public class Inventory : NetworkBehaviour
     // note: item must be network spawned
     public InsertResult InsertItemRef(Item item)
     {
-        if (!(IsServer || IsHost)) return InsertResult.Failure;
+        if (!IsServer) return InsertResult.Failure;
 
         for (int i = 0; i < size; i++)
             if (SetItemRef(item, i) == InsertResult.Success) return InsertResult.Success;
@@ -78,7 +78,7 @@ public class Inventory : NetworkBehaviour
         insertedItem = null;
         changedIndexes = new List<int>();
 
-        if (!(IsServer || IsHost)) return InsertResult.Failure;
+        if (!IsServer) return InsertResult.Failure;
 
         InsertResult result = InsertResult.Failure;
 
@@ -124,7 +124,7 @@ public class Inventory : NetworkBehaviour
     // note: item must be network spawned
     public InsertResult SetItemRef(Item item, int index)
     {
-        if (!(IsServer || IsHost) || item == null || items[index] != null) return InsertResult.Failure;
+        if (!IsServer || item == null || items[index] != null) return InsertResult.Failure;
 
         items[index] = item;
         SlotFilledFlag = true;
@@ -148,7 +148,7 @@ public class Inventory : NetworkBehaviour
     {
         insertedItem = null;
 
-        if (!(IsServer || IsHost) || item == null) return InsertResult.Failure;
+        if (!IsServer || item == null) return InsertResult.Failure;
 
         InsertResult result = InsertResult.Failure;
         if (items[index] == null)
@@ -221,7 +221,7 @@ public class Inventory : NetworkBehaviour
     // should only be called on the server
     public int ConsumeFromStack(int index, int stackToConsume)
     {
-        if (!(IsServer || IsHost) || stackToConsume < 0) return 0;
+        if (!IsServer || stackToConsume < 0) return 0;
 
         int oldStackSize = GetItemRef(index).GetStackSize();
         int newStackSize = GetItemRef(index).ChangeStackSize(Mathf.Clamp(-stackToConsume, -oldStackSize, 0));
@@ -257,7 +257,7 @@ public class Inventory : NetworkBehaviour
     {
         changedIndexes = new List<int>();
         
-        if (!(IsServer || IsHost) || stackToConsume < 0) return 0;
+        if (!IsServer || stackToConsume < 0) return 0;
 
         int consumedStack = 0;
         for (int i = 0; i < size; i++)
@@ -286,7 +286,7 @@ public class Inventory : NetworkBehaviour
     // should only be called on the server, syncs item with owner client
     public void ThrowItem(int index, int itemCount, Vector3 position, Quaternion rotation = default)
     {
-        if (!(IsServer || IsHost) || items[index] == null || items[index].GetStackSize() < itemCount) return;
+        if (!IsServer || items[index] == null || items[index].GetStackSize() < itemCount) return;
 
         Item thrownItem = items[index].Spawn(false, position, rotation);
         thrownItem.SetStackSize(itemCount);
@@ -317,7 +317,7 @@ public class Inventory : NetworkBehaviour
     // should only be called on the server, syncs item with owner client
     public void DeleteItem(int index)
     {
-        if (!(IsServer || IsHost) || items[index] == null) return;
+        if (!IsServer || items[index] == null) return;
 
         items[index] = null;
         SlotEmptiedFlag = true;

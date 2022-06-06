@@ -10,22 +10,21 @@ public class NetworkHealth : NetworkBehaviour
 
     private void Start()
     {
-        if (IsServer)
-        {
-            hp.Value = 100;
-            health = GetComponent<Health>();
-        }
+        if (!IsServer) return;
+        health = GetComponent<Health>();
+        hp.Value = health.spawnHp;
     }
 
     private void Update()
     {
-        if (IsServer)
-        {
-            hp.Value = health.GetHp();
-        }
+        if (!IsServer) return;
+        hp.Value = health.GetHp();
     }
 
-    public void DealDamage(float dmg) // clients should call this, server should call Health.DealDamage directly (when using SendMessage on server both methods will be called)
+    // clients should call this
+    // server should call Health.DealDamage directly
+    // note: when using SendMessage on server both methods will be called (both Health and NetworkHealth are enabled on the server)
+    public void DealDamage(float dmg) 
     {
         if (IsServer) return;
         DealDamageServerRpc(dmg);

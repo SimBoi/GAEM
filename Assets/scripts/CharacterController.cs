@@ -7,6 +7,7 @@ using Unity.Netcode;
 
 public class CharacterController : NetworkBehaviour
 {
+    // General
     public Health health;
     public Hunger hunger;
     public float interactDistance;
@@ -14,9 +15,11 @@ public class CharacterController : NetworkBehaviour
     public Camera characterCamera;
     public MouseLook mouseLook;
     public PlayerInventory inventory;
+    public PickupItemsNearby pickupItemsNearby;
     public GameObject eyePosition;
     public Transform gunRaySpawnPoint;
 
+    // UI
     public Canvas canvas;
     public GameObject pauseUI;
     public Slider healthSliderUI;
@@ -39,16 +42,17 @@ public class CharacterController : NetworkBehaviour
     public float inventoryUIScale;
     private List<List<InventorySlotUI>> inventoriesUI = new List<List<InventorySlotUI>>();
     private GameObject machineUI = null;
+
+    // Animation
     public Animator fpsArms;
     public RuntimeAnimatorController defaultFpsArmsAnimatorController;
 
-    // networking
+    // Networking
     public GameObject localPlayer;
     public GameObject externalPlayer;
     public NetworkObject networkObject;
     public NetworkedTransform networkTransform;
     public NetworkHealth networkHealth;
-    public NetworkPickupItem networkPickupItem;
 
     private void Start()
     {
@@ -59,6 +63,7 @@ public class CharacterController : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        // enable server only components/children
         if (IsServer)
         {
             health.enabled = true;
@@ -70,11 +75,11 @@ public class CharacterController : NetworkBehaviour
             hunger.enabled = false;
         }
 
+        // enable owner client only components/children
         if (IsOwner)
         {
             mouseLook.enabled = true;
             characterMovement.enabled = true;
-            inventory.enabled = true;
 
             localPlayer.SetActive(true);
             externalPlayer.SetActive(false);
@@ -83,7 +88,6 @@ public class CharacterController : NetworkBehaviour
         {
             mouseLook.enabled = false;
             characterMovement.enabled = false;
-            inventory.enabled = false;
 
             localPlayer.SetActive(false);
             externalPlayer.SetActive(true);
@@ -94,15 +98,8 @@ public class CharacterController : NetworkBehaviour
     {
         if (IsServer)
         {
-            if (transform.position.y < -5)
-            {
-                health.DealDamage(100 * Time.deltaTime);
-            }
-
-            if (networkHealth.hp.Value <= 0)
-            {
-                Die();
-            }
+            if (transform.position.y < -5) health.DealDamage(100 * Time.deltaTime);
+            if (networkHealth.hp.Value <= 0) Die();
         }
 
         if (IsOwner)
