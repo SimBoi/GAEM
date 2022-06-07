@@ -133,33 +133,25 @@ public class CharacterController : NetworkBehaviour
                 mouseLook.changeDirection(Input.GetAxis("Mouse Y"), Input.GetAxis("Mouse X"));
 
             // inventory and item inputs
-            if (Input.GetButtonDown("Inventory"))
-                ToggleInventoriesUI();
-            if (Input.GetAxisRaw("Hotbar Slot 0") == 1)
-                inventory.SwitchToItemServerRpc(0);
-            else if (Input.GetAxisRaw("Hotbar Slot 1") == 1)
-                inventory.SwitchToItemServerRpc(1);
-            else if (Input.GetButtonDown("Throw Item") && inventory.heldItemIndex != -1)
-                inventory.ThrowHeldItem(1);
+            if (Input.GetButtonDown("Inventory")) ToggleInventoriesUI();
+            if (Input.GetAxisRaw("Hotbar Slot 0") == 1) inventory.SwitchToItemServerRpc(0);
+            else if (Input.GetAxisRaw("Hotbar Slot 1") == 1) inventory.SwitchToItemServerRpc(1);
+            else if (Input.GetButtonDown("Throw Item") && inventory.heldItemIndex != -1) inventory.ThrowHeldItem(1);
             else if (inventory.heldItemIndex != -1 && !inventoriesUIParent.activeSelf)
             {
                 Item heldItem = inventory.GetHeldItemRef();
 
                 if (heldItem.GetType() == typeof(Gun))
                 {
-                    if (Input.GetAxisRaw("Fire1") == 1)
-                        ((Gun)heldItem).GetFireKey();
-                    if (Input.GetAxisRaw("Fire2") == 1)
-                        ((Gun)heldItem).GetADSKey();
-                    if (Input.GetAxisRaw("Reload") == 1)
-                        ((Gun)heldItem).GetReloadKey();
+                    if (Input.GetButtonDown("Fire1")) ((Gun)heldItem).GetFireKeyDown();
+                    if (Input.GetAxisRaw("Fire1") == 1) ((Gun)heldItem).GetFireKey();
+                    if (Input.GetAxisRaw("Fire2") == 1) ((Gun)heldItem).GetADSKey();
+                    if (Input.GetAxisRaw("Reload") == 1) ((Gun)heldItem).GetReloadKeyDown();
                 }
                 else
                 {
-                    if (Input.GetAxisRaw("Fire1") == 1 && inventory.heldItemIndex != -1)
-                        heldItem.PrimaryItemEvent(gameObject);
-                    if (Input.GetAxisRaw("Fire2") == 1 && inventory.heldItemIndex != -1)
-                        heldItem.SecondaryItemEvent(gameObject);
+                    if (Input.GetAxisRaw("Fire1") == 1 && inventory.heldItemIndex != -1) heldItem.PrimaryItemEvent(gameObject);
+                    if (Input.GetAxisRaw("Fire2") == 1 && inventory.heldItemIndex != -1) heldItem.SecondaryItemEvent(gameObject);
                 }
             }
 
@@ -194,14 +186,8 @@ public class CharacterController : NetworkBehaviour
 
     public void UpdateHeldItemUI()
     {
-        if (inventory.heldItemIndex == -1)
-        {
-            heldItemIconUI.sprite = handIcon;
-        }
-        else
-        {
-            heldItemIconUI.sprite = inventory.GetHeldItemRef().icon;
-        }
+        if (inventory.heldItemIndex == -1) heldItemIconUI.sprite = handIcon;
+        else heldItemIconUI.sprite = inventory.GetHeldItemRef().icon;
     }
 
     public void UpdateClickedItemUI()
@@ -230,7 +216,9 @@ public class CharacterController : NetworkBehaviour
         {
             // clear old inventory ui
             if (inventoriesUI[(int)inventoryType].Count > 0)
+            {
                 Destroy(inventoriesUI[(int)inventoryType][0].transform.parent.gameObject);
+            }
             inventoriesUI[(int)inventoryType].Clear();
 
             // generate new inventory ui
@@ -239,8 +227,7 @@ public class CharacterController : NetworkBehaviour
             dimentions.Add(GenerateInventoryUI(this.inventory.GetInventory(inventoryType), out slotsUI, out inventoryUI));
             totalHeight += dimentions[(int)inventoryType].y + paddingBetweenInventories;
             totalWidth = Mathf.Max(totalWidth, dimentions[(int)inventoryType].x + paddingBetweenInventories);
-            if (inventoryUI != null)
-                inventoriesUI[(int)inventoryType] = slotsUI;
+            if (inventoryUI != null) inventoriesUI[(int)inventoryType] = slotsUI;
         }
 
         float yPos = totalHeight / 2;
@@ -275,10 +262,9 @@ public class CharacterController : NetworkBehaviour
 
     public void setupMachineSlotUI(Transform machineUIElement)
     {
-        if (machineUIElement.GetComponent<MachineSlotUI>() != null)
-            machineUIElement.GetComponent<MachineSlotUI>().controller = this;
-        foreach (Transform child in machineUIElement)
-            setupMachineSlotUI(child);
+        MachineSlotUI machineSlotUI = machineUIElement.GetComponent<MachineSlotUI>();
+        if (machineSlotUI != null) machineSlotUI.controller = this;
+        foreach (Transform child in machineUIElement) setupMachineSlotUI(child);
     }
 
     public Vector2 GenerateInventoryUI(Inventory inventory, out List<InventorySlotUI> slotsUI, out GameObject inventoryUI)
@@ -316,8 +302,7 @@ public class CharacterController : NetworkBehaviour
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
 
-            if (playerInventoryUI.transform.childCount == 0)
-                GeneratePlayerInventoryUI();
+            if (playerInventoryUI.transform.childCount == 0) GeneratePlayerInventoryUI();
 
             if (machineUITemplate != null)
             {
@@ -426,9 +411,13 @@ public class CharacterController : NetworkBehaviour
         else
         {
             if (inventory.GetHeldItemRef().fpsArmsAnimatorOverrideController != null)
+            {
                 nextController = inventory.GetHeldItemRef().fpsArmsAnimatorOverrideController;
+            }
             else
+            {
                 nextController = defaultFpsArmsAnimatorController;
+            }
         }
 
         if (nextController != fpsArms.runtimeAnimatorController)
@@ -490,9 +479,6 @@ public class CharacterController : NetworkBehaviour
     [ClientRpc]
     private void DieClientRpc(bool callGameManager, ClientRpcParams clientRpcParams)
     {
-        if (callGameManager)
-        {
-            GameObject.Find("GameManager").GetComponent<GameManager>().KillPlayer();
-        }
+        if (callGameManager) GameObject.Find("GameManager").GetComponent<GameManager>().KillPlayer();
     }
 }

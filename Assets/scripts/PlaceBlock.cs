@@ -20,11 +20,11 @@ public class PlaceBlock : ItemEvent
             Land land = (Land)message[0];
             Vector3Int landBlockCoords = land.ConvertToLandCoords(hitInfo.point + (0.99f * hitInfo.normal));
 
-            if (land != null) PlaceBlockServerRpc(land.GetComponent<NetworkObject>().NetworkObjectId, landBlockCoords, (short)block.blockID, block.id, block.Serialize(), eventCaller.GetComponent<NetworkObject>().NetworkObjectId, OwnerClientId);
+            //if (land != null) PlaceBlockServerRpc(land.GetComponent<NetworkObject>().NetworkObjectId, landBlockCoords, (short)block.blockID, block.id, block.Serialize(), eventCaller.GetComponent<NetworkObject>().NetworkObjectId, OwnerClientId);
         }
     }
 
-    [ServerRpc]
+    /*[ServerRpc]
     public void PlaceBlockServerRpc(ulong landID, Vector3Int landBlockCoords, short blockID, int itemID, byte[] serializedItem, ulong eventCallerID, ulong clientId)
     {
         ClientRpcParams clientRpcParams = new ClientRpcParams
@@ -48,5 +48,5 @@ public class PlaceBlock : ItemEvent
     {
         PlayerInventory playerInventory = NetworkManager.Singleton.SpawnManager.SpawnedObjects[eventCallerID].gameObject.GetComponent<PlayerInventory>();
         playerInventory.ConsumeFromTotalStack(Item.Deserialize(itemID, serializedItem), 1, out _, out _);
-    }
+    }*/
 }

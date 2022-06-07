@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -57,6 +58,7 @@ public class Gun : Item
     private float reloadTimer = 0;
     private ushort fireTimer = 0;
     //private float swapTimer = 0;
+    private bool WaitingForServerReload = false;
 
     public void CopyFrom(Gun source)
     {
@@ -194,75 +196,91 @@ public class Gun : Item
 
     public void Update()
     {
-        if (isHeld)
+        if (!isHeld || !IsOwner) return;
+
+        if (isReloading)
         {
-            if (isReloading)
+            crosshairUI.SetActive(false);
+            reloadUI.SetActive(true);
+            ammoUI.SetActive(false);
+            reloadTimer += Time.deltaTime;
+            if (reloadTimer >= reloadTime && !WaitingForServerReload)
             {
-                crosshairUI.SetActive(false);
-                reloadUI.SetActive(true);
-                ammoUI.SetActive(false);
-                reloadTimer += Time.deltaTime;
-                if (reloadTimer >= reloadTime)
-                {
-                    magazine += (ushort)characterController.inventory.ConsumeFromTotalStack(ammoType, magazineSize - magazine, out _, out _);
-                    reloadTimer = 0;
-                    isReloading = false;
-                }
+                WaitingForServerReload = true;
+                ReloadServerRpc();
             }
-            else
-            {
-                crosshairUI.SetActive(true);
-                reloadUI.SetActive(false);
-                ammoUI.SetActive(true);
-                ammoUI.GetComponent<Text>().text = magazine + " / " + characterController.inventory.GetTotalStackSize(ammoType);
-            }
+        }
+        else
+        {
+            crosshairUI.SetActive(true);
+            reloadUI.SetActive(false);
+            ammoUI.SetActive(true);
+            ammoUI.GetComponent<Text>().text = magazine + " / " + characterController.inventory.GetTotalStackSize(ammoType);
         }
     }
 
     public void LateUpdate()
     {
-        if (isHeld && animate)
-        {
-            SendMessageUpwards("AnimIsADSing", isAiming);
-        }
+        if (!isHeld || !IsOwner) return;
 
+        if (animate) SendMessageUpwards("AnimIsADSing", isAiming);
         isAiming = false;
+    }
+
+    public void GetFireKeyDown()
+    {
+        if (type != WeaponType.SemiAutomatic || isReloading || fireTimer != 0 || magazine <= 0) return;
+
+        fireTimer = 10;
+        Fire();
+        StartCoroutine(FireDelay());
     }
 
     public void GetFireKey()
     {
-        if (isReloading || fireTimer != 0 || magazine <= 0)
-            return;
+        if (type != WeaponType.Automatic || isReloading || fireTimer != 0 || magazine <= 0) return;
 
-        if ((type == WeaponType.Automatic && Input.GetButton("Fire1")) ||
-            (type == WeaponType.SemiAutomatic && Input.GetButtonDown("Fire1")))
-        {
-            fireTimer = 10;
-            Fire();
-            StartCoroutine(FireDelay());
-        }
-    }
-
-    public void GetReloadKey()
-    {
-        if (Input.GetButtonDown("Reload") && !isReloading && magazine < magazineSize && characterController.inventory.GetTotalStackSize(ammoType) > 0)
-        {
-            reloadTimer = 0;
-            isReloading = true;
-            if (animate)
-            {
-                SendMessageUpwards("AnimReload");
-            }
-        }
+        fireTimer = 10;
+        Fire();
+        StartCoroutine(FireDelay());
     }
 
     public void GetADSKey()
     {
-        if (!isReloading)
+        if (isReloading) return;
+
+        isAiming = true;
+        playerLook.ChangeZoomLevel(adsZoom, adsTime);
+    }
+
+    public void GetReloadKeyDown()
+    {
+        if (isReloading && magazine >= magazineSize && characterController.inventory.GetTotalStackSize(ammoType) <= 0) return;
+
+        reloadTimer = 0;
+        isReloading = true;
+        if (animate) SendMessageUpwards("AnimReload");
+    }
+
+    private void Fire()
+    {
+        magazine--;
+        if (!IsHost) ConsumeAmmoServerRpc(1);
+
+        RaycastHit rayHit;
+        if (Physics.Raycast(raySpawnPoint.position, Bloom(), out rayHit, maxRange))
         {
-            isAiming = true;
-            playerLook.ChangeZoomLevel(adsZoom, adsTime);
+            SpawnBulletHole(rayHit);
+
+            float shotRange = Vector3.Distance(transform.position, rayHit.point);
+            float effectiveDmg = damage;
+            if (shotRange > effectiveRange) effectiveDmg *= (shotRange / (maxRange - effectiveRange));
+
+            DealDamage(rayHit.collider, effectiveDmg);
         }
+        Recoil();
+
+        if (animate) SendMessageUpwards("AnimFire");
     }
 
     IEnumerator FireDelay()
@@ -271,29 +289,33 @@ public class Gun : Item
         fireTimer = 0;
     }
 
-    private void Fire()
+    [ServerRpc]
+    public void ConsumeAmmoServerRpc(ushort amount)
     {
-        magazine--;
-        RaycastHit rayHit;
-        if (Physics.Raycast(raySpawnPoint.position, Bloom(), out rayHit, maxRange))
+        magazine -= amount;
+    }
+
+    [ServerRpc]
+    public void ReloadServerRpc()
+    {
+        magazine += (ushort)characterController.inventory.ConsumeFromTotalStack(ammoType, magazineSize - magazine, out _, out _);
+        ClientRpcParams clientRpcParams = new ClientRpcParams
         {
-            SpawnBulletHole(rayHit);
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { OwnerClientId }
+            }
+        };
+        ReloadClientRpc(magazine, clientRpcParams);
+    }
 
-            float shotRange = Vector3.Distance(transform.position, rayHit.point);
-            float effectiveDmg;
-            if (shotRange < effectiveRange)
-                effectiveDmg = damage;
-            else
-                effectiveDmg = damage * (shotRange / (maxRange - effectiveRange));
-
-            DealDamage(rayHit.collider, effectiveDmg);
-        }
-        Recoil();
-
-        if (animate)
-        {
-            SendMessageUpwards("AnimFire");
-        }
+    [ClientRpc]
+    public void ReloadClientRpc(ushort magazine, ClientRpcParams clientRpcParams)
+    {
+        this.magazine = magazine;
+        WaitingForServerReload = false;
+        reloadTimer = 0;
+        isReloading = false;
     }
 
     private Vector3 Bloom()
