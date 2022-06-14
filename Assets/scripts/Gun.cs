@@ -203,11 +203,14 @@ public class Gun : Item
             crosshairUI.SetActive(false);
             reloadUI.SetActive(true);
             ammoUI.SetActive(false);
-            reloadTimer += Time.deltaTime;
-            if (reloadTimer >= reloadTime && !WaitingForServerReload)
+            if (!WaitingForServerReload)
             {
-                WaitingForServerReload = true;
-                ReloadServerRpc();
+                reloadTimer += Time.deltaTime;
+                if (reloadTimer >= reloadTime)
+                {
+                    WaitingForServerReload = true;
+                    ReloadServerRpc();
+                }
             }
         }
         else

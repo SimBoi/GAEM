@@ -29,6 +29,6 @@ public class InventorySlotUI : MonoBehaviour
 
     public void OnClick()
     {
-        controller.OnClickInventorySlot(inventory, slotIndex);
+        controller.OnClickInventorySlotServerRpc(inventory, slotIndex);
     }
 }

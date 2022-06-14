@@ -260,26 +260,40 @@ public class PlayerInventory : NetworkBehaviour
         ConsumeFromTotalStack(Item.Deserialize(itemID, serializedItem), stackToConsume, out _, out _);
     }
 
+    // should only be called on the server
     public void ThrowHeldItem(int itemCount)
     {
         ThrowItem(PlayerInventoryType.Hotbar, heldItemIndex, itemCount);
     }
 
+    [ServerRpc]
+    public void ThrowHeldItemServerRpc(int itemCount)
+    {
+        ThrowHeldItem(itemCount);
+    }
+
+    // should only be called on the server
     public void ThrowItem(PlayerInventoryType inventoryType, int index, int itemCount)
     {
         if (inventoryType == PlayerInventoryType.Backpack)
         {
-            backpack.ThrowItemServerRpc(index, itemCount, transform.position);
+            backpack.ThrowItem(index, itemCount, transform.position);
         }
         else if (inventoryType == PlayerInventoryType.Hotbar)
         {
-            if (index == heldItemIndex && GetHeldItemRef().GetStackSize() == itemCount) LetGoOfHeldItemServerRpc();
-            hotbar.ThrowItemServerRpc(index, itemCount, transform.position);
+            if (index == heldItemIndex && GetHeldItemRef().GetStackSize() == itemCount) LetGoOfHeldItem();
+            hotbar.ThrowItem(index, itemCount, transform.position);
         }
         else
         {
-            armor.ThrowItemServerRpc(index, itemCount, transform.position);
+            armor.ThrowItem(index, itemCount, transform.position);
         }
+    }
+
+    [ServerRpc]
+    public void ThrowItemServerRpc(PlayerInventoryType inventoryType, int index, int itemCount)
+    {
+        ThrowItem(inventoryType, index, itemCount);
     }
 
     public bool IsSlotFilled(PlayerInventoryType inventoryType, int index)
@@ -303,21 +317,28 @@ public class PlayerInventory : NetworkBehaviour
         else return armor.GetItemCopy(index);
     }
 
+    // should only be called on the server
     public void DeleteItem(PlayerInventoryType inventoryType, int index)
     {
         if (inventoryType == PlayerInventoryType.Backpack)
         {
-            backpack.DeleteItemServerRpc(index);
+            backpack.DeleteItem(index);
         }
         else if (inventoryType == PlayerInventoryType.Hotbar)
         {
-            if (index == heldItemIndex) LetGoOfHeldItemServerRpc();
-            hotbar.DeleteItemServerRpc(index);
+            if (index == heldItemIndex) LetGoOfHeldItem();
+            hotbar.DeleteItem(index);
         }
         else
         {
-            armor.DeleteItemServerRpc(index);
+            armor.DeleteItem(index);
         }
+    }
+
+    [ServerRpc]
+    public void DeleteItemServerRpc(PlayerInventoryType inventoryType, int index)
+    {
+        DeleteItem(inventoryType, index);
     }
 
     public bool DoesInventoryExist(Inventory inventory, out PlayerInventoryType inventoryType)

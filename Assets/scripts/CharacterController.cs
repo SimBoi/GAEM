@@ -136,7 +136,7 @@ public class CharacterController : NetworkBehaviour
             if (Input.GetButtonDown("Inventory")) ToggleInventoriesUI();
             if (Input.GetAxisRaw("Hotbar Slot 0") == 1) inventory.SwitchToItemServerRpc(0);
             else if (Input.GetAxisRaw("Hotbar Slot 1") == 1) inventory.SwitchToItemServerRpc(1);
-            else if (Input.GetButtonDown("Throw Item") && inventory.heldItemIndex != -1) inventory.ThrowHeldItem(1);
+            else if (Input.GetButtonDown("Throw Item") && inventory.heldItemIndex != -1) inventory.ThrowHeldItemServerRpc(1);
             else if (inventory.heldItemIndex != -1 && !inventoriesUIParent.activeSelf)
             {
                 Item heldItem = inventory.GetHeldItemRef();
@@ -347,8 +347,11 @@ public class CharacterController : NetworkBehaviour
     }
 
     // returns the new item icon to display in the slot
-    public void OnClickInventorySlot(Inventory inventory, int slotIndex)
+    [ServerRpc]
+    public void OnClickInventorySlotServerRpc(NetworkBehaviourReference inventoryReference, int slotIndex)
     {
+        if (!inventoryReference.TryGet(out Inventory inventory)) return;
+
         Item previousClickedItem = clickedItem;
         PlayerInventoryType inventoryType;
 
@@ -380,9 +383,25 @@ public class CharacterController : NetworkBehaviour
         else
         {
             clickedItem = inventory.IsSlotFilled(slotIndex) ? inventory.GetItemCopy(slotIndex) : null;
-            inventory.DeleteItemServerRpc(slotIndex);
+            inventory.DeleteItem(slotIndex);
             if (previousClickedItem != null) inventory.SetItemCopy(previousClickedItem, slotIndex, out _);
         }
+
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { OwnerClientId }
+            }
+        };
+        if (clickedItem == null) SyncClickedItemClientRpc(0, null, clientRpcParams);
+        else SyncClickedItemClientRpc(clickedItem.id, clickedItem.Serialize(), clientRpcParams);
+    }
+
+    [ClientRpc]
+    public void SyncClickedItemClientRpc(int itemID, byte[] serializedItem, ClientRpcParams clientRpcParams)
+    {
+        clickedItem = Item.Deserialize(itemID, serializedItem);
     }
 
     public void TogglePauseMenu()

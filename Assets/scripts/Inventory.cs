@@ -341,7 +341,7 @@ public class Inventory : NetworkBehaviour
     [ClientRpc]
     public void SyncSlotClientRpc(int index, int itemID, byte[] serializedItem, ClientRpcParams clientRpcParams)
     {
-        items[index] = itemID == 0 ? null : Item.Deserialize(itemID, serializedItem);
+        items[index] = Item.Deserialize(itemID, serializedItem);
     }
 
     [ClientRpc]
@@ -353,6 +353,6 @@ public class Inventory : NetworkBehaviour
     [ClientRpc]
     public void SyncInventoryClientRpc(int[] itemIDs, byte[][] serializedItems, ClientRpcParams clientRpcParams)
     {
-        for (int i = 0; i < size; i++) items[i] = itemIDs[i] == 0 ? null : Item.Deserialize(itemIDs[i], serializedItems[i]);
+        for (int i = 0; i < size; i++) items[i] = Item.Deserialize(itemIDs[i], serializedItems[i]);
     }
 }

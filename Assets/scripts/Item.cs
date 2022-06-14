@@ -69,9 +69,13 @@ public class Item : NetworkBehaviour
         Deserialize(m, reader);
     }
 
+    // returns deserialized Item using the overridden deserialize method from the correct derived type, returns null for id <= 0 or id >= prefabs.length
     public static Item Deserialize(int id, byte[] serializedItem)
     {
+        if (id <= 0) return null;
+
         ItemPrefabs itemPrefabs = ((GameObject)Resources.Load("ItemPrefabReferences", typeof(GameObject))).GetComponent<ItemPrefabs>();
+        if (id >= itemPrefabs.prefabs.Length) return null;
         Item item = itemPrefabs.prefabs[id].GetComponent<Item>().Clone();
         item.Deserialize(serializedItem);
         return item;
