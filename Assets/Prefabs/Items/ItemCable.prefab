@@ -240,7 +240,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c9210f41e74ba043b78e3f313cdf5f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
   name: ItemCable
   id: 12
   maxStackSize: 64
@@ -311,7 +310,7 @@ MonoBehaviour:
   GlobalObjectIdHash: 951099334
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
+  AutoObjectParentSync: 0
 --- !u!1 &798687979277854724
 GameObject:
   m_ObjectHideFlags: 0

@@ -144,7 +144,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3cf49432732155249ba7cfe9555936a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
   name: Dogecoin Minter
   id: 4
   maxStackSize: 64
@@ -167,7 +166,6 @@ MonoBehaviour:
   hasCustomMesh: 1
   itemObject: {fileID: 1362694357772957986}
   blockObject: {fileID: 9192997310427570172}
-  inventorySizes: 
   machineUI: {fileID: 0}
   inventories: []
   PrimaryMachineEventType: 1
@@ -223,7 +221,7 @@ MonoBehaviour:
   GlobalObjectIdHash: 951099334
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
+  AutoObjectParentSync: 0
 --- !u!1 &9192997310427570172
 GameObject:
   m_ObjectHideFlags: 0

@@ -1015,7 +1015,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 779de0fa3dd5ba94c957d712554575f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
   name: Portal
   id: 10
   maxStackSize: 64
@@ -1038,7 +1037,6 @@ MonoBehaviour:
   hasCustomMesh: 1
   itemObject: {fileID: 5587268079771103166}
   blockObject: {fileID: 5299528784423561180}
-  inventorySizes: 
   machineUI: {fileID: 0}
   inventories: []
   PrimaryMachineEventType: 1
@@ -1094,7 +1092,7 @@ MonoBehaviour:
   GlobalObjectIdHash: 951099334
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
+  AutoObjectParentSync: 0
 --- !u!1 &5587268079771103166
 GameObject:
   m_ObjectHideFlags: 0

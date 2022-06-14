@@ -68,6 +68,36 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1163316422688437074
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1504417652188114840}
+  m_Layer: 0
+  m_Name: External Held Item Position
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1504417652188114840
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163316422688437074}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 3398832037710114755}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1246019865823731028
 GameObject:
   m_ObjectHideFlags: 0
@@ -441,7 +471,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: {fileID: 1828069676}
-  heldItemPos: {fileID: 2229074504544305825}
+  localHeldItemPos: {fileID: 2229074504544305825}
+  externalHeldItemPos: {fileID: 1504417652188114840}
   heldItemIndex: -1
   backpack: {fileID: 7398459472117307586}
   hotbar: {fileID: 7115738343574047991}
@@ -566,6 +597,7 @@ MonoBehaviour:
   characterCamera: {fileID: 2051427869518740362}
   mouseLook: {fileID: 2051427869558859582}
   inventory: {fileID: 1828069674}
+  pickupItemsNearby: {fileID: 0}
   eyePosition: {fileID: 1949629237}
   gunRaySpawnPoint: {fileID: 4576706661783122559}
   canvas: {fileID: 1048454355977733587}
@@ -622,7 +654,6 @@ MonoBehaviour:
   networkObject: {fileID: 4507752567041032622}
   networkTransform: {fileID: 203232871174289378}
   networkHealth: {fileID: 1355308355588449220}
-  networkPickupItem: {fileID: 6326046970249114573}
 --- !u!1 &2051427869652139020
 GameObject:
   m_ObjectHideFlags: 0
@@ -860,7 +891,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2229074504544305825}
   m_Layer: 0
-  m_Name: Held Item Position
+  m_Name: Local Held Item Position
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1457,7 +1488,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 1504417652188114840}
   m_Father: {fileID: 1869471055842684917}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

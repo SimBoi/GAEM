@@ -20,7 +20,8 @@ public enum ArmorPiece
 public class PlayerInventory : NetworkBehaviour
 {
     public Health health;
-    public Transform heldItemPos;
+    public Transform localHeldItemPos; // held item position for the owner client
+    public Transform externalHeldItemPos; // held item position for non owner clients
     public int heldItemIndex = -1; // held item index = -1 when no item is held
     public Inventory backpack;
     public Inventory hotbar;
@@ -62,22 +63,17 @@ public class PlayerInventory : NetworkBehaviour
         if (hotbar.IsSlotFilled(index))
         {
             // spawn item to be held and update inventory to the new spawned item and update held item index
-            Item spawnedItem = hotbar.GetItemRef(index).Spawn(true, heldItemPos.position, heldItemPos.rotation, heldItemPos);
+            Item spawnedItem;
+            if (IsOwner) spawnedItem = hotbar.GetItemRef(index).Spawn(true, localHeldItemPos.position, localHeldItemPos.rotation, localHeldItemPos);
+            else spawnedItem = hotbar.GetItemRef(index).Spawn(true, externalHeldItemPos.position, externalHeldItemPos.rotation, externalHeldItemPos);
             spawnedItem.preventDespawn = true;
-            spawnedItem.NetworkSpawn(); // spawns held item across the network
+            spawnedItem.NetworkSpawn(OwnerClientId); // spawns held item across the network
             spawnedItem.HoldEvent(gameObject); // calls hold event on the owner client
             hotbar.DeleteItem(index); // deletes previous item on the server and the owner client
             hotbar.SetItemRef(spawnedItem, index); // sets new held item ref on the server and the owner client
 
             heldItemIndex = index; // updates held item index on the server
-            ClientRpcParams clientRpcParams = new ClientRpcParams
-            {
-                Send = new ClientRpcSendParams
-                {
-                    TargetClientIds = new ulong[] { OwnerClientId }
-                }
-            };
-            SwitchToItemClientRpc(index, clientRpcParams); // updates heldItemIndex on the owner client
+            SwitchToItemClientRpc(index, spawnedItem.gameObject); // updates heldItemIndex on the owner client
         }
     }
 
@@ -88,9 +84,23 @@ public class PlayerInventory : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void SwitchToItemClientRpc(int index, ClientRpcParams clientRpcParams)
+    public void SwitchToItemClientRpc(int index, NetworkObjectReference heldItemReference)
     {
-        heldItemIndex = index;
+        // set correct position, rotation and parent for the held item on all clients and updates heldItemIndex on the owner client
+        Transform heldItemTransform = ((NetworkObject)heldItemReference).transform;
+        if (IsOwner)
+        {
+            heldItemIndex = index;
+            heldItemTransform.position = localHeldItemPos.position;
+            heldItemTransform.rotation = localHeldItemPos.rotation;
+            heldItemTransform.parent = localHeldItemPos;
+        }
+        else
+        {
+            heldItemTransform.position = externalHeldItemPos.position;
+            heldItemTransform.rotation = externalHeldItemPos.rotation;
+            heldItemTransform.parent = externalHeldItemPos;
+        }
     }
 
     public ref Item GetHeldItemRef()

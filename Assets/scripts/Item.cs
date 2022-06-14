@@ -5,6 +5,7 @@ using System.IO;
 using Unity.Netcode;
 using UnityEngine;
 
+// network object, if present, should have auto parenting sync disabled
 public class Item : NetworkBehaviour
 {
     [Header("Item Properties")]
@@ -69,7 +70,8 @@ public class Item : NetworkBehaviour
         Deserialize(m, reader);
     }
 
-    // returns deserialized Item using the overridden deserialize method from the correct derived type, returns null for id <= 0 or id >= prefabs.length
+    // returns deserialized Item using the overridden deserialize method from the correct derived type
+    // returns null for id <= 0 or id >= prefabs.length
     public static Item Deserialize(int id, byte[] serializedItem)
     {
         if (id <= 0) return null;
@@ -146,17 +148,17 @@ public class Item : NetworkBehaviour
         return true;
     }
 
-    //returns new stacksize on success, returns -1 on error
+    // returns new stacksize on success
+    // returns -1 on error
     public int ChangeStackSize(int stackChange, bool despawnItem = true)
     {
         if (stackSize + stackChange < 0 || stackSize + stackChange > maxStackSize) return -1;
         stackSize += stackChange;
-        if (despawnItem && stackSize <= 0)
-            Despawn();
+        if (despawnItem && stackSize <= 0) Despawn();
         return stackSize;
     }
 
-    //returns stacksize
+    // returns stacksize
     public int DamageItem(float dmg)
     { 
         health.DealDamage(dmg);
@@ -183,38 +185,38 @@ public class Item : NetworkBehaviour
     {
         GameObject newItem;
         ItemPrefabs itemPrefabs = ((GameObject)Resources.Load("ItemPrefabReferences", typeof(GameObject))).GetComponent<ItemPrefabs>();
-        if (parent == null)
-            newItem = Instantiate(itemPrefabs.prefabs[id], pos, rotation);
-        else
-            newItem = Instantiate(itemPrefabs.prefabs[id], pos, rotation, parent);
-
+        if (parent == null) newItem = Instantiate(itemPrefabs.prefabs[id], pos, rotation);
+        else newItem = Instantiate(itemPrefabs.prefabs[id], pos, rotation, parent);
         Item spawnedItem = newItem.GetComponent<Item>();
         spawnedItem.CopyFrom(this);
         spawnedItem.isHeld = isHeld;
         spawnedItem.timeSinceSpawn = 0;
-        if (isHeld && spawnedItem.ui != null)
-        {
-            spawnedItem.ui.SetActive(true);
-        }
         return spawnedItem;
     }
 
-    public void NetworkSpawn()
+    // Spawn the item on all clients
+    // Optional: set ownership to provided owner id, defaul is server owned
+    public void NetworkSpawn(ulong ownerClientID = NetworkManager.ServerClientId)
     {
-        if (NetworkManager.Singleton.IsServer) GetComponent<NetworkObject>().Spawn();
+        if (!NetworkManager.Singleton.IsServer) return;
+        GetComponent<NetworkObject>().SpawnWithOwnership(ownerClientID);
     }
 
     public override void OnNetworkSpawn()
     {
-        if (IsServer) SyncItemClientRpc(Serialize());
+        if (IsServer) InitializeItemClientRpc(Serialize());
+    }
+
+    [ClientRpc]
+    public virtual void InitializeItemClientRpc(byte[] serializedItem)
+    {
+        Deserialize(serializedItem);
+        if (IsOwner && isHeld && ui != null) ui.SetActive(true);
     }
 
     public virtual bool Despawn()
     {
-        try
-        {
-            if (gameObject != null) Destroy(gameObject);
-        }
+        try { if (gameObject != null) Destroy(gameObject); }
         catch (NullReferenceException) { }
         isDestroyed = true;
         return true;
@@ -222,12 +224,10 @@ public class Item : NetworkBehaviour
 
     public void FixedUpdate()
     {
-        if (!preventDespawn)
-        {
-            if (timeSinceSpawn >= despawnTime) Despawn();
-        }
-        if (timeSinceSpawn < despawnTime || timeSinceSpawn < pickupDelay)
-        timeSinceSpawn += Time.fixedDeltaTime;
+        if (!IsServer) return;
+
+        if (!preventDespawn && timeSinceSpawn >= despawnTime) Despawn();
+        if (timeSinceSpawn < despawnTime || timeSinceSpawn < pickupDelay) timeSinceSpawn += Time.fixedDeltaTime;
     }
 
     public virtual bool CanBePickedUp()
@@ -239,7 +239,8 @@ public class Item : NetworkBehaviour
 
     public virtual void PickupEvent() { }
     
-    // calls HoldItem on the client that owns eventCaller, eventCaller has to have a NetworkObject component
+    // calls HoldItem on the client that owns eventCaller
+    // eventCaller has to have a NetworkObject component
     public void HoldEvent(GameObject eventCaller)
     {
         NetworkObject callerNetworkObject = eventCaller.GetComponent<NetworkObject>();

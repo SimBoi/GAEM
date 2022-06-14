@@ -334,7 +334,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb08d8889b0ae114ca576d578ddab7e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
   name: Lamp
   id: 8
   maxStackSize: 16
@@ -357,7 +356,6 @@ MonoBehaviour:
   hasCustomMesh: 1
   itemObject: {fileID: 3133495701790374911}
   blockObject: {fileID: 5761350647884139944}
-  inventorySizes: 
   machineUI: {fileID: 0}
   inventories: []
   PrimaryMachineEventType: 1
@@ -414,4 +412,4 @@ MonoBehaviour:
   GlobalObjectIdHash: 951099334
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
+  AutoObjectParentSync: 0

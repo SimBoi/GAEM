@@ -48,7 +48,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0da444b6b4da7f449886d021a8773916, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
   name: Solar Panel
   id: 9
   maxStackSize: 16
@@ -71,7 +70,6 @@ MonoBehaviour:
   hasCustomMesh: 1
   itemObject: {fileID: 7745575149429932022}
   blockObject: {fileID: 6800486258220794364}
-  inventorySizes: 
   machineUI: {fileID: 0}
   inventories: []
   PrimaryMachineEventType: 1
@@ -126,7 +124,7 @@ MonoBehaviour:
   GlobalObjectIdHash: 951099334
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
+  AutoObjectParentSync: 0
 --- !u!1 &6800486258220794364
 GameObject:
   m_ObjectHideFlags: 0
