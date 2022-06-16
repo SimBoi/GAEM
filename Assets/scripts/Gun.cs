@@ -209,7 +209,7 @@ public class Gun : Item
                 if (reloadTimer >= reloadTime)
                 {
                     WaitingForServerReload = true;
-                    ReloadServerRpc();
+                    ReloadServerRpc(characterController.inventory);
                 }
             }
         }
@@ -258,7 +258,7 @@ public class Gun : Item
 
     public void GetReloadKeyDown()
     {
-        if (isReloading && magazine >= magazineSize && characterController.inventory.GetTotalStackSize(ammoType) <= 0) return;
+        if (isReloading || magazine >= magazineSize || characterController.inventory.GetTotalStackSize(ammoType) <= 0) return;
 
         reloadTimer = 0;
         isReloading = true;
@@ -299,9 +299,10 @@ public class Gun : Item
     }
 
     [ServerRpc]
-    public void ReloadServerRpc()
+    public void ReloadServerRpc(NetworkBehaviourReference inventoryReference)
     {
-        magazine += (ushort)characterController.inventory.ConsumeFromTotalStack(ammoType, magazineSize - magazine, out _, out _);
+        inventoryReference.TryGet(out PlayerInventory inventory);
+        magazine += (ushort)inventory.ConsumeFromTotalStack(ammoType, magazineSize - magazine, out _, out _);
         ClientRpcParams clientRpcParams = new ClientRpcParams
         {
             Send = new ClientRpcSendParams
