@@ -88,12 +88,9 @@ public class Inventory : NetworkBehaviour
             if (GetItemRef(i) == item)
             {
                 InsertResult currResult = SetItemCopy(item, i, out insertedItem, despawnItem);
-                if (currResult != InsertResult.Failure)
-                    changedIndexes.Add(i);
-                if (currResult == InsertResult.Partial)
-                    result = InsertResult.Partial;
-                if (currResult == InsertResult.Success)
-                    return InsertResult.Success;
+                if (currResult != InsertResult.Failure) changedIndexes.Add(i);
+                if (currResult == InsertResult.Partial) result = InsertResult.Partial;
+                if (currResult == InsertResult.Success) return InsertResult.Success;
             }
         }
         // add item to the first empty slot
@@ -164,10 +161,17 @@ public class Inventory : NetworkBehaviour
             if (item.GetStackSize() + items[index].GetStackSize() > items[index].maxStackSize)
             {
                 int stackToAdd = items[index].maxStackSize - items[index].GetStackSize();
-                items[index].ChangeStackSize(stackToAdd);
-                item.ChangeStackSize(-stackToAdd);
-                insertedItem = items[index];
-                result = InsertResult.Partial;
+                if (stackToAdd > 0)
+                {
+                    items[index].ChangeStackSize(stackToAdd);
+                    item.ChangeStackSize(-stackToAdd);
+                    insertedItem = items[index];
+                    result = InsertResult.Partial;
+                }
+                else
+                {
+                    result = InsertResult.Failure;
+                }
             }
             else
             {
