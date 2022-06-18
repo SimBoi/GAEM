@@ -8,6 +8,16 @@ using UnityEngine;
 // network object, if present, should have auto parenting sync disabled
 public class Item : NetworkBehaviour
 {
+    private static ItemPrefabs itemPrefabs = null;
+    public static GameObject[] prefabs
+    {
+        get
+        {
+            if (itemPrefabs == null) itemPrefabs = ((GameObject)Resources.Load("ItemPrefabReferences", typeof(GameObject))).GetComponent<ItemPrefabs>();
+            return itemPrefabs.prefabs;
+        }
+    }
+
     [Header("Item Properties")]
     public string name;
     public int id;
@@ -46,6 +56,8 @@ public class Item : NetworkBehaviour
         this.timeSinceSpawn = source.timeSinceSpawn;
         this.isHeld = source.isHeld;
         this.isDestroyed = source.isDestroyed;
+        this.icon = source.icon;
+        this.fpsArmsAnimatorOverrideController = source.fpsArmsAnimatorOverrideController;
     }
 
     public virtual Item Clone()
@@ -74,11 +86,9 @@ public class Item : NetworkBehaviour
     // returns null for id <= 0 or id >= prefabs.length
     public static Item Deserialize(int id, byte[] serializedItem)
     {
-        if (id <= 0) return null;
+        if (id <= 0 || id >= prefabs.Length) return null;
 
-        ItemPrefabs itemPrefabs = ((GameObject)Resources.Load("ItemPrefabReferences", typeof(GameObject))).GetComponent<ItemPrefabs>();
-        if (id >= itemPrefabs.prefabs.Length) return null;
-        Item item = itemPrefabs.prefabs[id].GetComponent<Item>().Clone();
+        Item item = prefabs[id].GetComponent<Item>().Clone();
         item.Deserialize(serializedItem);
         return item;
     }
@@ -140,7 +150,7 @@ public class Item : NetworkBehaviour
             return true;
         return false;
     }
-    
+
     public static bool operator !=(Item a, Item b)
     {
         if (a == b)
@@ -160,17 +170,17 @@ public class Item : NetworkBehaviour
 
     // returns stacksize
     public int DamageItem(float dmg)
-    { 
+    {
         health.DealDamage(dmg);
         if (health.GetHp() <= 0) ChangeStackSize(-1);
         return stackSize;
     }
-    
+
     public int GetStackSize()
     {
         return stackSize;
     }
-    
+
     public void SetStackSize(int newSize)
     {
         stackSize = newSize;
@@ -184,9 +194,8 @@ public class Item : NetworkBehaviour
     public virtual Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
     {
         GameObject newItem;
-        ItemPrefabs itemPrefabs = ((GameObject)Resources.Load("ItemPrefabReferences", typeof(GameObject))).GetComponent<ItemPrefabs>();
-        if (parent == null) newItem = Instantiate(itemPrefabs.prefabs[id], pos, rotation);
-        else newItem = Instantiate(itemPrefabs.prefabs[id], pos, rotation, parent);
+        if (parent == null) newItem = Instantiate(prefabs[id], pos, rotation);
+        else newItem = Instantiate(prefabs[id], pos, rotation, parent);
         Item spawnedItem = newItem.GetComponent<Item>();
         spawnedItem.CopyFrom(this);
         spawnedItem.isHeld = isHeld;
@@ -211,7 +220,10 @@ public class Item : NetworkBehaviour
     public virtual void InitializeItemClientRpc(byte[] serializedItem)
     {
         Deserialize(serializedItem);
-        if (IsOwner && isHeld && ui != null) ui.SetActive(true);
+        if (IsOwner && isHeld && ui != null) {
+            print("heq");
+            ui.SetActive(true);
+        }
     }
 
     public virtual bool Despawn()
@@ -238,7 +250,7 @@ public class Item : NetworkBehaviour
     }
 
     public virtual void PickupEvent() { }
-    
+
     // calls HoldItem on the client that owns eventCaller
     // eventCaller has to have a NetworkObject component
     public void HoldEvent(GameObject eventCaller)

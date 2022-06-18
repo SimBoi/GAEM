@@ -42,9 +42,8 @@ public class ItemConverter : Machine
     {
         base.Deserialize(m, reader);
 
-        ItemPrefabs itemPrefabs = ((GameObject)Resources.Load("ItemPrefabReferences", typeof(GameObject))).GetComponent<ItemPrefabs>();
-        inputItem = itemPrefabs.prefabs[reader.ReadInt32()].GetComponent<Item>();
-        outputItem = itemPrefabs.prefabs[reader.ReadInt32()].GetComponent<Item>();
+        inputItem = Item.prefabs[reader.ReadInt32()].GetComponent<Item>();
+        outputItem = Item.prefabs[reader.ReadInt32()].GetComponent<Item>();
         cost = reader.ReadInt32();
     }
 

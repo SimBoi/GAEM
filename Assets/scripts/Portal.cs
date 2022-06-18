@@ -44,8 +44,7 @@ public class Portal : Machine
     {
         base.Deserialize(m, reader);
 
-        ItemPrefabs itemPrefabs = ((GameObject)Resources.Load("ItemPrefabReferences", typeof(GameObject))).GetComponent<ItemPrefabs>();
-        inputItem = itemPrefabs.prefabs[reader.ReadInt32()].GetComponent<Item>();
+        inputItem = Item.prefabs[reader.ReadInt32()].GetComponent<Item>();
         cost = reader.ReadInt32();
         destCoords.x = reader.ReadSingle();
         destCoords.y = reader.ReadSingle();
