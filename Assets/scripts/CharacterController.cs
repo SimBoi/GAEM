@@ -57,7 +57,9 @@ public class CharacterController : NetworkBehaviour
     private void Start()
     {
         foreach (PlayerInventoryType inventoryType in Enum.GetValues(typeof(PlayerInventoryType)))
+        {
             inventoriesUI.Add(new List<InventorySlotUI>());
+        }
         clickedItemUI.transform.localScale = new Vector3(inventoryUIScale, inventoryUIScale, inventoryUIScale);
     }
 
@@ -499,5 +501,10 @@ public class CharacterController : NetworkBehaviour
     private void DieClientRpc(bool callGameManager, ClientRpcParams clientRpcParams)
     {
         if (callGameManager) GameObject.Find("GameManager").GetComponent<GameManager>().KillPlayer();
+    }
+
+    public void LeaveGame()
+    {
+        GameObject.Find("GameManager").GetComponent<GameManager>().LeaveGame();
     }
 }
