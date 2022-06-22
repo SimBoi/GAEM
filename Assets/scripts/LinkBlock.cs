@@ -16,9 +16,7 @@ public class LinkBlock : Block
     {
         LinkBlock spawnedItem = (LinkBlock)base.PlaceCustomBlock(globalPos, rotation, parentChunk, landPos);
 
-        object[] message = new object[1]{
-                null
-            };
+        object[] message = new object[1] { null };
         parentChunk.SendMessageUpwards("GetLandRefMsg", message);
         Land land = (Land)message[0];
 
@@ -26,32 +24,26 @@ public class LinkBlock : Block
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
         {
             Vector3Int neighborLandPos = landPos + Chunk.FaceToDirection(face);
-            if (spawnedItem.blockID == land.GetBlockID(neighborLandPos))
-                relinkNetwork = true;
+            if (spawnedItem.blockID == land.GetBlockID(neighborLandPos)) relinkNetwork = true;
         }
 
-        if (relinkNetwork)
-            spawnedItem.RelinkNetwork(land, landPos);
-        else
-            spawnedItem.RelinkNetwork(land, landPos, CreateNewNetwork());
+        if (relinkNetwork) spawnedItem.RelinkNetwork(land, landPos);
+        else spawnedItem.RelinkNetwork(land, landPos, CreateNewNetwork());
 
         return spawnedItem;
     }
 
-    public override bool BreakCustomBlock(Vector3 pos = default, bool spawnItem = false)
+    public override bool BreakCustomBlock(out Block spawnedItem, Vector3 pos = default, bool spawnItem = false)
     {
-        if (!base.BreakCustomBlock(pos, spawnItem))
-            return false;
+        if (!base.BreakCustomBlock(out spawnedItem, pos, spawnItem)) return false;
         UnlinkNetwork();
         return true;
     }
 
     public void RelinkNetwork(Land land, Vector3Int landPos, Network targetNetwork = null)
     {
-        if (isDestroyed)
-            return;
-        if (network != null && ReferenceEquals(targetNetwork, network))
-            return;
+        if (isDestroyed) return;
+        if (network != null && ReferenceEquals(targetNetwork, network)) return;
 
         if (targetNetwork == null)
         {
@@ -91,9 +83,7 @@ public class LinkBlock : Block
 
     public void UnlinkNetwork()
     {
-        object[] message = new object[1]{
-                null
-            };
+        object[] message = new object[1] { null };
         SendMessageUpwards("GetLandRefMsg", message);
         Land land = (Land)message[0];
         Vector3Int landPos = Vector3Int.FloorToInt(land.transform.InverseTransformPoint(transform.position));

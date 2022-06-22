@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3629375312731890503}
   - component: {fileID: 3629375312731890500}
   - component: {fileID: 3629375312731890497}
+  - component: {fileID: -7417669967530356410}
   m_Layer: 0
   m_Name: chunk
   m_TagString: Chunk
@@ -110,8 +111,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f46e748926138c04abe2edf9e99c6e58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  land: {fileID: 0}
-  itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
   blockToItemID: {fileID: 8468740666753732256, guid: 25b9fb8253abe4a4b8d11e60258ad1d6, type: 3}
   meshRenderer: {fileID: 3629375312731890500}
   meshFilter: {fileID: 3629375312731890503}
@@ -119,6 +118,23 @@ MonoBehaviour:
   sizeX: 16
   sizeY: 16
   sizeZ: 16
+  chunkIndex: {x: 0, y: 0}
   requiresMeshGeneration: 0
   vertexLength: 0
   resolution: {x: 0, y: 0}
+--- !u!114 &-7417669967530356410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3629375312731890501}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1

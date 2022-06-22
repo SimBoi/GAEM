@@ -21,8 +21,7 @@ public class Machine : Block
     public void Start()
     {
         GameObject tmp = GenerateMachineUI();
-        if (tmp != null)
-            machineUI = tmp.GetComponent<RectTransform>();
+        if (tmp != null) machineUI = tmp.GetComponent<RectTransform>();
     }
 
     public virtual GameObject GenerateMachineUI()
@@ -33,16 +32,11 @@ public class Machine : Block
     public override bool BlockInitialize()
     {
         if (!base.BlockInitialize()) return false;
-
         if (ports == null || ports.Length == 0)
         {
             ports = new Port[6];
-            for (int i = 0; i < ports.Length; i++)
-            {
-                ports[i] = new Port();
-            }
+            for (int i = 0; i < ports.Length; i++) ports[i] = new Port();
         }
-
         return true;
     }
 
@@ -77,9 +71,7 @@ public class Machine : Block
     {
         Machine spawnedItem = (Machine)base.PlaceCustomBlock(globalPos, rotation, parentChunk, landPos);
 
-        object[] message = new object[1]{
-                null
-            };
+        object[] message = new object[1] { null };
         parentChunk.SendMessageUpwards("GetLandRefMsg", message);
         Land land = (Land)message[0];
 
@@ -90,7 +82,9 @@ public class Machine : Block
             if (neighborBlock != null)
             {
                 if (typeof(LinkBlock).IsAssignableFrom(neighborBlock.GetType()))
+                {
                     spawnedItem.TryLinkNetwork(face, ((LinkBlock)neighborBlock).network);
+                }
                 if (typeof(Machine).IsAssignableFrom(neighborBlock.GetType()))
                 {
                     Network newNetwork = spawnedItem.ports[(int)face].CreateNewNetwork();
@@ -103,34 +97,28 @@ public class Machine : Block
         return spawnedItem;
     }
 
-    public override bool BreakCustomBlock(Vector3 pos = default, bool spawnItem = false)
+    public override bool BreakCustomBlock(out Block spawnedItem, Vector3 pos = default, bool spawnItem = false)
     {
-        if (!base.BreakCustomBlock(pos, spawnItem))
-            return false;
-        foreach (Faces face in Enum.GetValues(typeof(Faces)))
-            UnlinkNetwork(face);
+        if (!base.BreakCustomBlock(out spawnedItem, pos, spawnItem)) return false;
+        foreach (Faces face in Enum.GetValues(typeof(Faces))) UnlinkNetwork(face);
         foreach (Inventory inventory in inventories)
         {
-            if (inventory == null)
-                continue;
-            for (int i = 0; i < inventory.size; i++)
-                inventory.ThrowItemServerRpc(i, inventory.GetStackSize(i), pos);
+            if (inventory == null) continue;
+            for (int i = 0; i < inventory.size; i++) inventory.ThrowItemServerRpc(i, inventory.GetStackSize(i), pos);
         }
         return true;
     }
 
     public void TryLinkNetwork(Faces face, Network targetNetwork)
     {
-        if (isDestroyed || targetNetwork == null)
-            return;
+        if (isDestroyed || targetNetwork == null) return;
         targetNetwork.LinkPort(ports[(int)face]);
     }
 
     public void UnlinkNetwork(Faces face)
     {
         Port port = ports[(int)face];
-        if (port.network != null)
-            port.network.UnlinkPort(port);
+        if (port.network != null) port.network.UnlinkPort(port);
     }
 
     /// <summary>
@@ -150,15 +138,13 @@ public class Machine : Block
     {
         if (PrimaryMachineEventType != MachineEventType.disabled)
         {
-            if (wasPrimaryMachineEventActive && !isPrimaryMachineEventActive)
-                PrimaryMachineEventExit(lastPrimaryMachineEventCaller);
+            if (wasPrimaryMachineEventActive && !isPrimaryMachineEventActive) PrimaryMachineEventExit(lastPrimaryMachineEventCaller);
             wasPrimaryMachineEventActive = isPrimaryMachineEventActive;
             isPrimaryMachineEventActive = false;
         }
         if (SecondaryMachineEventType != MachineEventType.disabled)
         {
-            if (wasSecondaryMachineEventActive && !isSecondaryMachineEventActive)
-                SecondaryMachineEventExit(lastSecondaryMachineEventCaller);
+            if (wasSecondaryMachineEventActive && !isSecondaryMachineEventActive) SecondaryMachineEventExit(lastSecondaryMachineEventCaller);
             wasSecondaryMachineEventActive = isSecondaryMachineEventActive;
             isSecondaryMachineEventActive = false;
         }
@@ -170,8 +156,7 @@ public class Machine : Block
         {
             isPrimaryMachineEventActive = true;
             lastPrimaryMachineEventCaller = eventCaller;
-            if (wasPrimaryMachineEventActive == false)
-                PrimaryMachineEvent(eventCaller);
+            if (wasPrimaryMachineEventActive == false) PrimaryMachineEvent(eventCaller);
         }
         else if (PrimaryMachineEventType == MachineEventType.ContinuousEvent)
         {
@@ -187,8 +172,7 @@ public class Machine : Block
         {
             isSecondaryMachineEventActive = true;
             lastSecondaryMachineEventCaller = eventCaller;
-            if (wasSecondaryMachineEventActive == false)
-                SecondaryMachineEvent(eventCaller);
+            if (wasSecondaryMachineEventActive == false) SecondaryMachineEvent(eventCaller);
         }
         else if (SecondaryMachineEventType == MachineEventType.ContinuousEvent)
         {

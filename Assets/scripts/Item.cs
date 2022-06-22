@@ -220,10 +220,7 @@ public class Item : NetworkBehaviour
     public virtual void InitializeItemClientRpc(byte[] serializedItem)
     {
         Deserialize(serializedItem);
-        if (IsOwner && isHeld && ui != null) {
-            print("heq");
-            ui.SetActive(true);
-        }
+        if (IsOwner && isHeld && ui != null) ui.SetActive(true);
     }
 
     public virtual bool Despawn()

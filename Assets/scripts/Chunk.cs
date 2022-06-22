@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
 public enum Faces
 {
@@ -12,7 +13,7 @@ public enum Faces
     Back
 }
 
-public class Chunk : MonoBehaviour
+public class Chunk : NetworkBehaviour
 {
     public BlockToItemID blockToItemID;
     public MeshRenderer meshRenderer;
@@ -21,6 +22,7 @@ public class Chunk : MonoBehaviour
     public int sizeX = 16;
     public int sizeY = 16;
     public int sizeZ = 16;
+    public Vector2Int chunkIndex;
     public short[,,] blockIDs;
     public bool requiresMeshGeneration = false;
     public int vertexLength;
@@ -39,7 +41,7 @@ public class Chunk : MonoBehaviour
         }
         return Vector3Int.back;
     }
-    
+
     static public Faces GetOppositeFace(Faces face)
     {
         switch (face)
@@ -53,33 +55,51 @@ public class Chunk : MonoBehaviour
         return Faces.Front;
     }
 
-    public void WakeUp()
+    public void Initialize(Vector2Int resolution, int vertexLength, int sizeX, int sizeY, int sizeZ, Vector2Int chunkIndex)
     {
-        meshRenderer = GetComponent<MeshRenderer>();
-        meshCollider = GetComponent<MeshCollider>();
-        meshFilter = GetComponent<MeshFilter>();
+        this.resolution = resolution;
+        this.vertexLength = vertexLength;
+        this.sizeX = sizeX;
+        this.sizeY = sizeY;
+        this.sizeZ = sizeZ;
+        this.chunkIndex = chunkIndex;
+        this.meshRenderer = GetComponent<MeshRenderer>();
+        this.meshCollider = GetComponent<MeshCollider>();
+        this.meshFilter = GetComponent<MeshFilter>();
+        this.blockIDs = new short[sizeX, sizeY, sizeZ];
+    }
 
-        blockIDs = new short[sizeX, sizeY, sizeZ];
-        for (int x = 0; x < sizeX; x++)
+    public void NetworkSpawn()
+    {
+        if (!NetworkManager.Singleton.IsServer) return;
+        GetComponent<NetworkObject>().Spawn();
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
         {
-            for (int y = 0; y < sizeY; y++)
-            {
-                for (int z = 0; z < sizeZ; z++)
-                {
-                    blockIDs[x, y, z] = 0;
-                }
-            }
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+            InitializeClientRpc(resolution, vertexLength, sizeX, sizeY, sizeZ, chunkIndex);
         }
+    }
 
-        requiresMeshGeneration = true;
+    public void OnClientConnected(ulong clientID)
+    {
+        InitializeClientRpc(resolution, vertexLength, sizeX, sizeY, sizeZ, chunkIndex, SerializeBlockIDs(blockIDs, sizeX, sizeY, sizeZ), GetCustomBlockRefs());
+    }
+
+    [ClientRpc]
+    public void InitializeClientRpc(Vector2 resolutionFloats, int vertexLength, int sizeX, int sizeY, int sizeZ, Vector2 chunkIndexFloats, short[] serializedBlockIDs = null, NetworkBehaviourReference[] customBlockRefs = null)
+    {
+        if (IsServer) return;
+        Initialize(Vector2Int.FloorToInt(resolutionFloats), vertexLength, sizeX, sizeY, sizeZ, Vector2Int.FloorToInt(chunkIndexFloats));
+        if (serializedBlockIDs != null) OverrideChunkLocal(DeserializeBlockIDs(serializedBlockIDs, sizeX, sizeY, sizeZ), customBlockRefs);
     }
 
     private void Update()
     {
-        if (requiresMeshGeneration)
-        {
-            GenerateMesh();
-        }
+        if (requiresMeshGeneration) GenerateMesh();
     }
 
     void GenerateMesh()
@@ -291,54 +311,144 @@ public class Chunk : MonoBehaviour
         currentIndex += 4;
     }
 
-    public bool RemoveBlock(Vector3Int pos, bool spawnItem = false)
+    public void OverrideChunkLocal(short[,,] blockIDs, NetworkBehaviourReference[] customBlockRefs = null)
     {
-        if (blockIDs[pos.x, pos.y, pos.z] != 0)
+        Vector3Int chunkPos = new Vector3Int(chunkIndex.x * sizeX, 0, chunkIndex.y * sizeZ);
+        int i = 0;
+        for (int x = 0; x < sizeX; x++)
         {
-            if (customBlocks.ContainsKey(pos))
+            for (int y = 0; y < sizeY; y++)
             {
-                Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
-                customBlocks[pos].BreakCustomBlock(spawnPos, spawnItem);
-                customBlocks.Remove(pos);
-            }
-            else
-            {
-                if (spawnItem == true)
+                for (int z = 0; z < sizeZ; z++)
                 {
-                    GameObject newItem;
-                    Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
-                    newItem = Instantiate(Item.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])], spawnPos, default(Quaternion));
-                    Item spawnedItem = newItem.GetComponent<Item>();
-                    spawnedItem.SetStackSize(1);
+                    Vector3Int pos = new Vector3Int(x, y, z);
+                    if (IsServer)
+                    {
+                        OverrideBlockLocal(chunkPos + pos, blockIDs[x, y, z]);
+                    }
+                    else
+                    {
+                        Block block = blockIDs[x, y, z] == 0 ? null : Item.prefabs[blockToItemID.Convert(blockIDs[x, y, z])].GetComponent<Block>();
+                        Block customBlock = null;
+                        // use the NetworkBehaviourReference passed by the server to find the custom block that the server spawned
+                        if (block != null && block.hasCustomMesh) customBlockRefs[i++].TryGet(out customBlock);
+                        OverrideBlockLocal(chunkPos + pos, blockIDs[x, y, z], customBlock);
+                    }
                 }
-                requiresMeshGeneration = true;
             }
-
-            blockIDs[pos.x, pos.y, pos.z] = 0;
-            return true;
         }
-        return false;
     }
 
+    // should only be called on the server
+    public void OverrideChunk(short[,,] blockIDs)
+    {
+        OverrideChunkLocal(blockIDs);
+        if (IsSpawned) SyncChunkClientRpc(SerializeBlockIDs(blockIDs, sizeX, sizeY, sizeZ), GetCustomBlockRefs());
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void SyncChunkServerRpc(ulong clientID)
+    {
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientID }
+            }
+        };
+        SyncChunkClientRpc(SerializeBlockIDs(blockIDs, sizeX, sizeY, sizeZ), GetCustomBlockRefs(), clientRpcParams);
+    }
+
+    [ClientRpc]
+    public void SyncChunkClientRpc(short[] serializedBlockIDs, NetworkBehaviourReference[] customBlockRefs, ClientRpcParams clientRpcParams)
+    {
+        if (IsServer) return;
+        OverrideChunkLocal(DeserializeBlockIDs(serializedBlockIDs, sizeX, sizeY, sizeZ), customBlockRefs);
+    }
+
+    [ClientRpc]
+    public void SyncChunkClientRpc(short[] serializedBlockIDs, NetworkBehaviourReference[] customBlockRefs)
+    {
+        if (IsServer) return;
+        OverrideChunkLocal(DeserializeBlockIDs(serializedBlockIDs, sizeX, sizeY, sizeZ), customBlockRefs);
+    }
+
+    public void OverrideBlockLocal(Vector3Int landPos, short blockID, bool spawnItem = false, Block customBlock = null, Quaternion rotation = default)
+    {
+        Vector3Int pos = new Vector3Int(landPos.x % sizeX, landPos.y % sizeY, landPos.z % sizeZ);
+        short prevID = blockIDs[pos.x, pos.y, pos.z];
+        blockIDs[pos.x, pos.y, pos.z] = blockID;
+        Block block = blockID == 0 ? null : Item.prefabs[blockToItemID.Convert(blockID)].GetComponent<Block>();
+
+        // determine if we have to regenerate the mesh
+        if (!((prevID == 0 || customBlocks.ContainsKey(pos)) && (blockID == 0 || block.hasCustomMesh))) requiresMeshGeneration = true;
+
+        // remove prevoius custom block if it exists and spawn it
+        if (customBlocks.ContainsKey(pos))
+        {
+            if (IsServer)
+            {
+                Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
+                customBlocks[pos].BreakCustomBlock(out Block spawnedItem, spawnPos, spawnItem);
+                if (spawnItem) spawnedItem.NetworkSpawn();
+            }
+            customBlocks.Remove(pos);
+        }
+        // spawn previous normal Item if it exists
+        else if (prevID != 0 && spawnItem == true)
+        {
+            GameObject newItem;
+            Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
+            newItem = Instantiate(Item.prefabs[blockToItemID.Convert(prevID)], spawnPos, default(Quaternion));
+            Item spawnedItem = newItem.GetComponent<Item>();
+            spawnedItem.SetStackSize(1);
+            spawnedItem.NetworkSpawn();
+        }
+
+        // spawn the new custom block if on the server, use the passed custom block if on a client
+        if (blockID != 0 && block.hasCustomMesh)
+        {
+            if (IsServer)
+            {
+                Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
+                customBlock = (Block)block.PlaceCustomBlock(spawnPos, rotation, this, landPos);
+                customBlock.NetworkSpawn();
+            }
+            customBlocks.Add(pos, customBlock);
+        }
+    }
+
+    // should only be called on the server
     public bool AddBlock(Vector3Int landPos, short blockID, Quaternion rotation = default)
     {
         Vector3Int pos = new Vector3Int(landPos.x % sizeX, landPos.y % sizeY, landPos.z % sizeZ);
-        if (blockIDs[pos.x, pos.y, pos.z] == 0)
-        {
-            blockIDs[pos.x, pos.y, pos.z] = blockID;
-            if (Item.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().hasCustomMesh)
-            {
-                Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
-                Block customBlock = (Block)Item.prefabs[blockToItemID.Convert(blockIDs[pos.x, pos.y, pos.z])].GetComponent<Block>().PlaceCustomBlock(spawnPos, rotation, this, landPos);
-                customBlocks.Add(pos, customBlock);
-            }
-            else
-            {
-                requiresMeshGeneration = true;
-            }
-            return true;
-        }
-        return false;
+        if (blockIDs[pos.x, pos.y, pos.z] != 0) return false;
+        OverrideBlockLocal(landPos, blockID, false, null, rotation);
+        NetworkBehaviourReference customBlockRef = customBlocks.ContainsKey(pos) ? customBlocks[pos] : default(NetworkBehaviourReference);
+        SyncBlockClientRpc(landPos, blockID, customBlockRef, rotation);
+        return true;
+    }
+
+    // should only be called on the server
+    public bool RemoveBlock(Vector3Int pos, bool spawnItem = false)
+    {
+        if (blockIDs[pos.x, pos.y, pos.z] == 0) return false;
+        Vector3Int landPos = new Vector3Int(chunkIndex.x * sizeX + pos.x, pos.y, chunkIndex.y * sizeZ + pos.z);
+        OverrideBlockLocal(landPos, 0, spawnItem);
+        SyncBlockClientRpc(landPos, 0);
+        return true;
+    }
+
+    [ClientRpc]
+    public void SyncBlockClientRpc(Vector3 landPosFloats, short blockID, NetworkBehaviourReference customBlockRef = default, Quaternion rotation = default)
+    {
+        if (IsServer) return;
+        Vector3Int landPos = Vector3Int.FloorToInt(landPosFloats);
+        Block block = blockID == 0 ? null : Item.prefabs[blockToItemID.Convert(blockID)].GetComponent<Block>();
+        Block customBlock = null;
+        // use the NetworkBehaviourReference passed by the server to find the custom block that the server spawned
+        if (blockID != 0 && block.hasCustomMesh) customBlockRef.TryGet(out customBlock);
+        OverrideBlockLocal(landPos, blockID, false, customBlock, rotation);
     }
 
     public float GetStiffness(Vector3Int pos)
@@ -353,9 +463,57 @@ public class Chunk : MonoBehaviour
 
     public Block GetCustomBlock(Vector3Int pos)
     {
-        if (customBlocks.ContainsKey(pos))
-            return customBlocks[pos];
-        else
-            return null;
+        return customBlocks.ContainsKey(pos) ? customBlocks[pos] : null;
+    }
+
+    public NetworkBehaviourReference[] GetCustomBlockRefs()
+    {
+        List<NetworkBehaviourReference> customBlockRefs = new List<NetworkBehaviourReference>();
+        for (int x = 0; x < sizeX; x++)
+        {
+            for (int y = 0; y < sizeY; y++)
+            {
+                for (int z = 0; z < sizeZ; z++)
+                {
+                    Vector3Int pos = new Vector3Int(x, y, z);
+                    if (customBlocks.ContainsKey(pos)) customBlockRefs.Add(customBlocks[pos]);
+                }
+            }
+        }
+        return customBlockRefs.ToArray();
+    }
+
+    public short[] SerializeBlockIDs(short[,,] blockIDs, int sizeX, int sizeY, int sizeZ)
+    {
+        short[] serializedBlockIDs = new short[sizeX * sizeY * sizeZ];
+        int i = 0;
+        for (int x = 0; x < sizeX; x++)
+        {
+            for (int y = 0; y < sizeY; y++)
+            {
+                for (int z = 0; z < sizeZ; z++)
+                {
+                    serializedBlockIDs[i++] = blockIDs[x, y, z];
+                }
+            }
+        }
+        return serializedBlockIDs;
+    }
+
+    public short[,,] DeserializeBlockIDs(short[] serializedBlockIDs, int sizeX, int sizeY, int sizeZ)
+    {
+        short[,,] blockIDs = new short[sizeX, sizeY, sizeZ];
+        int i = 0;
+        for (int x = 0; x < sizeX; x++)
+        {
+            for (int y = 0; y < sizeY; y++)
+            {
+                for (int z = 0; z < sizeZ; z++)
+                {
+                    blockIDs[x, y, z] = serializedBlockIDs[i++];
+                }
+            }
+        }
+        return blockIDs;
     }
 }

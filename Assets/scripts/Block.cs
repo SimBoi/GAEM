@@ -104,9 +104,10 @@ public class Block : Item
         return spawnedItem;
     }
 
-    public virtual bool BreakCustomBlock(Vector3 pos = default, bool spawnItem = false)
+    public virtual bool BreakCustomBlock(out Block spawnedItem, Vector3 pos = default, bool spawnItem = false)
     {
-        if (spawnItem) Spawn(false, pos);
+        spawnedItem = null;
+        if (spawnItem) spawnedItem = (Block)Spawn(false, pos);
         return Despawn();
     }
 }
