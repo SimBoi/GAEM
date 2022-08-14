@@ -7,7 +7,7 @@ public class ChunkGenerator : NetworkBehaviour
 {
     public Land land;
     public int landSize;
-    private float timer = 0;
+    private float timer = 2;
 
     private void Start()
     {
@@ -23,10 +23,10 @@ public class ChunkGenerator : NetworkBehaviour
 
     private void Update()
     {
-        if (IsServer && timer < 8)
+        if (IsServer && timer > 0)
         {
-            timer += Time.deltaTime;
-            if (timer >= 8)
+            timer -= Time.deltaTime;
+            if (timer <= 0)
             {
                 GenerateChunks();
             }

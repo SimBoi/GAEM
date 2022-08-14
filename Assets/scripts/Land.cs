@@ -26,7 +26,7 @@ public class Land : NetworkBehaviour
         chunk.Initialize(resolution, vertexLength, chunkSizeX, chunkSizeY, chunkSizeZ, coords);
         chunk.NetworkSpawn();
         chunks.Add(coords, chunk.gameObject);
-        //chunks[coords].transform.SetParent(transform);
+        chunks[coords].transform.SetParent(transform);
         InitChunkClientRpc(coords, chunk.gameObject);
     }
 
@@ -37,6 +37,16 @@ public class Land : NetworkBehaviour
         Vector2Int coords = Vector2Int.FloorToInt(coordsFloats);
         chunkRef.TryGet(out NetworkObject chunk);
         chunks.Add(coords, chunk.gameObject);
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer) NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+    }
+
+    public void OnClientConnected(ulong clientID)
+    {
+        foreach (var entry in chunks) InitChunkClientRpc(entry.Key, entry.Value);
     }
 
     // should only be called on the server

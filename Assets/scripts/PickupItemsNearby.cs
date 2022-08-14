@@ -9,14 +9,22 @@ public class PickupItemsNearby : NetworkBehaviour
     public float pickupRadius;
     private object[] message = new object[1] { null };
 
+    private bool spawnDelay = true;
     private void Start()
     {
         controller = GetComponent<CharacterController>();
+        StartCoroutine(StartTimer());
+    }
+
+    IEnumerator StartTimer()
+    {
+        yield return new WaitForSeconds(0.5f);
+        spawnDelay = false;
     }
 
     private void Update()
     {
-        if (!IsServer) return;
+        if (spawnDelay || !IsSpawned || !IsServer) return;
 
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, pickupRadius);
         foreach (var hitCollider in hitColliders)

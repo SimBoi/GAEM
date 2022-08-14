@@ -56,7 +56,7 @@ public class CharacterController : NetworkBehaviour
 
     private void Start()
     {
-        foreach (PlayerInventoryType inventoryType in Enum.GetValues(typeof(PlayerInventoryType)))
+        foreach (var _ in Enum.GetValues(typeof(PlayerInventoryType)))
         {
             inventoriesUI.Add(new List<InventorySlotUI>());
         }
@@ -136,8 +136,8 @@ public class CharacterController : NetworkBehaviour
 
             // inventory and item inputs
             if (Input.GetButtonDown("Inventory")) ToggleInventoriesUI();
-            if (Input.GetAxisRaw("Hotbar Slot 0") == 1) inventory.SwitchToItemServerRpc(0);
-            else if (Input.GetAxisRaw("Hotbar Slot 1") == 1) inventory.SwitchToItemServerRpc(1);
+            if (Input.GetButtonDown("Hotbar Slot 0")) inventory.SwitchToItemServerRpc(0);
+            else if (Input.GetButtonDown("Hotbar Slot 1")) inventory.SwitchToItemServerRpc(1);
             else if (Input.GetButtonDown("Throw Item") && inventory.heldItemIndex != -1) inventory.ThrowHeldItemServerRpc(1);
             else if (inventory.heldItemIndex != -1 && !inventoriesUIParent.activeSelf)
             {
