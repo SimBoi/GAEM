@@ -676,7 +676,7 @@ MonoBehaviour:
   characterCamera: {fileID: 2051427869518740362}
   mouseLook: {fileID: 2051427869558859582}
   inventory: {fileID: 1828069674}
-  pickupItemsNearby: {fileID: 0}
+  pickupItemsNearby: {fileID: 6326046970249114573}
   eyePosition: {fileID: 1949629237}
   gunRaySpawnPoint: {fileID: 4576706661783122559}
   canvas: {fileID: 1048454355977733587}

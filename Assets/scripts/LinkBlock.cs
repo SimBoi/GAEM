@@ -12,9 +12,10 @@ public class LinkBlock : Block
         return Network.CreateNewNetwork();
     }
 
-    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
+    public override void InitializeCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
     {
-        LinkBlock spawnedItem = (LinkBlock)base.PlaceCustomBlock(globalPos, rotation, parentChunk, landPos);
+        if (initialized) return;
+        base.InitializeCustomBlock(globalPos, rotation, parentChunk, landPos);
 
         object[] message = new object[1] { null };
         parentChunk.SendMessageUpwards("GetLandRefMsg", message);
@@ -24,13 +25,11 @@ public class LinkBlock : Block
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
         {
             Vector3Int neighborLandPos = landPos + Chunk.FaceToDirection(face);
-            if (spawnedItem.blockID == land.GetBlockID(neighborLandPos)) relinkNetwork = true;
+            if (blockID == land.GetBlockID(neighborLandPos)) relinkNetwork = true;
         }
 
-        if (relinkNetwork) spawnedItem.RelinkNetwork(land, landPos);
-        else spawnedItem.RelinkNetwork(land, landPos, CreateNewNetwork());
-
-        return spawnedItem;
+        if (relinkNetwork) RelinkNetwork(land, landPos);
+        else RelinkNetwork(land, landPos, CreateNewNetwork());
     }
 
     public override bool BreakCustomBlock(out Block spawnedItem, Vector3 pos = default, bool spawnItem = false)

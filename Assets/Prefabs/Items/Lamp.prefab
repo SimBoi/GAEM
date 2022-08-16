@@ -356,6 +356,7 @@ MonoBehaviour:
   hasCustomMesh: 1
   itemObject: {fileID: 3133495701790374911}
   blockObject: {fileID: 5761350647884139944}
+  initialized: 0
   machineUI: {fileID: 0}
   inventories: []
   PrimaryMachineEventType: 1
@@ -381,6 +382,7 @@ MonoBehaviour:
   timer: 0
   efficiency: 1
   prevCoords: {x: 0, y: 0, z: 0}
+  prevBlockID: 0
 --- !u!114 &6330898024830566039
 MonoBehaviour:
   m_ObjectHideFlags: 0

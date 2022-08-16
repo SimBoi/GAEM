@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using Unity.Netcode;
 
 public class Block : Item
 {
@@ -11,6 +12,8 @@ public class Block : Item
     public bool hasCustomMesh;
     public GameObject itemObject;
     public GameObject blockObject;
+
+    [HideInInspector] public bool initialized = false;
 
     public void CopyFrom(Block source)
     {
@@ -59,48 +62,52 @@ public class Block : Item
 
     public override bool CanBePickedUp()
     {
-        if (base.CanBePickedUp() && (!hasCustomMesh || itemObject.activeSelf))
-            return true;
+        if (base.CanBePickedUp() && (!hasCustomMesh || itemObject.activeSelf)) return true;
         return false;
     }
 
     public void Update()
     {
-        if (blockObject != null && blockObject.activeSelf)
-        {
-            BlockInitialize();
-            BlockUpdate();
-        }
+        if (initialized) BlockUpdate();
     }
 
     public new void FixedUpdate()
     {
         base.FixedUpdate();
-        if (blockObject != null && blockObject.activeSelf)
-        {
-            BlockFixedUpdate();
-        }
+        if (initialized) BlockFixedUpdate();
     }
 
-    private bool initialized = false;
-    public virtual bool BlockInitialize()
+    public virtual void InitializeCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
     {
-        if (initialized || blockObject == null || !blockObject.activeSelf) return false;
+        if (initialized) return;
         initialized = true;
-        return true;
+
+        itemObject.SetActive(false);
+        blockObject.SetActive(true);
+        preventDespawn = true;
+    }
+
+    [ClientRpc]
+    public void InitializeCustomBlockClientRpc(Vector3 globalPos, Quaternion rotation, NetworkBehaviourReference parentChunkRef, Vector3 landPosFloats)
+    {
+        if (initialized) return;
+        parentChunkRef.TryGet(out Chunk parentChunk);
+        Vector3Int landPos = Vector3Int.FloorToInt(landPosFloats);
+        InitializeCustomBlock(globalPos, rotation, parentChunk, landPos);
     }
 
     public virtual void BlockUpdate() { }
 
     public virtual void BlockFixedUpdate() { }
 
-    public virtual Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
+    // spawns the custom block across the network and calls BlockInitialize
+    // should only be called on the server
+    public Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
     {
+        if (!NetworkManager.Singleton.IsServer) return null;
         Block spawnedItem = (Block)Spawn(false, globalPos, rotation, parentChunk.transform);
-        spawnedItem.itemObject.SetActive(false);
-        spawnedItem.blockObject.SetActive(true);
-        spawnedItem.preventDespawn = true;
-        spawnedItem.BlockInitialize();
+        spawnedItem.NetworkSpawn();
+        spawnedItem.InitializeCustomBlockClientRpc(globalPos, rotation, parentChunk, landPos);
         return spawnedItem;
     }
 

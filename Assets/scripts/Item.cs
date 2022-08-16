@@ -217,7 +217,7 @@ public class Item : NetworkBehaviour
     }
 
     [ClientRpc]
-    public virtual void InitializeItemClientRpc(byte[] serializedItem)
+    public void InitializeItemClientRpc(byte[] serializedItem)
     {
         Deserialize(serializedItem);
         if (IsOwner && isHeld && ui != null) ui.SetActive(true);

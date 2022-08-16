@@ -1232,6 +1232,7 @@ MonoBehaviour:
   hasCustomMesh: 1
   itemObject: {fileID: 498573177659942960}
   blockObject: {fileID: 7752415408075902702}
+  initialized: 0
   machineUI: {fileID: 672314262119255522}
   inventories:
   - {fileID: -3922005335432339402}
@@ -1252,6 +1253,7 @@ MonoBehaviour:
   size: 6
   SlotFilledFlag: 0
   SlotEmptiedFlag: 0
+  syncMode: 1
 --- !u!114 &6119643799773556008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1269,6 +1271,7 @@ MonoBehaviour:
   timer: 0
   efficiency: 1
   prevCoords: {x: 0, y: 0, z: 0}
+  prevBlockID: 0
 --- !u!114 &7750832660848634804
 MonoBehaviour:
   m_ObjectHideFlags: 0

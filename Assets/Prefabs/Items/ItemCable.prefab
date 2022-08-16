@@ -262,6 +262,7 @@ MonoBehaviour:
   hasCustomMesh: 1
   itemObject: {fileID: 798687980102176184}
   blockObject: {fileID: 798687979331688716}
+  initialized: 0
 --- !u!114 &798687978397726789
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -279,6 +280,7 @@ MonoBehaviour:
   timer: 0
   efficiency: 1
   prevCoords: {x: 0, y: 0, z: 0}
+  prevBlockID: 0
 --- !u!114 &798687978397726788
 MonoBehaviour:
   m_ObjectHideFlags: 0

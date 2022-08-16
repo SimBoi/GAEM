@@ -29,15 +29,39 @@ public class Machine : Block
         return null;
     }
 
-    public override bool BlockInitialize()
+    public override void InitializeCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
     {
-        if (!base.BlockInitialize()) return false;
+        if (initialized) return;
+        base.InitializeCustomBlock(globalPos, rotation, parentChunk, landPos);
+
         if (ports == null || ports.Length == 0)
         {
             ports = new Port[6];
             for (int i = 0; i < ports.Length; i++) ports[i] = new Port();
         }
-        return true;
+
+        object[] message = new object[1] { null };
+        parentChunk.SendMessageUpwards("GetLandRefMsg", message);
+        Land land = (Land)message[0];
+
+        foreach (Faces face in Enum.GetValues(typeof(Faces)))
+        {
+            Vector3Int neighborLandPos = landPos + Chunk.FaceToDirection(face);
+            Block neighborBlock = land.GetCustomBlock(neighborLandPos);
+            if (neighborBlock != null)
+            {
+                if (typeof(LinkBlock).IsAssignableFrom(neighborBlock.GetType()))
+                {
+                    TryLinkNetwork(face, ((LinkBlock)neighborBlock).network);
+                }
+                if (typeof(Machine).IsAssignableFrom(neighborBlock.GetType()))
+                {
+                    Network newNetwork = ports[(int)face].CreateNewNetwork();
+                    TryLinkNetwork(face, newNetwork);
+                    ((Machine)neighborBlock).TryLinkNetwork(Chunk.GetOppositeFace(face), newNetwork);
+                }
+            }
+        }
     }
 
     public override void BlockFixedUpdate()
@@ -65,36 +89,6 @@ public class Machine : Block
                 }
             }
         }
-    }
-
-    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
-    {
-        Machine spawnedItem = (Machine)base.PlaceCustomBlock(globalPos, rotation, parentChunk, landPos);
-
-        object[] message = new object[1] { null };
-        parentChunk.SendMessageUpwards("GetLandRefMsg", message);
-        Land land = (Land)message[0];
-
-        foreach (Faces face in Enum.GetValues(typeof(Faces)))
-        {
-            Vector3Int neighborLandPos = landPos + Chunk.FaceToDirection(face);
-            Block neighborBlock = land.GetCustomBlock(neighborLandPos);
-            if (neighborBlock != null)
-            {
-                if (typeof(LinkBlock).IsAssignableFrom(neighborBlock.GetType()))
-                {
-                    spawnedItem.TryLinkNetwork(face, ((LinkBlock)neighborBlock).network);
-                }
-                if (typeof(Machine).IsAssignableFrom(neighborBlock.GetType()))
-                {
-                    Network newNetwork = spawnedItem.ports[(int)face].CreateNewNetwork();
-                    spawnedItem.TryLinkNetwork(face, newNetwork);
-                    ((Machine)neighborBlock).TryLinkNetwork(Chunk.GetOppositeFace(face), newNetwork);
-                }
-            }
-        }
-
-        return spawnedItem;
     }
 
     public override bool BreakCustomBlock(out Block spawnedItem, Vector3 pos = default, bool spawnItem = false)

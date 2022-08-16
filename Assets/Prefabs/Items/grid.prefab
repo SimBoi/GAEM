@@ -134,6 +134,7 @@ MonoBehaviour:
   hasCustomMesh: 0
   itemObject: {fileID: 0}
   blockObject: {fileID: 0}
+  initialized: 0
 --- !u!114 &7959325127622393445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -151,6 +152,7 @@ MonoBehaviour:
   timer: 0
   efficiency: 1
   prevCoords: {x: 0, y: 0, z: 0}
+  prevBlockID: 0
 --- !u!114 &5838950628382587129
 MonoBehaviour:
   m_ObjectHideFlags: 0

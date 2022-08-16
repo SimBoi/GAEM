@@ -360,14 +360,7 @@ public class Chunk : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void SyncChunkClientRpc(short[] serializedBlockIDs, NetworkBehaviourReference[] customBlockRefs, ClientRpcParams clientRpcParams)
-    {
-        if (IsServer) return;
-        OverrideChunkLocal(DeserializeBlockIDs(serializedBlockIDs, sizeX, sizeY, sizeZ), customBlockRefs);
-    }
-
-    [ClientRpc]
-    public void SyncChunkClientRpc(short[] serializedBlockIDs, NetworkBehaviourReference[] customBlockRefs)
+    public void SyncChunkClientRpc(short[] serializedBlockIDs, NetworkBehaviourReference[] customBlockRefs, ClientRpcParams clientRpcParams = default)
     {
         if (IsServer) return;
         OverrideChunkLocal(DeserializeBlockIDs(serializedBlockIDs, sizeX, sizeY, sizeZ), customBlockRefs);
@@ -408,12 +401,10 @@ public class Chunk : NetworkBehaviour
         // spawn the new custom block if on the server, use the passed custom block if on a client
         if (blockID != 0 && block.hasCustomMesh)
         {
-            if (IsServer)
-            {
-                Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
-                customBlock = (Block)block.PlaceCustomBlock(spawnPos, rotation, this, landPos);
-                customBlock.NetworkSpawn();
-            }
+            Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
+            if (IsServer) customBlock = (Block)block.PlaceCustomBlock(spawnPos, rotation, this, landPos);
+            Debug.Log(customBlock.transform.name);
+            customBlock.InitializeCustomBlock(spawnPos, rotation, this, landPos);
             customBlocks.Add(pos, customBlock);
         }
     }

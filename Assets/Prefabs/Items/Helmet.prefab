@@ -147,6 +147,7 @@ MonoBehaviour:
   timer: 0
   efficiency: 1
   prevCoords: {x: 0, y: 0, z: 0}
+  prevBlockID: 0
 --- !u!114 &3522964247126172184
 MonoBehaviour:
   m_ObjectHideFlags: 0

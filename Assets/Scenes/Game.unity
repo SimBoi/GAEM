@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641258, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -827,8 +827,6 @@ MonoBehaviour:
   playerPrefab: {fileID: 2051427869558859583, guid: 0cb7672919ac6a9468c8279cce2d3189, type: 3}
   spawnPoints:
   - {fileID: 898818831}
-  - {fileID: 1375966607}
-  - {fileID: 1697999129}
   activePlayer: {fileID: 0}
 --- !u!114 &430698847
 MonoBehaviour:
@@ -1017,7 +1015,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7300327053921501084, guid: 17e14d8b03dfec34bb6367597ff1a05f, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 13.21
+      value: 7.7
       objectReference: {fileID: 0}
     - target: {fileID: 7300327053921501084, guid: 17e14d8b03dfec34bb6367597ff1a05f, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1025,7 +1023,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7300327053921501084, guid: 17e14d8b03dfec34bb6367597ff1a05f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 13.11
+      value: 7.54
       objectReference: {fileID: 0}
     - target: {fileID: 7300327053921501084, guid: 17e14d8b03dfec34bb6367597ff1a05f, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1999,11 +1997,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b183b10a98696d441b82cacff6a5227c, type: 3}
---- !u!4 &1375966607 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1375966607, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
-  m_PrefabInstance: {fileID: 1691645546881401339}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1407884993
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2449,11 +2442,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 2
   m_TargetDisplay: 0
---- !u!4 &1697999129 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1697999129, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
-  m_PrefabInstance: {fileID: 1691645546881401339}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1782779780
 PrefabInstance:
   m_ObjectHideFlags: 0

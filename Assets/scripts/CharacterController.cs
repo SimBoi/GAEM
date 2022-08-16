@@ -355,37 +355,27 @@ public class CharacterController : NetworkBehaviour
         if (!inventoryReference.TryGet(out Inventory inventory)) return;
 
         Item previousClickedItem = clickedItem;
-        PlayerInventoryType inventoryType;
 
-        if (this.inventory.DoesInventoryExist(inventory, out inventoryType))
+        if (this.inventory.DoesInventoryExist(inventory, out PlayerInventoryType inventoryType))
         {
             if (this.inventory.IsItemCompatible(inventoryType, clickedItem, slotIndex))
             {
                 // copy item in slot
-                if (this.inventory.IsSlotFilled(inventoryType, slotIndex))
-                {
-                    clickedItem = this.inventory.GetItemCopy(inventoryType, slotIndex);
-                    clickedItem.isHeld = false;
-                }
-                else
-                {
-                    clickedItem = null;
-                }
-
+                clickedItem = this.inventory.IsSlotFilled(inventoryType, slotIndex) ? this.inventory.GetItemCopy(inventoryType, slotIndex) : null;
+                if (clickedItem != null) clickedItem.isHeld = false;
                 // delete old item from slot
                 this.inventory.DeleteItem(inventoryType, slotIndex);
-
                 // insert new item in slot
-                if (previousClickedItem != null)
-                {
-                    this.inventory.SetItemCopy(inventoryType, previousClickedItem, slotIndex, out _);
-                }
+                if (previousClickedItem != null) this.inventory.SetItemCopy(inventoryType, previousClickedItem, slotIndex, out _);
             }
         }
         else
         {
+            // copy item in slot
             clickedItem = inventory.IsSlotFilled(slotIndex) ? inventory.GetItemCopy(slotIndex) : null;
+            // delete old item from slot
             inventory.DeleteItem(slotIndex);
+            // insert new item in slot
             if (previousClickedItem != null) inventory.SetItemCopy(previousClickedItem, slotIndex, out _);
         }
 
