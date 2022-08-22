@@ -67,6 +67,44 @@ public class Inventory : NetworkBehaviour
         items = new Item[size];
     }
 
+    public override void OnNetworkSpawn()
+    {
+        if (!IsServer || syncMode != InventorySyncMode.AllClients) return;
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        if (!IsServer || syncMode != InventorySyncMode.AllClients) return;
+        NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+    }
+
+    public void OnClientConnected(ulong clientID)
+    {
+        if (syncMode != InventorySyncMode.AllClients) return;
+
+        SerializeInventory(out int[] itemIDs, out byte[][] serializedItems);
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientID }
+            }
+        };
+        SyncInventoryClientRpc(itemIDs, serializedItems, clientRpcParams);
+    }
+
+    [ClientRpc]
+    public void SyncInventoryClientRpc(int[] itemIDs, byte[][] serializedItems, ClientRpcParams clientRpcParams)
+    {
+        if (IsServer) return;
+        for (int i = 0; i < size; i++)
+        {
+            Debug.Log(itemIDs[i] + " - " + (serializedItems[i] != null));
+            items[i] = Item.Deserialize(itemIDs[i], serializedItems[i]);
+        }
+    }
+
     // if index is -1 item gets inserted in the first empty inventory space
     // should only be called on the server
     public InsertResult PickupItem(Item item, out List<int> changedIndexes, bool despawnItem = true, int index = -1)
@@ -323,8 +361,7 @@ public class Inventory : NetworkBehaviour
 
     public bool IsSlotFilled(int index)
     {
-        if (items[index] == null) return false;
-        return true;
+        return items[index] != null;
     }
 
     public int GetStackSize(int index)
@@ -340,9 +377,27 @@ public class Inventory : NetworkBehaviour
         return totalStack;
     }
 
-    /*[ClientRpc]
-    public void SyncInventoryClientRpc(int[] itemIDs, byte[][] serializedItems, ClientRpcParams clientRpcParams)
+    public void SerializeInventory(out int[] itemIDs, out byte[][] serializedItems)
     {
-        for (int i = 0; i < size; i++) items[i] = Item.Deserialize(itemIDs[i], serializedItems[i]);
-    }*/
+        itemIDs = new int[size];
+        serializedItems = new byte[size][];
+        for (int i = 0; i < size; i++)
+        {
+            if (IsSlotFilled(i))
+            {
+                itemIDs[i] = items[i].id;
+                serializedItems[i] = items[i].Serialize();
+            }
+            else
+            {
+                itemIDs[i] = 0;
+                serializedItems[i] = null;
+            }
+        }
+    }
+
+    public void DeserializeInventory(int[] itemIDs, int[] sizes, byte[] serializedItems)
+    {
+
+    }
 }

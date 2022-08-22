@@ -84,13 +84,25 @@ public class Chunk : NetworkBehaviour
         }
     }
 
+    public override void OnNetworkDespawn()
+    {
+        if (IsServer) NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+    }
+
     public void OnClientConnected(ulong clientID)
     {
-        InitializeClientRpc(resolution, vertexLength, sizeX, sizeY, sizeZ, chunkIndex, SerializeBlockIDs(blockIDs, sizeX, sizeY, sizeZ), GetCustomBlockRefs());
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientID }
+            }
+        };
+        InitializeClientRpc(resolution, vertexLength, sizeX, sizeY, sizeZ, chunkIndex, SerializeBlockIDs(blockIDs, sizeX, sizeY, sizeZ), GetCustomBlockRefs(), clientRpcParams);
     }
 
     [ClientRpc]
-    public void InitializeClientRpc(Vector2 resolutionFloats, int vertexLength, int sizeX, int sizeY, int sizeZ, Vector2 chunkIndexFloats, short[] serializedBlockIDs = null, NetworkBehaviourReference[] customBlockRefs = null)
+    public void InitializeClientRpc(Vector2 resolutionFloats, int vertexLength, int sizeX, int sizeY, int sizeZ, Vector2 chunkIndexFloats, short[] serializedBlockIDs = null, NetworkBehaviourReference[] customBlockRefs = null, ClientRpcParams clientRpcParams = default)
     {
         if (IsServer) return;
         Initialize(Vector2Int.FloorToInt(resolutionFloats), vertexLength, sizeX, sizeY, sizeZ, Vector2Int.FloorToInt(chunkIndexFloats));
@@ -332,7 +344,7 @@ public class Chunk : NetworkBehaviour
                         Block customBlock = null;
                         // use the NetworkBehaviourReference passed by the server to find the custom block that the server spawned
                         if (block != null && block.hasCustomMesh) customBlockRefs[i++].TryGet(out customBlock);
-                        OverrideBlockLocal(chunkPos + pos, blockIDs[x, y, z], customBlock);
+                        OverrideBlockLocal(chunkPos + pos, blockIDs[x, y, z], false, customBlock);
                     }
                 }
             }
@@ -403,7 +415,6 @@ public class Chunk : NetworkBehaviour
         {
             Vector3 spawnPos = transform.TransformPoint(pos + new Vector3(0.5f, 0.5f, 0.5f));
             if (IsServer) customBlock = (Block)block.PlaceCustomBlock(spawnPos, rotation, this, landPos);
-            Debug.Log(customBlock.transform.name);
             customBlock.InitializeCustomBlock(spawnPos, rotation, this, landPos);
             customBlocks.Add(pos, customBlock);
         }

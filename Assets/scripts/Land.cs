@@ -31,7 +31,7 @@ public class Land : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void InitChunkClientRpc(Vector2 coordsFloats, NetworkObjectReference chunkRef)
+    public void InitChunkClientRpc(Vector2 coordsFloats, NetworkObjectReference chunkRef, ClientRpcParams clientRpcParams = default)
     {
         if (IsServer) return;
         Vector2Int coords = Vector2Int.FloorToInt(coordsFloats);
@@ -44,9 +44,21 @@ public class Land : NetworkBehaviour
         if (IsServer) NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
     }
 
+    public override void OnNetworkDespawn()
+    {
+        if (IsServer) NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+    }
+
     public void OnClientConnected(ulong clientID)
     {
-        foreach (var entry in chunks) InitChunkClientRpc(entry.Key, entry.Value);
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientID }
+            }
+        };
+        foreach (var entry in chunks) InitChunkClientRpc(entry.Key, entry.Value, clientRpcParams);
     }
 
     // should only be called on the server
