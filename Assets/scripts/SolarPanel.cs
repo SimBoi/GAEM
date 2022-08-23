@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Netcode;
 using UnityEngine;
 
 public class SolarPanel : Machine
@@ -53,12 +54,19 @@ public class SolarPanel : Machine
     {
         if (initialized) return;
         base.InitializeCustomBlock(globalPos, rotation, parentChunk, landPos);
+        if (!IsServer) return;
 
         ports[(int)Faces.Up] = new EnergyPort() { type = PortType.output };
         ((EnergyPort)ports[(int)Faces.Up]).capacity = isActive ? rate : 0;
     }
 
     public override void PrimaryMachineEvent(GameObject eventCaller)
+    {
+        PowerSwitchServerRpc();
+    }
+
+    [ServerRpc]
+    public void PowerSwitchServerRpc()
     {
         isActive = !isActive;
         ((EnergyPort)ports[(int)Faces.Up]).capacity = isActive ? rate : 0;

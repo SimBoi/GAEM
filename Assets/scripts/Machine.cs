@@ -40,25 +40,28 @@ public class Machine : Block
             for (int i = 0; i < ports.Length; i++) ports[i] = new Port();
         }
 
-        object[] message = new object[1] { null };
-        parentChunk.SendMessageUpwards("GetLandRefMsg", message);
-        Land land = (Land)message[0];
-
-        foreach (Faces face in Enum.GetValues(typeof(Faces)))
+        if (IsServer)
         {
-            Vector3Int neighborLandPos = landPos + Chunk.FaceToDirection(face);
-            Block neighborBlock = land.GetCustomBlock(neighborLandPos);
-            if (neighborBlock != null)
+            object[] message = new object[1] { null };
+            parentChunk.SendMessageUpwards("GetLandRefMsg", message);
+            Land land = (Land)message[0];
+
+            foreach (Faces face in Enum.GetValues(typeof(Faces)))
             {
-                if (typeof(LinkBlock).IsAssignableFrom(neighborBlock.GetType()))
+                Vector3Int neighborLandPos = landPos + Chunk.FaceToDirection(face);
+                Block neighborBlock = land.GetCustomBlock(neighborLandPos);
+                if (neighborBlock != null)
                 {
-                    TryLinkNetwork(face, ((LinkBlock)neighborBlock).network);
-                }
-                if (typeof(Machine).IsAssignableFrom(neighborBlock.GetType()))
-                {
-                    Network newNetwork = ports[(int)face].CreateNewNetwork();
-                    TryLinkNetwork(face, newNetwork);
-                    ((Machine)neighborBlock).TryLinkNetwork(Chunk.GetOppositeFace(face), newNetwork);
+                    if (typeof(LinkBlock).IsAssignableFrom(neighborBlock.GetType()))
+                    {
+                        TryLinkNetwork(face, ((LinkBlock)neighborBlock).network);
+                    }
+                    else if (typeof(Machine).IsAssignableFrom(neighborBlock.GetType()))
+                    {
+                        Network newNetwork = ports[(int)face].CreateNewNetwork();
+                        TryLinkNetwork(face, newNetwork);
+                        ((Machine)neighborBlock).TryLinkNetwork(Chunk.GetOppositeFace(face), newNetwork);
+                    }
                 }
             }
         }
@@ -67,6 +70,8 @@ public class Machine : Block
     public override void BlockFixedUpdate()
     {
         base.BlockFixedUpdate();
+        if (!IsServer) return;
+
         foreach (Port port in ports)
         {
             if (port.GetType() == typeof(ItemPort))
@@ -103,12 +108,14 @@ public class Machine : Block
         return true;
     }
 
+    // should only be called on the server
     public void TryLinkNetwork(Faces face, Network targetNetwork)
     {
         if (isDestroyed || targetNetwork == null) return;
         targetNetwork.LinkPort(ports[(int)face]);
     }
 
+    // should only be called on the server
     public void UnlinkNetwork(Faces face)
     {
         Port port = ports[(int)face];

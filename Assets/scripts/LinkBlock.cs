@@ -17,19 +17,22 @@ public class LinkBlock : Block
         if (initialized) return;
         base.InitializeCustomBlock(globalPos, rotation, parentChunk, landPos);
 
-        object[] message = new object[1] { null };
-        parentChunk.SendMessageUpwards("GetLandRefMsg", message);
-        Land land = (Land)message[0];
-
-        bool relinkNetwork = false;
-        foreach (Faces face in Enum.GetValues(typeof(Faces)))
+        if (IsServer)
         {
-            Vector3Int neighborLandPos = landPos + Chunk.FaceToDirection(face);
-            if (blockID == land.GetBlockID(neighborLandPos)) relinkNetwork = true;
-        }
+            object[] message = new object[1] { null };
+            parentChunk.SendMessageUpwards("GetLandRefMsg", message);
+            Land land = (Land)message[0];
 
-        if (relinkNetwork) RelinkNetwork(land, landPos);
-        else RelinkNetwork(land, landPos, CreateNewNetwork());
+            bool relinkNetwork = false;
+            foreach (Faces face in Enum.GetValues(typeof(Faces)))
+            {
+                Vector3Int neighborLandPos = landPos + Chunk.FaceToDirection(face);
+                if (blockID == land.GetBlockID(neighborLandPos)) relinkNetwork = true;
+            }
+
+            if (relinkNetwork) RelinkNetwork(land, landPos);
+            else RelinkNetwork(land, landPos, CreateNewNetwork());
+        }
     }
 
     public override bool BreakCustomBlock(out Block spawnedItem, Vector3 pos = default, bool spawnItem = false)
@@ -39,6 +42,7 @@ public class LinkBlock : Block
         return true;
     }
 
+    // should only be called on the server
     public void RelinkNetwork(Land land, Vector3Int landPos, Network targetNetwork = null)
     {
         if (isDestroyed) return;
@@ -80,6 +84,7 @@ public class LinkBlock : Block
         }
     }
 
+    // should only be called on the server
     public void UnlinkNetwork()
     {
         object[] message = new object[1] { null };

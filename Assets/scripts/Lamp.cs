@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Netcode;
 using UnityEngine;
 
 public class Lamp : Machine
@@ -58,6 +59,7 @@ public class Lamp : Machine
     {
         if (initialized) return;
         base.InitializeCustomBlock(globalPos, rotation, parentChunk, landPos);
+        if (!IsServer) return;
 
         ports[(int)Faces.Down] = new EnergyPort()
         {
@@ -73,6 +75,12 @@ public class Lamp : Machine
     }
 
     public override void PrimaryMachineEvent(GameObject eventCaller)
+    {
+        PowerSwitchServerRpc();
+    }
+
+    [ServerRpc]
+    public void PowerSwitchServerRpc()
     {
         isActive = !isActive;
         ((EnergyPort)ports[(int)Faces.Down]).peakDemand = isActive ? peakEnergyDemand : 0;

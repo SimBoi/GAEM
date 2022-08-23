@@ -111,6 +111,7 @@ public class Block : Item
         return spawnedItem;
     }
 
+    // should only be called on the server
     public virtual bool BreakCustomBlock(out Block spawnedItem, Vector3 pos = default, bool spawnItem = false)
     {
         spawnedItem = null;

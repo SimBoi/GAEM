@@ -35,8 +35,7 @@ public class EnergyPort : Port
 
     private void CalcNetworkSpecs()
     {
-        if (network != null)
-            ((EnergyNetwork)network).CalcSpecs();
+        if (network != null)  ((EnergyNetwork)network).CalcSpecs();
     }
 
     public override Network CreateNewNetwork()

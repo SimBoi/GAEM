@@ -8,6 +8,7 @@ public class Chest : Machine
     {
         if (initialized) return;
         base.InitializeCustomBlock(globalPos, rotation, parentChunk, landPos);
+        if (!IsServer) return;
 
         ports[(int)Faces.Down] = new ItemPort() {
             type = PortType.input,

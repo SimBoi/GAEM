@@ -53,6 +53,7 @@ public class AreaPickup : Machine
     {
         if (initialized) return;
         base.InitializeCustomBlock(globalPos, rotation, parentChunk, landPos);
+        if (!IsServer) return;
 
         ports[(int)Faces.Up] = new ItemPort()
         {
