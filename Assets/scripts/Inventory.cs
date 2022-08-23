@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -82,8 +83,7 @@ public class Inventory : NetworkBehaviour
     public void OnClientConnected(ulong clientID)
     {
         if (syncMode != InventorySyncMode.AllClients) return;
-
-        SerializeInventory(out int[] itemIDs, out byte[][] serializedItems);
+        SerializeInventory(out int[] itemIDs, out int[] sizes, out byte[] serializedItems);
         ClientRpcParams clientRpcParams = new ClientRpcParams
         {
             Send = new ClientRpcSendParams
@@ -91,18 +91,14 @@ public class Inventory : NetworkBehaviour
                 TargetClientIds = new ulong[] { clientID }
             }
         };
-        SyncInventoryClientRpc(itemIDs, serializedItems, clientRpcParams);
+        SyncInventoryClientRpc(itemIDs, sizes, serializedItems, clientRpcParams);
     }
 
     [ClientRpc]
-    public void SyncInventoryClientRpc(int[] itemIDs, byte[][] serializedItems, ClientRpcParams clientRpcParams)
+    public void SyncInventoryClientRpc(int[] itemIDs, int[] sizes, byte[] serializedItems, ClientRpcParams clientRpcParams)
     {
         if (IsServer) return;
-        for (int i = 0; i < size; i++)
-        {
-            Debug.Log(itemIDs[i] + " - " + (serializedItems[i] != null));
-            items[i] = Item.Deserialize(itemIDs[i], serializedItems[i]);
-        }
+        DeserializeInventory(itemIDs, sizes, serializedItems);
     }
 
     // if index is -1 item gets inserted in the first empty inventory space
@@ -377,27 +373,38 @@ public class Inventory : NetworkBehaviour
         return totalStack;
     }
 
-    public void SerializeInventory(out int[] itemIDs, out byte[][] serializedItems)
+    public void SerializeInventory(out int[] itemIDs, out int[] sizes, out byte[] serializedItems)
     {
         itemIDs = new int[size];
-        serializedItems = new byte[size][];
+        sizes = new int[size];
+        List<byte> serializedItemsList = new List<byte>();
         for (int i = 0; i < size; i++)
         {
             if (IsSlotFilled(i))
             {
                 itemIDs[i] = items[i].id;
-                serializedItems[i] = items[i].Serialize();
+                byte[] serializedItem = items[i].Serialize();
+                sizes[i] = serializedItem.Length;
+                foreach (byte b in serializedItem) serializedItemsList.Add(b);
             }
             else
             {
                 itemIDs[i] = 0;
-                serializedItems[i] = null;
+                sizes[i] = 0;
             }
         }
+        serializedItems = serializedItemsList.ToArray();
     }
 
     public void DeserializeInventory(int[] itemIDs, int[] sizes, byte[] serializedItems)
     {
-
+        int j = 0;
+        for (int i = 0; i < size; i++)
+        {
+            byte[] serializedItem = new byte[sizes[i]];
+            Array.Copy(serializedItems, j, serializedItem, 0, sizes[i]);
+            items[i] = Item.Deserialize(itemIDs[i], serializedItem);
+            j += sizes[i];
+        }
     }
 }
