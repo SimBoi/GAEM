@@ -333,19 +333,26 @@ public class CharacterController : NetworkBehaviour
                 machineUI = null;
             }
 
-            if (clickedItem != null)
-            {
-                ThrowClickedItemServerRpc(clickedItem.id, clickedItem.Serialize());
-                clickedItem = null;
-            }
+            ThrowClickedItemServerRpc();
         }
     }
 
     [ServerRpc]
-    private void ThrowClickedItemServerRpc(int itemID, byte[] serializedItem)
+    private void ThrowClickedItemServerRpc()
     {
-        Item spawnedItem = Item.Deserialize(itemID, serializedItem).Spawn(false, transform.position);
+        if (clickedItem == null) return;
+
+        Item spawnedItem = clickedItem.Spawn(false, transform.position);
         spawnedItem.NetworkSpawn();
+        clickedItem = null;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { OwnerClientId }
+            }
+        };
+        SyncClickedItemClientRpc(0, null, clientRpcParams);
     }
 
     // returns the new item icon to display in the slot
