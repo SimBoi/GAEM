@@ -64,7 +64,7 @@ public class SolarPanel : Machine
         PowerSwitchServerRpc();
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     public void PowerSwitchServerRpc()
     {
         isActive = !isActive;

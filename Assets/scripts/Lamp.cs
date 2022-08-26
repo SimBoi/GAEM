@@ -8,6 +8,7 @@ public class Lamp : Machine
 {
     public float peakEnergyDemand;
     public float maxIntensity;
+    public NetworkVariable<float> intensity = new NetworkVariable<float>();
     public Light pointLight;
     public bool isActive = false;
 
@@ -70,7 +71,8 @@ public class Lamp : Machine
     public override void BlockUpdate()
     {
         base.BlockUpdate();
-        pointLight.intensity = ((EnergyPort)ports[(int)Faces.Down]).input * maxIntensity / peakEnergyDemand;
+        if (IsServer) intensity.Value = ((EnergyPort)ports[(int)Faces.Down]).input * maxIntensity / peakEnergyDemand;
+        pointLight.intensity = intensity.Value;
     }
 
     public override void PrimaryMachineEvent(GameObject eventCaller)
@@ -78,7 +80,7 @@ public class Lamp : Machine
         PowerSwitchServerRpc();
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     public void PowerSwitchServerRpc()
     {
         isActive = !isActive;
