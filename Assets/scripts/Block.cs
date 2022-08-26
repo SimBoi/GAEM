@@ -77,11 +77,15 @@ public class Block : Item
         if (initialized) BlockFixedUpdate();
     }
 
+    // initialization of fields for custom blocks should be done by overriding this function
+    public virtual void InitializeFields() { }
+
     public virtual void InitializeCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
     {
         if (initialized) return;
         initialized = true;
 
+        InitializeFields();
         itemObject.SetActive(false);
         blockObject.SetActive(true);
         preventDespawn = true;
@@ -107,6 +111,7 @@ public class Block : Item
         if (!NetworkManager.Singleton.IsServer) return null;
         Block spawnedItem = (Block)Spawn(false, globalPos, rotation, parentChunk.transform);
         spawnedItem.NetworkSpawn();
+        spawnedItem.InitializeCustomBlock(globalPos, rotation, parentChunk, landPos);
         spawnedItem.InitializeCustomBlockClientRpc(globalPos, rotation, parentChunk, landPos);
         return spawnedItem;
     }

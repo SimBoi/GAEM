@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Netcode;
 using UnityEngine;
 
 public class AreaPickup : Machine
 {
     public float radius;
-    public bool isActive = false;
+    public NetworkVariable<bool> isActive = new NetworkVariable<bool>(false);
 
     public void CopyFrom(AreaPickup source)
     {
@@ -31,7 +32,6 @@ public class AreaPickup : Machine
         base.Serialize(m, writer);
 
         writer.Write(radius);
-        writer.Write(isActive);
     }
 
     public override void Deserialize(MemoryStream m, BinaryReader reader)
@@ -39,7 +39,6 @@ public class AreaPickup : Machine
         base.Deserialize(m, reader);
 
         radius = reader.ReadSingle();
-        isActive = reader.ReadBoolean();
     }
 
     public override Item Spawn(bool isHeld, Vector3 pos, Quaternion rotation = default(Quaternion), Transform parent = null)
@@ -49,10 +48,9 @@ public class AreaPickup : Machine
         return spawnedItem;
     }
 
-    public override void InitializeCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
+    public override void InitializeFields()
     {
-        if (initialized) return;
-        base.InitializeCustomBlock(globalPos, rotation, parentChunk, landPos);
+        base.InitializeFields();
         if (!IsServer) return;
 
         ports[(int)Faces.Up] = new ItemPort()
@@ -65,13 +63,12 @@ public class AreaPickup : Machine
     public override void BlockUpdate()
     {
         base.BlockUpdate();
-        if (!isActive) return;
+        if (!IsServer || !isActive.Value) return;
+
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, radius);
         foreach (var hitCollider in hitColliders)
         {
-            object[] message = new object[1]{
-                null
-            };
+            object[] message = new object[1] { null };
             hitCollider.SendMessageUpwards("GetItemRefMsg", message, SendMessageOptions.DontRequireReceiver);
             Item item = (Item)message[0];
             if (item != null && item.CanBePickedUp())
@@ -83,11 +80,18 @@ public class AreaPickup : Machine
 
     public override void PrimaryMachineEvent(GameObject eventCaller)
     {
+        TakeItemsServerRpc(eventCaller.GetComponent<PlayerInventory>());
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void TakeItemsServerRpc(NetworkBehaviourReference eventCaller)
+    {
+        eventCaller.TryGet(out PlayerInventory inventory);
         for (int i = 0; i < inventories[0].size; i++)
         {
             if (inventories[0].IsSlotFilled(i))
             {
-                eventCaller.GetComponent<PlayerInventory>().PickupItem(inventories[0].GetItemRef(i), out _, out _);
+                inventory.PickupItem(inventories[0].GetItemRef(i), out _, out _);
                 inventories[0].DeleteItemServerRpc(i);
                 break;
             }
@@ -96,6 +100,12 @@ public class AreaPickup : Machine
 
     public override void SecondaryMachineEvent(GameObject eventCaller)
     {
-        isActive = !isActive;
+        PowerSwitchServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void PowerSwitchServerRpc()
+    {
+        isActive.Value = !isActive.Value;
     }
 }

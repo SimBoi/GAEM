@@ -5,9 +5,10 @@ using UnityEngine;
 public class MagnetSpinnerXDDDD : MonoBehaviour
 {
     public float rotationSpeed = 50;
+    public AreaPickup magnet;
 
     void Update()
     {
-        transform.Rotate(0, Time.deltaTime*rotationSpeed, 0);
+        if (magnet.isActive.Value) transform.Rotate(0, Time.deltaTime*rotationSpeed, 0);
     }
 }

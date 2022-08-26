@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotationSpeed: 50
+  magnet: {fileID: 8774141630154489949}
 --- !u!1 &1152231785428549892
 GameObject:
   m_ObjectHideFlags: 0
@@ -92,6 +93,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotationSpeed: 50
+  magnet: {fileID: 8774141630154489949}
 --- !u!1 &3962700581658683233
 GameObject:
   m_ObjectHideFlags: 0
@@ -651,7 +653,8 @@ MonoBehaviour:
   PrimaryMachineEventType: 1
   SecondaryMachineEventType: 1
   radius: 5
-  isActive: 0
+  isActive:
+    m_InternalValue: 0
 --- !u!114 &7779009410753719219
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -667,7 +670,7 @@ MonoBehaviour:
   size: 10
   SlotFilledFlag: 0
   SlotEmptiedFlag: 0
-  syncMode: 0
+  syncMode: 1
 --- !u!114 &5191238020087436525
 MonoBehaviour:
   m_ObjectHideFlags: 0

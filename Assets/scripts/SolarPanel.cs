@@ -50,10 +50,9 @@ public class SolarPanel : Machine
         return spawnedItem;
     }
 
-    public override void InitializeCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
+    public override void InitializeFields()
     {
-        if (initialized) return;
-        base.InitializeCustomBlock(globalPos, rotation, parentChunk, landPos);
+        base.InitializeFields();
         if (!IsServer) return;
 
         ports[(int)Faces.Up] = new EnergyPort() { type = PortType.output };

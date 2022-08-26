@@ -140,22 +140,13 @@ public class Item : NetworkBehaviour
 
     public static bool operator ==(Item a, Item b)
     {
-        if (a is null || b is null)
-        {
-            if (a is null && b is null) return true;
-            return false;
-        }
-
-        if (a.id == b.id && a.name == b.name)
-            return true;
-        return false;
+        if (a is null || b is null) return (a is null && b is null);
+        return (a.id == b.id && a.name == b.name);
     }
 
     public static bool operator !=(Item a, Item b)
     {
-        if (a == b)
-            return false;
-        return true;
+        return !(a == b);
     }
 
     // returns new stacksize on success

@@ -19,10 +19,19 @@ public enum InventorySyncMode
 public class Inventory : NetworkBehaviour
 {
     public int size;
-    private Item[] items;
     public bool SlotFilledFlag = false;
     public bool SlotEmptiedFlag = false;
     public InventorySyncMode syncMode = InventorySyncMode.OwnerClientOnly;
+
+    private Item[] _items = null;
+    private Item[] items
+    {
+        get
+        {
+            if (_items == null) _items = new Item[size];
+            return _items;
+        }
+    }
 
     private ClientRpcParams _clientRpcParams;
     private bool initRpcParams = true;
@@ -61,11 +70,6 @@ public class Inventory : NetworkBehaviour
     static public bool operator !=(Inventory inv1, Inventory inv2)
     {
         return !(inv1 == inv2);
-    }
-
-    private void Start()
-    {
-        items = new Item[size];
     }
 
     public override void OnNetworkSpawn()

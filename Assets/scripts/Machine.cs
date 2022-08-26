@@ -1,7 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 
 public enum MachineEventType
@@ -29,16 +26,20 @@ public class Machine : Block
         return null;
     }
 
-    public override void InitializeCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
+    public override void InitializeFields()
     {
-        if (initialized) return;
-        base.InitializeCustomBlock(globalPos, rotation, parentChunk, landPos);
-
+        base.InitializeFields();
         if (ports == null || ports.Length == 0)
         {
             ports = new Port[6];
             for (int i = 0; i < ports.Length; i++) ports[i] = new Port();
         }
+    }
+
+    public override void InitializeCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
+    {
+        if (initialized) return;
+        base.InitializeCustomBlock(globalPos, rotation, parentChunk, landPos);
 
         if (IsServer)
         {
