@@ -48,7 +48,7 @@ public class CharacterController : MonoBehaviour
     public void Start()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        foreach (PlayerInventoryType inventoryType in Enum.GetValues(typeof(PlayerInventoryType))) inventoriesUI.Add(new List<InventorySlotUI>());
+        foreach (PlayerInventoryType _ in Enum.GetValues(typeof(PlayerInventoryType))) inventoriesUI.Add(new List<InventorySlotUI>());
         clickedItemUI.transform.localScale = new Vector3(inventoryUIScale, inventoryUIScale, inventoryUIScale);
         foreach (VoxelGrid voxelGrid in gameManager.voxelGrids) voxelGrid.SetRenderDistance(renderDistance, transform.position);
         lastPosition = transform.position;

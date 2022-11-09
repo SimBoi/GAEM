@@ -124,7 +124,7 @@ public class VoxelGrid : MonoBehaviour
             blockIDs[chunkIndex][chunkCoords.x, chunkCoords.y, chunkCoords.z] = blockID;
             if (itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[chunkIndex][chunkCoords.x, chunkCoords.y, chunkCoords.z])].GetComponent<Block>().hasCustomMesh)
             {
-                Vector3 spawnPos = transform.TransformPoint(chunkCoords + new Vector3(0.5f, 0.5f, 0.5f));
+                Vector3 spawnPos = transform.TransformPoint(gridCoords + new Vector3(0.5f, 0.5f, 0.5f));
                 Block customBlock = (Block)itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[chunkIndex][chunkCoords.x, chunkCoords.y, chunkCoords.z])].GetComponent<Block>().PlaceCustomBlock(spawnPos, rotation, this, gridCoords);
                 customBlocks[chunkIndex].Add(chunkCoords, customBlock);
             }
@@ -157,7 +157,7 @@ public class VoxelGrid : MonoBehaviour
                 if (spawnItem == true)
                 {
                     GameObject newItem;
-                    Vector3 spawnPos = transform.TransformPoint(chunkCoords + new Vector3(0.5f, 0.5f, 0.5f));
+                    Vector3 spawnPos = transform.TransformPoint(gridCoords + new Vector3(0.5f, 0.5f, 0.5f));
                     newItem = Instantiate(itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[chunkIndex][chunkCoords.x, chunkCoords.y, chunkCoords.z])], spawnPos, default(Quaternion));
                     Item spawnedItem = newItem.GetComponent<Item>();
                     spawnedItem.SetStackSize(1);
@@ -186,12 +186,14 @@ public class VoxelGrid : MonoBehaviour
         if (!chunkPool.IsInstantiated(chunkIndex)) return 0;
 
         Vector3Int chunkCoords = GridToChunkCoords(gridCoords);
-        return blockIDs[chunkIndex][chunkCoords.x, chunkCoords.y, chunkCoords.z];
+        return blockIDs.ContainsKey(chunkIndex) ? blockIDs[chunkIndex][chunkCoords.x, chunkCoords.y, chunkCoords.z] : (short)0;
     }
 
     public float GetStiffness(Vector3Int gridCoords)
     {
-        return itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[GridToChunkIndex(gridCoords)][gridCoords.x, gridCoords.y, gridCoords.z])].GetComponent<Block>().stiffness;
+        Vector3Int chunkCoords = GridToChunkCoords(gridCoords);
+        Vector2Int chunkIndex = GridToChunkIndex(gridCoords);
+        return itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[chunkIndex][chunkCoords.x, chunkCoords.y, chunkCoords.z])].GetComponent<Block>().stiffness;
     }
 
     public Block GetCustomBlock(Vector3Int gridCoords)
@@ -199,10 +201,10 @@ public class VoxelGrid : MonoBehaviour
         if (gridCoords.y > chunkSizeY) return null;
 
         Vector2Int chunkIndex = GridToChunkIndex(gridCoords);
-        if (!chunkPool.IsInstantiated(chunkIndex)) return null;
+        if (!customBlocks.ContainsKey(chunkIndex)) return null;
 
         Vector3Int chunkCoords = GridToChunkCoords(gridCoords);
-        return customBlocks[chunkIndex][chunkCoords];
+        return customBlocks[chunkIndex].ContainsKey(chunkCoords) ? customBlocks[chunkIndex][chunkCoords] : null;
     }
 
     public Vector3Int GlobalToGridCoords(Vector3 globalCoords)
@@ -212,12 +214,20 @@ public class VoxelGrid : MonoBehaviour
 
     public Vector3Int GridToChunkCoords(Vector3Int gridCoords)
     {
-        return new Vector3Int(gridCoords.x % chunkSizeX, gridCoords.y % chunkSizeY, gridCoords.z % chunkSizeZ);
+        int x = gridCoords.x % chunkSizeX;
+        x = x < 0 ? x + chunkSizeX : x;
+        int y = gridCoords.y % chunkSizeY;
+        y = y < 0 ? y + chunkSizeY : y;
+        int z = gridCoords.z % chunkSizeZ;
+        z = z < 0 ? z + chunkSizeZ : z;
+        return new Vector3Int(x, y, z);
     }
 
     public Vector2Int GridToChunkIndex(Vector3Int gridCoords)
     {
-        return new Vector2Int(gridCoords.x / chunkSizeX, gridCoords.z / chunkSizeZ);
+        int x = Mathf.FloorToInt(gridCoords.x / (float)chunkSizeX);
+        int z = Mathf.FloorToInt(gridCoords.z / (float)chunkSizeZ);
+        return new Vector2Int(x, z);
     }
 
     static public Vector3Int FaceToDirection(Faces face)

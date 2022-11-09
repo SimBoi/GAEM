@@ -188,5 +188,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c12cf7571571adb43989e7132652a96f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  land: {fileID: 1691645546888138168}
-  landSize: 2
+  voxelGrid: {fileID: 1691645546888138168}
+  gridSize: 20
