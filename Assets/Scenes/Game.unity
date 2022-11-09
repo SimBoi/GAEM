@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641258, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -796,6 +796,7 @@ MonoBehaviour:
   - {fileID: 898818831}
   - {fileID: 1375966607}
   - {fileID: 1697999129}
+  voxelGrids: []
 --- !u!1001 &468792233
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1897,6 +1898,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1697999129, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
   m_PrefabInstance: {fileID: 1691645546881401339}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1708288744 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1691645546888138168, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+  m_PrefabInstance: {fileID: 1691645546881401339}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f7b47d5e62516545bbd7a83b929343e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2096015896
 GameObject:
   m_ObjectHideFlags: 0
@@ -2143,6 +2155,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: land
       objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: gridSize
+      value: 17
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: landSize
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1691645546888138174, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
+      propertyPath: voxelGrid
+      value: 
+      objectReference: {fileID: 1708288744}
     - target: {fileID: 1691645546888138175, guid: 3e8d29af5e305e346b81c2623313242a, type: 3}
       propertyPath: m_RootOrder
       value: 2

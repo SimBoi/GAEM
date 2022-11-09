@@ -168,14 +168,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f7b47d5e62516545bbd7a83b929343e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LandPosition: {x: 0, y: 0, z: 0}
   vertexLength: 386
   resolution: {x: 3088, y: 772}
   chunkSizeX: 16
   chunkSizeY: 16
   chunkSizeZ: 16
   chunkPrefab: {fileID: 3629375312731890501, guid: 3cd583f52cb004046bfc5a9f4a9d4ff7, type: 3}
-  chunkPoolSize: 16
+  itemPrefabs: {fileID: 3576886974872947454, guid: a1d1bb6225450414b8f69521660b16ac, type: 3}
+  blockToItemID: {fileID: 8468740666753732256, guid: 25b9fb8253abe4a4b8d11e60258ad1d6, type: 3}
 --- !u!114 &1691645546888138174
 MonoBehaviour:
   m_ObjectHideFlags: 0

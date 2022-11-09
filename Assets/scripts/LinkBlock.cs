@@ -12,22 +12,22 @@ public class LinkBlock : Block
         return Network.CreateNewNetwork();
     }
 
-    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, VoxelGrid voxelGrid, Vector3Int landPos)
+    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, VoxelGrid voxelGrid, Vector3Int gridCoords)
     {
-        LinkBlock spawnedItem = (LinkBlock)base.PlaceCustomBlock(globalPos, rotation, voxelGrid, landPos);
+        LinkBlock spawnedItem = (LinkBlock)base.PlaceCustomBlock(globalPos, rotation, voxelGrid, gridCoords);
 
         bool relinkNetwork = false;
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
         {
-            Vector3Int neighborLandPos = landPos + VoxelGrid.FaceToDirection(face);
-            if (spawnedItem.blockID == voxelGrid.GetBlockID(neighborLandPos))
+            Vector3Int neighborGridCoords = gridCoords + VoxelGrid.FaceToDirection(face);
+            if (spawnedItem.blockID == voxelGrid.GetBlockID(neighborGridCoords))
                 relinkNetwork = true;
         }
 
         if (relinkNetwork)
-            spawnedItem.RelinkNetwork(voxelGrid, landPos);
+            spawnedItem.RelinkNetwork(voxelGrid, gridCoords);
         else
-            spawnedItem.RelinkNetwork(voxelGrid, landPos, CreateNewNetwork());
+            spawnedItem.RelinkNetwork(voxelGrid, gridCoords, CreateNewNetwork());
 
         return spawnedItem;
     }
@@ -40,7 +40,7 @@ public class LinkBlock : Block
         return true;
     }
 
-    public void RelinkNetwork(VoxelGrid land, Vector3Int landPos, Network targetNetwork = null)
+    public void RelinkNetwork(VoxelGrid voxelGrid, Vector3Int gridCoords, Network targetNetwork = null)
     {
         if (isDestroyed)
             return;
@@ -51,8 +51,8 @@ public class LinkBlock : Block
         {
             foreach (Faces face in Enum.GetValues(typeof(Faces)))
             {
-                Vector3Int neighborLandPos = landPos + VoxelGrid.FaceToDirection(face);
-                Block neighborBlock = land.GetCustomBlock(neighborLandPos);
+                Vector3Int neighborGridCoords = gridCoords + VoxelGrid.FaceToDirection(face);
+                Block neighborBlock = voxelGrid.GetCustomBlock(neighborGridCoords);
                 if (neighborBlock != null && blockID == neighborBlock.blockID)
                 {
                     if (blockID == neighborBlock.blockID)
@@ -67,13 +67,13 @@ public class LinkBlock : Block
 
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
         {
-            Vector3Int neighborLandPos = landPos + VoxelGrid.FaceToDirection(face);
-            Block neighborBlock = land.GetCustomBlock(neighborLandPos);
+            Vector3Int neighborGridCoords = gridCoords + VoxelGrid.FaceToDirection(face);
+            Block neighborBlock = voxelGrid.GetCustomBlock(neighborGridCoords);
             if (neighborBlock != null)
             {
                 if (blockID == neighborBlock.blockID)
                 {
-                    ((LinkBlock)neighborBlock).RelinkNetwork(land, neighborLandPos, targetNetwork);
+                    ((LinkBlock)neighborBlock).RelinkNetwork(voxelGrid, neighborGridCoords, targetNetwork);
                 }
                 else if (typeof(Machine).IsAssignableFrom(neighborBlock.GetType()))
                 {
@@ -88,19 +88,19 @@ public class LinkBlock : Block
         object[] message = new object[1]{
                 null
             };
-        SendMessageUpwards("GetLandRefMsg", message);
-        VoxelGrid land = (VoxelGrid)message[0];
-        Vector3Int landPos = Vector3Int.FloorToInt(land.transform.InverseTransformPoint(transform.position));
+        SendMessageUpwards("GetGridRefMsg", message);
+        VoxelGrid voxelGrid = (VoxelGrid)message[0];
+        Vector3Int gridCoords = Vector3Int.FloorToInt(voxelGrid.transform.InverseTransformPoint(transform.position));
 
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
         {
-            Vector3Int neighborLandPos = landPos + VoxelGrid.FaceToDirection(face);
-            Block neighborBlock = land.GetCustomBlock(neighborLandPos);
+            Vector3Int neighborGridCoords = gridCoords + VoxelGrid.FaceToDirection(face);
+            Block neighborBlock = voxelGrid.GetCustomBlock(neighborGridCoords);
             if (neighborBlock != null)
             {
                 if (blockID == neighborBlock.blockID)
                 {
-                    ((LinkBlock)neighborBlock).RelinkNetwork(land, neighborLandPos, CreateNewNetwork());
+                    ((LinkBlock)neighborBlock).RelinkNetwork(voxelGrid, neighborGridCoords, CreateNewNetwork());
                 }
                 else if (typeof(Machine).IsAssignableFrom(neighborBlock.GetType()))
                 {

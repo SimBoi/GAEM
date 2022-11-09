@@ -424,6 +424,7 @@ MonoBehaviour:
   health: {fileID: 1828069676}
   hunger: {fileID: 1828069675}
   interactDistance: 5
+  renderDistance: 4
   characterMovement: {fileID: 7335673406425807029}
   characterCamera: {fileID: 2051427869518740362}
   mouseLook: {fileID: 2051427869558859582}

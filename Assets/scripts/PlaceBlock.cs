@@ -17,15 +17,15 @@ public class PlaceBlock : ItemEvent
             object[] message = new object[1]{
                 null
             };
-            hitInfo.collider.SendMessageUpwards("GetLandRefMsg", message, SendMessageOptions.DontRequireReceiver);
-            VoxelGrid land = (VoxelGrid)message[0];
+            hitInfo.collider.SendMessageUpwards("GetGridRefMsg", message, SendMessageOptions.DontRequireReceiver);
+            VoxelGrid voxelGrid = (VoxelGrid)message[0];
 
-            if (land != null)
+            if (voxelGrid != null)
             {
-                Vector3Int landBlockCoords = land.GlobalToLandCoords(hitInfo.point + (0.99f * hitInfo.normal));
+                Vector3Int GridBlockCoords = voxelGrid.GlobalToGridCoords(hitInfo.point + (0.99f * hitInfo.normal));
 
-                //if (land.AddBlock(landBlockCoords, (short)block.blockID, Quaternion.LookRotation(hitInfo.normal)))
-                if (land.AddBlock(landBlockCoords, (short)block.blockID))
+                //if (voxelGrid.AddBlock(GridBlockCoords, (short)block.blockID, Quaternion.LookRotation(hitInfo.normal)))
+                if (voxelGrid.AddBlock(GridBlockCoords, (short)block.blockID))
                 {
                     PlayerInventory playerInventory = eventCaller.GetComponent<PlayerInventory>();
                     playerInventory.ConsumeFromStack(1, playerInventory.heldItemIndex);

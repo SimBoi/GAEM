@@ -18,21 +18,21 @@ public class BreakBlock : ItemEvent
             object[] message = new object[1]{
                 null
             };
-            hitInfo.collider.SendMessageUpwards("GetLandRefMsg", message, SendMessageOptions.DontRequireReceiver);
-            VoxelGrid land = (VoxelGrid)message[0];
+            hitInfo.collider.SendMessageUpwards("GetGridRefMsg", message, SendMessageOptions.DontRequireReceiver);
+            VoxelGrid voxelGrid = (VoxelGrid)message[0];
 
-            if (land != null)
+            if (voxelGrid != null)
             {
-                Vector3Int landBlockCoords = land.GlobalToLandCoords(hitInfo.point - (0.01f * hitInfo.normal));
-                if (landBlockCoords != prevCoords) timer = 0;
+                Vector3Int gridBlockCoords = voxelGrid.GlobalToGridCoords(hitInfo.point - (0.01f * hitInfo.normal));
+                if (gridBlockCoords != prevCoords) timer = 0;
 
-                float blockStiffness = land.GetStiffness(landBlockCoords);
+                float blockStiffness = voxelGrid.GetStiffness(gridBlockCoords);
                 if (timer >= blockStiffness / efficiency)
                 {
-                    land.RemoveBlock(landBlockCoords, true);
+                    voxelGrid.RemoveBlock(gridBlockCoords, true);
                     timer = 0;
                 }
-                prevCoords = landBlockCoords;
+                prevCoords = gridBlockCoords;
             }
             else
             {

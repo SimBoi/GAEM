@@ -28,6 +28,14 @@ public class Chunk : MonoBehaviour
 
     void GenerateMesh()
     {
+        if (!voxelGrid.blockIDs.ContainsKey(chunkIndex))
+        {
+            meshFilter.mesh = null;
+            meshCollider.sharedMesh = null;
+            requiresMeshGeneration = false;
+            return;
+        }
+
         Mesh newMesh = new Mesh();
         List<Vector3> vertices = new List<Vector3>();
         List<Vector3> normals = new List<Vector3>();

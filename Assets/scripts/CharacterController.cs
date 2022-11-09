@@ -10,6 +10,7 @@ public class CharacterController : MonoBehaviour
     public Health health;
     public Hunger hunger;
     public float interactDistance;
+    public int renderDistance;
     public CharacterMovement characterMovement;
     public Camera characterCamera;
     public MouseLook mouseLook;
@@ -47,9 +48,10 @@ public class CharacterController : MonoBehaviour
     public void Start()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        foreach (PlayerInventoryType inventoryType in Enum.GetValues(typeof(PlayerInventoryType)))
-            inventoriesUI.Add(new List<InventorySlotUI>());
+        foreach (PlayerInventoryType inventoryType in Enum.GetValues(typeof(PlayerInventoryType))) inventoriesUI.Add(new List<InventorySlotUI>());
         clickedItemUI.transform.localScale = new Vector3(inventoryUIScale, inventoryUIScale, inventoryUIScale);
+        foreach (VoxelGrid voxelGrid in gameManager.voxelGrids) voxelGrid.SetRenderDistance(renderDistance, transform.position);
+        lastPosition = transform.position;
     }
 
     public void Update()
@@ -200,10 +202,10 @@ public class CharacterController : MonoBehaviour
     {
         foreach (VoxelGrid voxelGrid in gameManager.voxelGrids)
         {
-            Vector3Int landCoords = voxelGrid.GlobalToLandCoords(transform.position);
-            Vector2Int centerIndex = voxelGrid.LandToChunkIndex(landCoords);
-            Vector3Int lastLandCoords = voxelGrid.GlobalToLandCoords(lastPosition);
-            Vector2Int lastCenterIndex = voxelGrid.LandToChunkIndex(lastLandCoords);
+            Vector3Int gridCoords = voxelGrid.GlobalToGridCoords(transform.position);
+            Vector2Int centerIndex = voxelGrid.GridToChunkIndex(gridCoords);
+            Vector3Int lastGridCoords = voxelGrid.GlobalToGridCoords(lastPosition);
+            Vector2Int lastCenterIndex = voxelGrid.GridToChunkIndex(lastGridCoords);
 
             if (lastCenterIndex == centerIndex) continue;
 

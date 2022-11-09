@@ -111,14 +111,14 @@ public class Machine : Block
         }
     }
 
-    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, VoxelGrid voxelGrid, Vector3Int landPos)
+    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, VoxelGrid voxelGrid, Vector3Int gridCoords)
     {
-        Machine spawnedItem = (Machine)base.PlaceCustomBlock(globalPos, rotation, voxelGrid, landPos);
+        Machine spawnedItem = (Machine)base.PlaceCustomBlock(globalPos, rotation, voxelGrid, gridCoords);
 
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
         {
-            Vector3Int neighborLandPos = landPos + VoxelGrid.FaceToDirection(face);
-            Block neighborBlock = voxelGrid.GetCustomBlock(neighborLandPos);
+            Vector3Int neighborGridCoords = gridCoords + VoxelGrid.FaceToDirection(face);
+            Block neighborBlock = voxelGrid.GetCustomBlock(neighborGridCoords);
             if (neighborBlock != null)
             {
                 if (typeof(LinkBlock).IsAssignableFrom(neighborBlock.GetType()))

@@ -52,7 +52,7 @@ public class VoxelGrid : MonoBehaviour
         }
         chunkPool = new ChunkPool(this, chunkPrefab, chunkPoolSize);
 
-        RenderSurroundingChunks(LandToChunkIndex(GlobalToLandCoords(position)));
+        RenderSurroundingChunks(GridToChunkIndex(GlobalToGridCoords(position)));
     }
 
     private void RenderChunk(Vector2Int chunkIndex)
@@ -63,7 +63,7 @@ public class VoxelGrid : MonoBehaviour
         chunk.requiresMeshGeneration = true;
     }
 
-    private void DerenderChunk(Vector2Int chunkIndex)
+    private void UnrenderChunk(Vector2Int chunkIndex)
     {
         if (!chunkPool.IsInstantiated(chunkIndex)) return;
         chunkPool.Destroy(chunkIndex);
@@ -83,7 +83,7 @@ public class VoxelGrid : MonoBehaviour
         // destroy rendered chunks outside the range
         for (int i = 0; i < chunkPool.size; i++)
         {
-            if (!surroundingChunks.Contains(chunkPool[i].chunkIndex)) DerenderChunk(chunkPool[i].chunkIndex);
+            if (!surroundingChunks.Contains(chunkPool[i].chunkIndex)) UnrenderChunk(chunkPool[i].chunkIndex);
         }
 
         // instantiate missing chunks inside the range
@@ -109,12 +109,12 @@ public class VoxelGrid : MonoBehaviour
         }
     }
 
-    public bool AddBlock(Vector3Int landCoords, short blockID, Quaternion rotation = default)
+    public bool AddBlock(Vector3Int gridCoords, short blockID, Quaternion rotation = default)
     {
-        if (landCoords.y > chunkSizeY) return false;
+        if (gridCoords.y > chunkSizeY) return false;
 
-        Vector2Int chunkIndex = LandToChunkIndex(landCoords);
-        Vector3Int chunkCoords = LandToChunkCoords(landCoords);
+        Vector2Int chunkIndex = GridToChunkIndex(gridCoords);
+        Vector3Int chunkCoords = GridToChunkCoords(gridCoords);
 
         // initialize new chunk region
         if (!blockIDs.ContainsKey(chunkIndex)) InitChunkRegion(chunkIndex);
@@ -125,7 +125,7 @@ public class VoxelGrid : MonoBehaviour
             if (itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[chunkIndex][chunkCoords.x, chunkCoords.y, chunkCoords.z])].GetComponent<Block>().hasCustomMesh)
             {
                 Vector3 spawnPos = transform.TransformPoint(chunkCoords + new Vector3(0.5f, 0.5f, 0.5f));
-                Block customBlock = (Block)itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[chunkIndex][chunkCoords.x, chunkCoords.y, chunkCoords.z])].GetComponent<Block>().PlaceCustomBlock(spawnPos, rotation, this, landCoords);
+                Block customBlock = (Block)itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[chunkIndex][chunkCoords.x, chunkCoords.y, chunkCoords.z])].GetComponent<Block>().PlaceCustomBlock(spawnPos, rotation, this, gridCoords);
                 customBlocks[chunkIndex].Add(chunkCoords, customBlock);
             }
             else if (chunkPool.IsInstantiated(chunkIndex))
@@ -137,12 +137,12 @@ public class VoxelGrid : MonoBehaviour
         return false;
     }
 
-    public bool RemoveBlock(Vector3Int landCoords, bool spawnItem = false)
+    public bool RemoveBlock(Vector3Int gridCoords, bool spawnItem = false)
     {
-        if (landCoords.y > chunkSizeY) return false;
+        if (gridCoords.y > chunkSizeY) return false;
 
-        Vector2Int chunkIndex = LandToChunkIndex(landCoords);
-        Vector3Int chunkCoords = LandToChunkCoords(LandToChunkCoords(landCoords));
+        Vector2Int chunkIndex = GridToChunkIndex(gridCoords);
+        Vector3Int chunkCoords = GridToChunkCoords(GridToChunkCoords(gridCoords));
         
         if (blockIDs[chunkIndex][chunkCoords.x, chunkCoords.y, chunkCoords.z] != 0)
         {
@@ -172,52 +172,52 @@ public class VoxelGrid : MonoBehaviour
         return false;
     }
 
-    // message[0] = (Land)return
-    public void GetLandRefMsg(object[] message)
+    // message[0] = (VoxelGrid)return
+    public void GetGridRefMsg(object[] message)
     {
         message[0] = this;
     }
 
-    public short GetBlockID(Vector3Int landCoords)
+    public short GetBlockID(Vector3Int gridCoords)
     {
-        if (landCoords.y > chunkSizeY) return 0;
+        if (gridCoords.y > chunkSizeY) return 0;
 
-        Vector2Int chunkIndex = LandToChunkIndex(landCoords);
+        Vector2Int chunkIndex = GridToChunkIndex(gridCoords);
         if (!chunkPool.IsInstantiated(chunkIndex)) return 0;
 
-        Vector3Int chunkCoords = LandToChunkCoords(landCoords);
+        Vector3Int chunkCoords = GridToChunkCoords(gridCoords);
         return blockIDs[chunkIndex][chunkCoords.x, chunkCoords.y, chunkCoords.z];
     }
 
-    public float GetStiffness(Vector3Int landCoords)
+    public float GetStiffness(Vector3Int gridCoords)
     {
-        return itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[LandToChunkIndex(landCoords)][landCoords.x, landCoords.y, landCoords.z])].GetComponent<Block>().stiffness;
+        return itemPrefabs.prefabs[blockToItemID.Convert(blockIDs[GridToChunkIndex(gridCoords)][gridCoords.x, gridCoords.y, gridCoords.z])].GetComponent<Block>().stiffness;
     }
 
-    public Block GetCustomBlock(Vector3Int landCoords)
+    public Block GetCustomBlock(Vector3Int gridCoords)
     {
-        if (landCoords.y > chunkSizeY) return null;
+        if (gridCoords.y > chunkSizeY) return null;
 
-        Vector2Int chunkIndex = LandToChunkIndex(landCoords);
+        Vector2Int chunkIndex = GridToChunkIndex(gridCoords);
         if (!chunkPool.IsInstantiated(chunkIndex)) return null;
 
-        Vector3Int chunkCoords = LandToChunkCoords(landCoords);
+        Vector3Int chunkCoords = GridToChunkCoords(gridCoords);
         return customBlocks[chunkIndex][chunkCoords];
     }
 
-    public Vector3Int GlobalToLandCoords(Vector3 globalCoords)
+    public Vector3Int GlobalToGridCoords(Vector3 globalCoords)
     {
         return Vector3Int.FloorToInt(transform.InverseTransformPoint(globalCoords));
     }
 
-    public Vector3Int LandToChunkCoords(Vector3Int landCoords)
+    public Vector3Int GridToChunkCoords(Vector3Int gridCoords)
     {
-        return new Vector3Int(landCoords.x % chunkSizeX, landCoords.y % chunkSizeY, landCoords.z % chunkSizeZ);
+        return new Vector3Int(gridCoords.x % chunkSizeX, gridCoords.y % chunkSizeY, gridCoords.z % chunkSizeZ);
     }
 
-    public Vector2Int LandToChunkIndex(Vector3Int landCoords)
+    public Vector2Int GridToChunkIndex(Vector3Int gridCoords)
     {
-        return new Vector2Int(landCoords.x / chunkSizeX, landCoords.z / chunkSizeZ);
+        return new Vector2Int(gridCoords.x / chunkSizeX, gridCoords.z / chunkSizeZ);
     }
 
     static public Vector3Int FaceToDirection(Faces face)
