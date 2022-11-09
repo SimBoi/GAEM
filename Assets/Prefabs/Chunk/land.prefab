@@ -175,6 +175,7 @@ MonoBehaviour:
   chunkSizeY: 16
   chunkSizeZ: 16
   chunkPrefab: {fileID: 3629375312731890501, guid: 3cd583f52cb004046bfc5a9f4a9d4ff7, type: 3}
+  chunkPoolSize: 16
 --- !u!114 &1691645546888138174
 MonoBehaviour:
   m_ObjectHideFlags: 0

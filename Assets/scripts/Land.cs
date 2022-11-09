@@ -1,5 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq.Expressions;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Land : MonoBehaviour
@@ -11,29 +14,32 @@ public class Land : MonoBehaviour
     public int chunkSizeY = 16;
     public int chunkSizeZ = 16;
     public GameObject chunkPrefab;
-    public Dictionary<Vector2Int, GameObject> chunks = new Dictionary<Vector2Int, GameObject>();
+    public int chunkPoolSize;
 
-    private void Start()
+    private ChunkPool chunkPool;
+
+    private void Awake()
     {
         transform.position = LandPosition;
+        chunkPool = new ChunkPool(chunkPrefab, chunkPoolSize);
     }
 
     public void InitChunk(Vector2Int coords)
     {
-        chunks.Add(coords, Instantiate(chunkPrefab, new Vector3Int(coords.x * chunkSizeX, 0, coords.y * chunkSizeZ), transform.rotation, gameObject.transform));
-        chunks[coords].GetComponent<Chunk>().resolution = resolution;
-        chunks[coords].GetComponent<Chunk>().vertexLength = vertexLength;
-        chunks[coords].GetComponent<Chunk>().sizeX = chunkSizeX;
-        chunks[coords].GetComponent<Chunk>().sizeY = chunkSizeY;
-        chunks[coords].GetComponent<Chunk>().sizeZ = chunkSizeZ;
-        chunks[coords].GetComponent<Chunk>().WakeUp();
+        GameObject newChunk = chunkPool.Instantiate(coords, new Vector3Int(coords.x * chunkSizeX, 0, coords.y * chunkSizeZ), transform.rotation, gameObject.transform);
+        newChunk.GetComponent<Chunk>().resolution = resolution;
+        newChunk.GetComponent<Chunk>().vertexLength = vertexLength;
+        newChunk.GetComponent<Chunk>().sizeX = chunkSizeX;
+        newChunk.GetComponent<Chunk>().sizeY = chunkSizeY;
+        newChunk.GetComponent<Chunk>().sizeZ = chunkSizeZ;
+        newChunk.GetComponent<Chunk>().WakeUp();
         return;
     }
 
     public bool RemoveBlock(Vector3Int coords, bool spawnItem = false)
     {
         if (coords.y > chunkSizeY) return false;
-        Chunk chunk = chunks[new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ)].GetComponent<Chunk>();
+        Chunk chunk = chunkPool[new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ)].GetComponent<Chunk>();
         return chunk.RemoveBlock(LandToChunkCoords(coords), spawnItem);
     }
 
@@ -42,9 +48,8 @@ public class Land : MonoBehaviour
         if (coords.y > chunkSizeY) return false;
 
         Vector2Int chunkIndex = new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ);
-        if (!chunks.ContainsKey(chunkIndex))
-            InitChunk(chunkIndex);
-        Chunk chunk = chunks[chunkIndex].GetComponent<Chunk>();
+        if (!chunkPool.IsInstantiated(chunkIndex)) InitChunk(chunkIndex);
+        Chunk chunk = chunkPool[chunkIndex].GetComponent<Chunk>();
 
         return chunk.AddBlock(coords, blockID, rotation);
     }
@@ -55,14 +60,18 @@ public class Land : MonoBehaviour
         message[0] = this;
     }
 
+    public GameObject GetChunk(Vector2Int chunkIndex)
+    {
+        return chunkPool[chunkIndex];
+    }
+
     public short GetBlockID(Vector3Int coords)
     {
         if (coords.y > chunkSizeY) return 0;
 
         Vector2Int chunkIndex = new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ);
-        if (!chunks.ContainsKey(chunkIndex))
-            return 0;
-        Chunk chunk = chunks[chunkIndex].GetComponent<Chunk>();
+        if (!chunkPool.IsInstantiated(chunkIndex)) return 0;
+        Chunk chunk = chunkPool[chunkIndex].GetComponent<Chunk>();
 
         Vector3Int chunkPos = LandToChunkCoords(coords);
         return chunk.blockIDs[chunkPos.x, chunkPos.y, chunkPos.z];
@@ -73,9 +82,8 @@ public class Land : MonoBehaviour
         if (coords.y > chunkSizeY) return null;
 
         Vector2Int chunkIndex = new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ);
-        if (!chunks.ContainsKey(chunkIndex))
-            return null;
-        Chunk chunk = chunks[chunkIndex].GetComponent<Chunk>();
+        if (!chunkPool.IsInstantiated(chunkIndex)) return null;
+        Chunk chunk = chunkPool[chunkIndex].GetComponent<Chunk>();
 
         Vector3Int chunkPos = LandToChunkCoords(coords);
         return chunk.GetCustomBlock(chunkPos);
@@ -89,5 +97,75 @@ public class Land : MonoBehaviour
     public Vector3Int LandToChunkCoords(Vector3Int coords)
     {
         return new Vector3Int(coords.x % chunkSizeX, coords.y % chunkSizeY, coords.z % chunkSizeZ);
+    }
+}
+
+public class ChunkPool
+{
+    private GameObject[] pool;
+    private Queue<int> reuseQueue = new Queue<int>();
+    private Dictionary<Vector2Int, int> inUse = new Dictionary<Vector2Int, int>();
+
+    public int size
+    {
+        get => pool.Length;
+    }
+
+    public int available
+    {
+        get => reuseQueue.Count;
+    }
+
+    public GameObject this[Vector2Int chunkIndex]
+    {
+        get => pool[inUse[chunkIndex]];
+    }
+
+    public ChunkPool(GameObject chunkPrefab, int size)
+    {
+        pool = new GameObject[size];
+        for (int i = 0; i < size; i++)
+        {
+            pool[i] = GameObject.Instantiate(chunkPrefab);
+            pool[i].SetActive(false);
+            reuseQueue.Enqueue(i);
+        }
+    }
+
+    ~ChunkPool()
+    {
+        for (int i = 0; i < size; i++)
+        {
+            if (pool[i] != null) GameObject.Destroy(pool[i]);
+        }
+    }
+
+    public bool IsInstantiated(Vector2Int chunkIndex)
+    {
+        return inUse.ContainsKey(chunkIndex);
+    }
+
+    // should only be called after making sure a chunk is available for reuse
+    public GameObject Instantiate(Vector2Int chunkIndex, Vector3 position = default, Quaternion rotation = default, Transform parent = null)
+    {
+        int i = reuseQueue.Dequeue();
+        inUse.Add(chunkIndex, i);
+
+        pool[i].SetActive(true);
+        pool[i].transform.position = position;
+        pool[i].transform.rotation = rotation;
+        pool[i].transform.parent = parent;
+
+        return pool[i];
+    }
+
+    public void Destroy(Vector2Int chunkIndex)
+    {
+        int i = inUse[chunkIndex];
+
+        pool[i].SetActive(false);
+
+        reuseQueue.Enqueue(i);
+        inUse.Remove(chunkIndex);
     }
 }
