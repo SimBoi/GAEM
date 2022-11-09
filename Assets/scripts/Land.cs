@@ -14,9 +14,24 @@ public class Land : MonoBehaviour
     public int chunkSizeY = 16;
     public int chunkSizeZ = 16;
     public GameObject chunkPrefab;
-    public int chunkPoolSize;
 
     private ChunkPool chunkPool;
+    private int _renderDistance;
+    private int chunkPoolSize;
+
+    public int renderDistance
+    {
+        get
+        {
+            return _renderDistance;
+        }
+        set
+        {
+            _renderDistance = value;
+            chunkPoolSize = 2 * value;
+            chunkPool = new ChunkPool(chunkPrefab, chunkPoolSize);
+        }
+    }
 
     private void Awake()
     {
@@ -24,7 +39,7 @@ public class Land : MonoBehaviour
         chunkPool = new ChunkPool(chunkPrefab, chunkPoolSize);
     }
 
-    public void InitChunk(Vector2Int coords)
+    public void RenderChunk(Vector2Int coords)
     {
         GameObject newChunk = chunkPool.Instantiate(coords, new Vector3Int(coords.x * chunkSizeX, 0, coords.y * chunkSizeZ), transform.rotation, gameObject.transform);
         newChunk.GetComponent<Chunk>().resolution = resolution;
@@ -33,13 +48,28 @@ public class Land : MonoBehaviour
         newChunk.GetComponent<Chunk>().sizeY = chunkSizeY;
         newChunk.GetComponent<Chunk>().sizeZ = chunkSizeZ;
         newChunk.GetComponent<Chunk>().WakeUp();
-        return;
+    }
+
+    public void RenderSurroundingChunks(Vector3 coords)
+    {
+        Vector3Int landCoords = GlobalToLandCoords(coords);
+        Vector2Int centerIndex = LandToChunkIndex(landCoords);
+        for (int x = centerIndex.x - renderDistance; x < centerIndex.x + renderDistance; x++)
+        {
+            int zRange = (int)Mathf.Sqrt(Mathf.Pow(renderDistance, 2) - Mathf.Pow(x, 2));
+            for (int z = centerIndex.y - zRange; z < centerIndex.y + zRange; z++)
+            {
+                Vector2Int chunkIndex = new Vector2Int(x, z);
+                if (chunkPool.IsInstantiated(chunkIndex)) continue;
+                RenderChunk(chunkIndex);
+            }
+        }
     }
 
     public bool RemoveBlock(Vector3Int coords, bool spawnItem = false)
     {
         if (coords.y > chunkSizeY) return false;
-        Chunk chunk = chunkPool[new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ)].GetComponent<Chunk>();
+        Chunk chunk = chunkPool[LandToChunkIndex(coords)].GetComponent<Chunk>();
         return chunk.RemoveBlock(LandToChunkCoords(coords), spawnItem);
     }
 
@@ -47,8 +77,8 @@ public class Land : MonoBehaviour
     {
         if (coords.y > chunkSizeY) return false;
 
-        Vector2Int chunkIndex = new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ);
-        if (!chunkPool.IsInstantiated(chunkIndex)) InitChunk(chunkIndex);
+        Vector2Int chunkIndex = LandToChunkIndex(coords);
+        if (!chunkPool.IsInstantiated(chunkIndex)) RenderChunk(chunkIndex);
         Chunk chunk = chunkPool[chunkIndex].GetComponent<Chunk>();
 
         return chunk.AddBlock(coords, blockID, rotation);
@@ -69,7 +99,7 @@ public class Land : MonoBehaviour
     {
         if (coords.y > chunkSizeY) return 0;
 
-        Vector2Int chunkIndex = new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ);
+        Vector2Int chunkIndex = LandToChunkIndex(coords);
         if (!chunkPool.IsInstantiated(chunkIndex)) return 0;
         Chunk chunk = chunkPool[chunkIndex].GetComponent<Chunk>();
 
@@ -81,7 +111,7 @@ public class Land : MonoBehaviour
     {
         if (coords.y > chunkSizeY) return null;
 
-        Vector2Int chunkIndex = new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ);
+        Vector2Int chunkIndex = LandToChunkIndex(coords);
         if (!chunkPool.IsInstantiated(chunkIndex)) return null;
         Chunk chunk = chunkPool[chunkIndex].GetComponent<Chunk>();
 
@@ -89,7 +119,7 @@ public class Land : MonoBehaviour
         return chunk.GetCustomBlock(chunkPos);
     }
 
-    public Vector3Int ConvertToLandCoords(Vector3 coords)
+    public Vector3Int GlobalToLandCoords(Vector3 coords)
     {
         return Vector3Int.FloorToInt(transform.InverseTransformPoint(coords));
     }
@@ -98,6 +128,11 @@ public class Land : MonoBehaviour
     {
         return new Vector3Int(coords.x % chunkSizeX, coords.y % chunkSizeY, coords.z % chunkSizeZ);
     }
+
+    public Vector2Int LandToChunkIndex(Vector3Int coords)
+    {
+        return new Vector2Int(coords.x / chunkSizeX, coords.z / chunkSizeZ);
+    }    
 }
 
 public class ChunkPool

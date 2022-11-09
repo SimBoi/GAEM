@@ -22,7 +22,7 @@ public class PlaceBlock : ItemEvent
 
             if (land != null)
             {
-                Vector3Int landBlockCoords = land.ConvertToLandCoords(hitInfo.point + (0.99f * hitInfo.normal));
+                Vector3Int landBlockCoords = land.GlobalToLandCoords(hitInfo.point + (0.99f * hitInfo.normal));
 
                 //if (land.AddBlock(landBlockCoords, (short)block.blockID, Quaternion.LookRotation(hitInfo.normal)))
                 if (land.AddBlock(landBlockCoords, (short)block.blockID))
