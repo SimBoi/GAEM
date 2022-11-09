@@ -111,20 +111,14 @@ public class Machine : Block
         }
     }
 
-    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
+    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, VoxelGrid voxelGrid, Vector3Int landPos)
     {
-        Machine spawnedItem = (Machine)base.PlaceCustomBlock(globalPos, rotation, parentChunk, landPos);
-
-        object[] message = new object[1]{
-                null
-            };
-        parentChunk.SendMessageUpwards("GetLandRefMsg", message);
-        Land land = (Land)message[0];
+        Machine spawnedItem = (Machine)base.PlaceCustomBlock(globalPos, rotation, voxelGrid, landPos);
 
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
         {
-            Vector3Int neighborLandPos = landPos + Chunk.FaceToDirection(face);
-            Block neighborBlock = land.GetCustomBlock(neighborLandPos);
+            Vector3Int neighborLandPos = landPos + VoxelGrid.FaceToDirection(face);
+            Block neighborBlock = voxelGrid.GetCustomBlock(neighborLandPos);
             if (neighborBlock != null)
             {
                 if (typeof(LinkBlock).IsAssignableFrom(neighborBlock.GetType()))
@@ -133,7 +127,7 @@ public class Machine : Block
                 {
                     Network newNetwork = spawnedItem.ports[(int)face].CreateNewNetwork();
                     spawnedItem.TryLinkNetwork(face, newNetwork);
-                    ((Machine)neighborBlock).TryLinkNetwork(Chunk.GetOppositeFace(face), newNetwork);
+                    ((Machine)neighborBlock).TryLinkNetwork(VoxelGrid.GetOppositeFace(face), newNetwork);
                 }
             }
         }

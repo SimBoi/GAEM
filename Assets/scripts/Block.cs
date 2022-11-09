@@ -75,9 +75,9 @@ public class Block : Item
 
     public virtual void BlockFixedUpdate() { }
 
-    public virtual Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
+    public virtual Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, VoxelGrid voxelGrid, Vector3Int landPos)
     {
-        Block spawnedItem = (Block)Spawn(false, globalPos, rotation, parentChunk.transform);
+        Block spawnedItem = (Block)Spawn(false, globalPos, rotation, voxelGrid.transform);
         spawnedItem.itemObject.SetActive(false);
         spawnedItem.blockObject.SetActive(true);
         spawnedItem.preventDespawn = true;

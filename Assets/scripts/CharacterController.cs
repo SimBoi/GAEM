@@ -42,8 +42,11 @@ public class CharacterController : MonoBehaviour
     public Animator fpsArms;
     public RuntimeAnimatorController defaultFpsArmsAnimatorController;
 
+    private GameManager gameManager;
+
     public void Start()
     {
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         foreach (PlayerInventoryType inventoryType in Enum.GetValues(typeof(PlayerInventoryType)))
             inventoriesUI.Add(new List<InventorySlotUI>());
         clickedItemUI.transform.localScale = new Vector3(inventoryUIScale, inventoryUIScale, inventoryUIScale);
@@ -67,6 +70,11 @@ public class CharacterController : MonoBehaviour
         UpdateHeldItemUI();
         UpdateClickedItemUI();
         UpdateHeldItemAnimationController();
+    }
+
+    public void FixedUpdate()
+    {
+        RenderSurroundingChunks();
     }
 
     private bool getThrowItem = false;
@@ -185,6 +193,23 @@ public class CharacterController : MonoBehaviour
         getThrowItemDown = false;
         getInventoryDown = false;
         getPauseDown = false;
+    }
+
+    private Vector3 lastPosition;
+    public void RenderSurroundingChunks()
+    {
+        foreach (VoxelGrid voxelGrid in gameManager.voxelGrids)
+        {
+            Vector3Int landCoords = voxelGrid.GlobalToLandCoords(transform.position);
+            Vector2Int centerIndex = voxelGrid.LandToChunkIndex(landCoords);
+            Vector3Int lastLandCoords = voxelGrid.GlobalToLandCoords(lastPosition);
+            Vector2Int lastCenterIndex = voxelGrid.LandToChunkIndex(lastLandCoords);
+
+            if (lastCenterIndex == centerIndex) continue;
+
+            voxelGrid.RenderSurroundingChunks(centerIndex);
+        }
+        lastPosition = transform.position;
     }
 
     public void PickupItemsNearby()

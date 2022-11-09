@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public GameObject respawnUI;
     public GameObject playerPrefab;
     public Transform[] spawnPoints;
+    public List<VoxelGrid> voxelGrids = new List<VoxelGrid>(); // voxel grids should add themselves to the list
 
     private GameObject activePlayer = null;
 

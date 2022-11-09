@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ChunkGenerator : MonoBehaviour
 {
-    public Land land;
+    public VoxelGrid land;
     public int landSize;
 
     private void Start()

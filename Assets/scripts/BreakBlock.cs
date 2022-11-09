@@ -19,15 +19,14 @@ public class BreakBlock : ItemEvent
                 null
             };
             hitInfo.collider.SendMessageUpwards("GetLandRefMsg", message, SendMessageOptions.DontRequireReceiver);
-            Land land = (Land)message[0];
+            VoxelGrid land = (VoxelGrid)message[0];
 
             if (land != null)
             {
                 Vector3Int landBlockCoords = land.GlobalToLandCoords(hitInfo.point - (0.01f * hitInfo.normal));
-                Vector3Int chunkBlockCoords = new Vector3Int(landBlockCoords.x % land.chunkSizeX, landBlockCoords.y % land.chunkSizeY, landBlockCoords.z % land.chunkSizeZ);
                 if (landBlockCoords != prevCoords) timer = 0;
 
-                float blockStiffness = land.GetChunk(new Vector2Int((int)landBlockCoords.x/ land.chunkSizeX, (int)landBlockCoords.z/ land.chunkSizeZ)).GetComponent<Chunk>().GetStiffness(chunkBlockCoords);
+                float blockStiffness = land.GetStiffness(landBlockCoords);
                 if (timer >= blockStiffness / efficiency)
                 {
                     land.RemoveBlock(landBlockCoords, true);

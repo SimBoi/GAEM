@@ -12,28 +12,22 @@ public class LinkBlock : Block
         return Network.CreateNewNetwork();
     }
 
-    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, Chunk parentChunk, Vector3Int landPos)
+    public override Item PlaceCustomBlock(Vector3 globalPos, Quaternion rotation, VoxelGrid voxelGrid, Vector3Int landPos)
     {
-        LinkBlock spawnedItem = (LinkBlock)base.PlaceCustomBlock(globalPos, rotation, parentChunk, landPos);
-
-        object[] message = new object[1]{
-                null
-            };
-        parentChunk.SendMessageUpwards("GetLandRefMsg", message);
-        Land land = (Land)message[0];
+        LinkBlock spawnedItem = (LinkBlock)base.PlaceCustomBlock(globalPos, rotation, voxelGrid, landPos);
 
         bool relinkNetwork = false;
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
         {
-            Vector3Int neighborLandPos = landPos + Chunk.FaceToDirection(face);
-            if (spawnedItem.blockID == land.GetBlockID(neighborLandPos))
+            Vector3Int neighborLandPos = landPos + VoxelGrid.FaceToDirection(face);
+            if (spawnedItem.blockID == voxelGrid.GetBlockID(neighborLandPos))
                 relinkNetwork = true;
         }
 
         if (relinkNetwork)
-            spawnedItem.RelinkNetwork(land, landPos);
+            spawnedItem.RelinkNetwork(voxelGrid, landPos);
         else
-            spawnedItem.RelinkNetwork(land, landPos, CreateNewNetwork());
+            spawnedItem.RelinkNetwork(voxelGrid, landPos, CreateNewNetwork());
 
         return spawnedItem;
     }
@@ -46,7 +40,7 @@ public class LinkBlock : Block
         return true;
     }
 
-    public void RelinkNetwork(Land land, Vector3Int landPos, Network targetNetwork = null)
+    public void RelinkNetwork(VoxelGrid land, Vector3Int landPos, Network targetNetwork = null)
     {
         if (isDestroyed)
             return;
@@ -57,7 +51,7 @@ public class LinkBlock : Block
         {
             foreach (Faces face in Enum.GetValues(typeof(Faces)))
             {
-                Vector3Int neighborLandPos = landPos + Chunk.FaceToDirection(face);
+                Vector3Int neighborLandPos = landPos + VoxelGrid.FaceToDirection(face);
                 Block neighborBlock = land.GetCustomBlock(neighborLandPos);
                 if (neighborBlock != null && blockID == neighborBlock.blockID)
                 {
@@ -73,7 +67,7 @@ public class LinkBlock : Block
 
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
         {
-            Vector3Int neighborLandPos = landPos + Chunk.FaceToDirection(face);
+            Vector3Int neighborLandPos = landPos + VoxelGrid.FaceToDirection(face);
             Block neighborBlock = land.GetCustomBlock(neighborLandPos);
             if (neighborBlock != null)
             {
@@ -83,7 +77,7 @@ public class LinkBlock : Block
                 }
                 else if (typeof(Machine).IsAssignableFrom(neighborBlock.GetType()))
                 {
-                    ((Machine)neighborBlock).TryLinkNetwork(Chunk.GetOppositeFace(face), targetNetwork);
+                    ((Machine)neighborBlock).TryLinkNetwork(VoxelGrid.GetOppositeFace(face), targetNetwork);
                 }
             }
         }
@@ -95,12 +89,12 @@ public class LinkBlock : Block
                 null
             };
         SendMessageUpwards("GetLandRefMsg", message);
-        Land land = (Land)message[0];
+        VoxelGrid land = (VoxelGrid)message[0];
         Vector3Int landPos = Vector3Int.FloorToInt(land.transform.InverseTransformPoint(transform.position));
 
         foreach (Faces face in Enum.GetValues(typeof(Faces)))
         {
-            Vector3Int neighborLandPos = landPos + Chunk.FaceToDirection(face);
+            Vector3Int neighborLandPos = landPos + VoxelGrid.FaceToDirection(face);
             Block neighborBlock = land.GetCustomBlock(neighborLandPos);
             if (neighborBlock != null)
             {
@@ -110,7 +104,7 @@ public class LinkBlock : Block
                 }
                 else if (typeof(Machine).IsAssignableFrom(neighborBlock.GetType()))
                 {
-                    ((Machine)neighborBlock).UnlinkNetwork(Chunk.GetOppositeFace(face));
+                    ((Machine)neighborBlock).UnlinkNetwork(VoxelGrid.GetOppositeFace(face));
                 }
             }
         }
