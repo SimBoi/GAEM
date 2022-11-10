@@ -50,7 +50,7 @@ public class VoxelGrid : MonoBehaviour
             int zRange = (int)Mathf.Sqrt(Mathf.Pow(renderDistance, 2) - Mathf.Pow(x, 2));
             for (int z = -zRange; z < zRange; z++) chunkPoolSize++;
         }
-        chunkPool = new ChunkPool(this, chunkPrefab, chunkPoolSize);
+        chunkPool.ReInitialize(this, chunkPrefab, chunkPoolSize);
 
         RenderSurroundingChunks(GridToChunkIndex(GlobalToGridCoords(position)));
     }
@@ -286,6 +286,20 @@ public class ChunkPool
     public ChunkPool(VoxelGrid voxelGrid, GameObject chunkPrefab, int size)
     {
         pool = new Chunk[size];
+        InitializePool(voxelGrid, chunkPrefab);
+    }
+
+    public void ReInitialize(VoxelGrid voxelGrid, GameObject chunkPrefab, int newSize)
+    {
+        for (int i = 0; i < size; i++) if (pool[i] != null) GameObject.Destroy(pool[i].gameObject);
+        pool = new Chunk[newSize];
+        reuseQueue.Clear();
+        inUse.Clear();
+        InitializePool(voxelGrid, chunkPrefab);
+    }
+
+    private void InitializePool(VoxelGrid voxelGrid, GameObject chunkPrefab)
+    {
         for (int i = 0; i < size; i++)
         {
             pool[i] = GameObject.Instantiate(chunkPrefab).GetComponent<Chunk>();
@@ -293,14 +307,6 @@ public class ChunkPool
             pool[i].transform.SetParent(voxelGrid.transform);
             pool[i].gameObject.SetActive(false);
             reuseQueue.Enqueue(i);
-        }
-    }
-
-    ~ChunkPool()
-    {
-        for (int i = 0; i < size; i++)
-        {
-            if (pool[i] != null) GameObject.Destroy(pool[i].gameObject);
         }
     }
 
